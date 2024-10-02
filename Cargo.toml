@@ -25,3 +25,7 @@ iyes_perf_ui = { version = "0.3.0", optional = true }
 rand = "0.8.5"
 serde = "1.0.210"
 serde_json = "1.0.128"
+
+
+[profile.release]
+codegen-units = 1

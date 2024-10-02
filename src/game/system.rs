@@ -1,6 +1,7 @@
-use std::f32::consts::PI;
-
+use avian3d::prelude::*;
 use bevy::{
+    gltf::{GltfMesh, GltfNode},
+    math::vec3,
     prelude::*,
     render::{
         render_asset::RenderAssetUsages,
@@ -8,6 +9,9 @@ use bevy::{
     },
 };
 use bevy_color::palettes::css::SILVER;
+use std::f32::consts::PI;
+
+use crate::assets::resources::MyAsstes;
 #[derive(Component)]
 pub struct Shape;
 
@@ -19,6 +23,11 @@ pub fn test_setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    //
+    my_assets: Res<MyAsstes>,
+    assets_gltf: Res<Assets<Gltf>>,
+    assets_node: Res<Assets<GltfNode>>,
+    assets_gltfmesh: Res<Assets<GltfMesh>>,
 ) {
     let debug_material = materials.add(StandardMaterial {
         base_color_texture: Some(images.add(uv_debug_texture())),
@@ -99,11 +108,217 @@ pub fn test_setup(
     });
 
     // ground plane
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Plane3d::default().mesh().size(50.0, 50.0).subdivisions(10)),
-        material: materials.add(Color::from(SILVER)),
-        ..default()
-    });
+    // commands.spawn(PbrBundle {
+    //     mesh: meshes.add(Plane3d::default().mesh().size(50.0, 50.0).subdivisions(10)),
+    //     material: materials.add(Color::from(SILVER)),
+    //     ..default()
+    // });
+
+    //////
+
+    // commands.spawn((
+    //     SceneBundle {
+    //         scene: my_assets.luckyball.clone(),
+    //         transform: Transform {
+    //             translation: vec3(0., 10., 0.),
+    //             scale: vec3(10., 10., 10.),
+    //             ..default()
+    //         },
+    //         ..default()
+    //     },
+    //     RigidBody::Static,
+    // ));
+    if let Some(gltf) = assets_gltf.get(my_assets.luckyball.id()) {
+        for (node_name, _node_handle) in gltf.named_nodes.iter() {
+            info!("node name: {:?}", node_name);
+            let GltfNode {
+                mesh, transform, ..
+            } = assets_node.get(&gltf.named_nodes[node_name]).unwrap();
+
+            if let Some(a) = mesh {
+                let b = assets_gltfmesh.get(a.id()).unwrap();
+                let mat = match &b.primitives[0].material {
+                    Some(a) => a.clone(),
+                    None => materials.add(StandardMaterial::default()),
+                };
+
+                let mat_handle = mat;
+                let mesh_handle = b.primitives[0].mesh.clone();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                let transform = *transform;
+                let node_name = node_name.as_ref();
+                if node_name == "BallCase" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            // transform: transform.with_scale(vec3(10., 10., 10.)), // .with_translation(vec3(0., 10., 0.)),
+                            ..default()
+                        })
+                        .insert(RigidBody::Static)
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(Name::new("BallCase"));
+                } else if node_name == "BallInletCover" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            // transform: transform.with_scale(vec3(10., 10., 10.)), // .with_translation(vec3(0., 10., 0.)),
+                            ..default()
+                        })
+                        // .insert(RigidBody::Static)
+                        // .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(Name::new("BallInletCover"));
+                } else if node_name == "BallMixer" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            // transform: transform.with_scale(vec3(10., 10., 10.)), // .with_translation(vec3(0., 10., 0.)),
+                            ..default()
+                        })
+                        .insert(RigidBody::Kinematic)
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(BallMixer)
+                        .insert(AngularVelocity(vec3(0., 1., 0.)))
+                        .insert(Name::new("BallMixer"));
+                } else if node_name == "BallInletGuide2" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            // transform: transform.with_scale(vec3(10., 10., 10.)), // .with_translation(vec3(0., 10., 0.)),
+                            ..default()
+                        })
+                        .insert(RigidBody::Static)
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(Name::new("BallInletCover"));
+                } else if node_name == "pool" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            // transform: transform.with_scale(vec3(10., 10., 10.)), // .with_translation(vec3(0., 10., 0.)),
+                            ..default()
+                        })
+                        .insert(RigidBody::Static)
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(Name::new("pool"));
+                } else if node_name == "BottomSupport" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            // transform: transform.with_scale(vec3(10., 10., 10.)), // .with_translation(vec3(0., 10., 0.)),
+                            ..default()
+                        })
+                        .insert(RigidBody::Static)
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(Name::new("BottomSupport"));
+                } else if node_name == "BallTmp1_1"
+                    || node_name == "BallTmp1_2"
+                    || node_name == "BallTmp1_3"
+                    || node_name == "BallTmp1_4"
+                    || node_name == "BallTmp1_5"
+                    || node_name == "BallTmp1_6"
+                    || node_name == "BallTmp1_7"
+                    || node_name == "BallTmp1_8"
+                    || node_name == "BallTmp1_9"
+                    || node_name == "BallTmp1_10"
+                    || node_name == "BallTmp1_11"
+                    || node_name == "BallTmp1_12"
+                    || node_name == "BallTmp1_13"
+                    || node_name == "BallTmp1_14"
+                    || node_name == "BallTmp2_1"
+                    || node_name == "BallTmp2_2"
+                    || node_name == "BallTmp2_3"
+                    || node_name == "BallTmp2_4"
+                    || node_name == "BallTmp2_5"
+                    || node_name == "BallTmp2_6"
+                    || node_name == "BallTmp2_7"
+                    || node_name == "BallTmp2_8"
+                    || node_name == "BallTmp2_9"
+                    || node_name == "BallTmp2_10"
+                    || node_name == "BallTmp2_11"
+                    || node_name == "BallTmp2_12"
+                    || node_name == "BallTmp2_13"
+                    || node_name == "BallTmp2_14"
+                    || node_name == "BallTmp3_1"
+                    || node_name == "BallTmp3_2"
+                    || node_name == "BallTmp3_3"
+                    || node_name == "BallTmp3_4"
+                    || node_name == "BallTmp3_5"
+                    || node_name == "BallTmp3_6"
+                    || node_name == "BallTmp3_7"
+                    || node_name == "BallTmp3_8"
+                    || node_name == "BallTmp3_9"
+                    || node_name == "BallTmp3_10"
+                    || node_name == "BallTmp3_11"
+                    || node_name == "BallTmp3_12"
+                    || node_name == "BallTmp3_13"
+                    || node_name == "BallTmp3_14"
+                    || node_name == "BallTmp4_1"
+                    || node_name == "BallTmp4_2"
+                    || node_name == "BallTmp4_3"
+                    || node_name == "BallTmp4_4"
+                    || node_name == "BallTmp4_5"
+                    || node_name == "BallTmp4_6"
+                    || node_name == "BallTmp4_7"
+                    || node_name == "BallTmp4_8"
+                    || node_name == "BallTmp4_9"
+                    || node_name == "BallTmp4_10"
+                    || node_name == "BallTmp4_11"
+                    || node_name == "BallTmp4_12"
+                    || node_name == "BallTmp4_13"
+                    || node_name == "BallTmp4_14"
+                    || node_name == "BallTmp5_1"
+                    || node_name == "BallTmp5_2"
+                    || node_name == "BallTmp5_3"
+                    || node_name == "BallTmp5_4"
+                    || node_name == "BallTmp5_5"
+                    || node_name == "BallTmp5_6"
+                    || node_name == "BallTmp5_7"
+                    || node_name == "BallTmp5_8"
+                    || node_name == "BallTmp5_9"
+                    || node_name == "BallTmp5_10"
+                    || node_name == "BallTmp5_11"
+                    || node_name == "BallTmp5_12"
+                    || node_name == "BallTmp5_13"
+                    || node_name == "BallTmp5_14"
+                {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            // transform: transform.with_scale(vec3(1., 1., 1.)),
+                            ..default()
+                        })
+                        .insert(RigidBody::Dynamic)
+                        // .insert(Collider::trimesh_from_mesh(mesh).unwrap());
+                        .insert(Collider::sphere(1.))
+                        .insert(Name::new("BallTmp"));
+                }
+            }
+        }
+    }
+
+    // commands.spawn((
+    //     PbrBundle {
+    //         mesh: meshes.add(Sphere::default()),
+    //         material: materials.add(StandardMaterial::default()),
+    //         transform: Transform::from_xyz(0., 25.0, 0.),
+    //         ..default()
+    //     },
+    //     RigidBody::Dynamic,
+    //     Collider::sphere(0.5),
+    // ));
 }
 pub fn rotate(mut query: Query<&mut Transform, With<Shape>>, time: Res<Time>) {
     for mut transform in &mut query {
@@ -138,4 +353,14 @@ fn uv_debug_texture() -> Image {
         TextureFormat::Rgba8UnormSrgb,
         RenderAssetUsages::RENDER_WORLD,
     )
+}
+
+#[derive(Component)]
+pub struct BallMixer;
+
+pub fn ball_mixer_rotate(mut q_mixer: Query<&mut Transform, With<BallMixer>>, time: Res<Time>) {
+    for mut tr in &mut q_mixer {
+        info!("zzz {:?}, {:?}", tr.rotation.y, time.elapsed_seconds());
+        tr.rotation.y = time.elapsed_seconds();
+    }
 }

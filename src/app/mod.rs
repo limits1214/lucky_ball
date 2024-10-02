@@ -1,8 +1,8 @@
+use crate::{assets::AssetsPlugin, game::GamePlugin};
+use avian3d::prelude::*;
 use bevy::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use states::{Loading, MyStates};
-
-use crate::{assets::AssetsPlugin, game::GamePlugin};
 
 pub mod states;
 
@@ -12,7 +12,8 @@ impl Plugin for AppPlugin {
     fn build(&self, app: &mut App) {
         app.insert_state(MyStates::Load(Loading::Loading));
 
-        app.add_plugins(PanOrbitCameraPlugin);
+        app.add_plugins(PanOrbitCameraPlugin)
+            .add_plugins(PhysicsPlugins::default());
 
         app.add_plugins(AssetsPlugin).add_plugins(GamePlugin);
 
@@ -21,7 +22,8 @@ impl Plugin for AppPlugin {
         #[cfg(feature = "inspector")]
         {
             use super::inspector::InspectorPlugin;
-            app.add_plugins(InspectorPlugin);
+            app.add_plugins(InspectorPlugin)
+                .add_plugins(PhysicsDebugPlugin::default());
         }
     }
 }

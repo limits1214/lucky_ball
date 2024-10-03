@@ -2,6 +2,7 @@ use crate::{assets::AssetsPlugin, game::GamePlugin};
 use avian3d::prelude::*;
 use bevy::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
+use bevy_tweening::TweeningPlugin;
 use states::{Loading, MyStates};
 
 pub mod states;
@@ -13,6 +14,7 @@ impl Plugin for AppPlugin {
         app.insert_state(MyStates::Load(Loading::Loading));
 
         app.add_plugins(PanOrbitCameraPlugin)
+            .add_plugins(TweeningPlugin)
             .add_plugins(PhysicsPlugins::default());
 
         app.add_plugins(AssetsPlugin).add_plugins(GamePlugin);
@@ -70,7 +72,7 @@ fn camera_light_setup(mut commands: Commands) {
 
     commands.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(-0.0, 25.0, 10.0).looking_at(Vec3::Y * 2.0, Vec3::Y),
+            transform: Transform::from_xyz(-0.0, 10.0, 10.0).looking_at(Vec3::Y * 2.0, Vec3::Y),
             ..default()
         },
         PanOrbitCamera::default(),

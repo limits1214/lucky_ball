@@ -3,25 +3,25 @@ use bevy::{
     gltf::{GltfMesh, GltfNode},
     math::vec3,
     prelude::*,
-    render::{
-        render_asset::RenderAssetUsages,
-        render_resource::{Extent3d, TextureDimension, TextureFormat},
+};
+use bevy_tweening::{lens::TransformPositionLens, Animator, EaseFunction, Tween};
+use std::time::Duration;
+
+use crate::{
+    assets::resources::MyAsstes,
+    game::{
+        component::{Ball, BallDrawStick, BallDrawStickIn, BallMixer},
+        constant::BALL_NAMES,
     },
 };
-use bevy_color::palettes::css::SILVER;
-use std::f32::consts::PI;
 
-use crate::assets::resources::MyAsstes;
-#[derive(Component)]
-pub struct Shape;
+use super::{
+    component::BallCatchSensor,
+    event::{BallMixerRotateEvent, BallRigidChange, DrawStickDownEvent, DrawStickUpEvent},
+};
 
-const SHAPES_X_EXTENT: f32 = 14.0;
-const EXTRUSION_X_EXTENT: f32 = 16.0;
-const Z_EXTENT: f32 = 5.0;
-pub fn test_setup(
+pub fn spawn_balls(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     //
     my_assets: Res<MyAsstes>,
@@ -29,108 +29,104 @@ pub fn test_setup(
     assets_node: Res<Assets<GltfNode>>,
     assets_gltfmesh: Res<Assets<GltfMesh>>,
 ) {
-    let debug_material = materials.add(StandardMaterial {
-        base_color_texture: Some(images.add(uv_debug_texture())),
-        ..default()
-    });
+    if let Some(gltf) = assets_gltf.get(my_assets.luckyball.id()) {
+        struct Balls {
+            node_name: String,
+            transform: Transform,
+            number: u8,
+            mesh_handle: Handle<Mesh>,
+            mat_handle: Handle<StandardMaterial>,
+        }
 
-    let shapes = [
-        meshes.add(Cuboid::default()),
-        meshes.add(Tetrahedron::default()),
-        meshes.add(Capsule3d::default()),
-        meshes.add(Torus::default()),
-        meshes.add(Cylinder::default()),
-        meshes.add(Cone::default()),
-        meshes.add(ConicalFrustum::default()),
-        meshes.add(Sphere::default().mesh().ico(5).unwrap()),
-        meshes.add(Sphere::default().mesh().uv(32, 18)),
-    ];
+        let mut balls: Vec<Balls> = Vec::new();
 
-    let extrusions = [
-        meshes.add(Extrusion::new(Rectangle::default(), 1.)),
-        meshes.add(Extrusion::new(Capsule2d::default(), 1.)),
-        meshes.add(Extrusion::new(Annulus::default(), 1.)),
-        meshes.add(Extrusion::new(Circle::default(), 1.)),
-        meshes.add(Extrusion::new(Ellipse::default(), 1.)),
-        meshes.add(Extrusion::new(RegularPolygon::default(), 1.)),
-        meshes.add(Extrusion::new(Triangle2d::default(), 1.)),
-    ];
+        // collect balls
+        for (node_name, _node_handle) in gltf.named_nodes.iter() {
+            let GltfNode {
+                mesh, transform, ..
+            } = assets_node.get(&gltf.named_nodes[node_name]).unwrap();
 
-    let num_shapes = shapes.len();
+            if let Some(a) = mesh {
+                let b = assets_gltfmesh.get(a.id()).unwrap();
+                let mat = match &b.primitives[0].material {
+                    Some(a) => a.clone(),
+                    None => materials.add(StandardMaterial::default()),
+                };
 
-    for (i, shape) in shapes.into_iter().enumerate() {
-        commands.spawn((
-            PbrBundle {
-                mesh: shape,
-                material: debug_material.clone(),
-                transform: Transform::from_xyz(
-                    -SHAPES_X_EXTENT / 2. + i as f32 / (num_shapes - 1) as f32 * SHAPES_X_EXTENT,
-                    2.0,
-                    Z_EXTENT / 2.,
-                )
-                .with_rotation(Quat::from_rotation_x(-PI / 4.)),
+                let mat_handle = mat;
+                let mesh_handle = b.primitives[0].mesh.clone();
+                let transform = *transform;
+                let node_name = node_name.as_ref();
+
+                for (name, num) in BALL_NAMES {
+                    if name == node_name {
+                        balls.push(Balls {
+                            node_name: name.to_owned(),
+                            transform,
+                            number: num,
+                            mat_handle: mat_handle.clone(),
+                            mesh_handle: mesh_handle.clone(),
+                        });
+                    }
+                }
+            }
+        }
+
+        // spawn balls
+        for Balls {
+            node_name,
+            transform,
+            number,
+            mat_handle,
+            mesh_handle,
+        } in balls
+        {
+            commands
+                .spawn(PbrBundle {
+                    mesh: mesh_handle,
+                    material: mat_handle,
+                    transform,
+                    ..default()
+                })
+                .insert(RigidBody::Static)
+                .insert(Friction::new(0.4))
+                .insert(Restitution::new(0.9))
+                .insert(Collider::sphere(1.))
+                .insert(Ball(number))
+                .insert(Name::new(node_name));
+        }
+    }
+}
+
+pub fn spawn_setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    //
+    my_assets: Res<MyAsstes>,
+    assets_gltf: Res<Assets<Gltf>>,
+    assets_node: Res<Assets<GltfNode>>,
+    assets_gltfmesh: Res<Assets<GltfMesh>>,
+) {
+    commands.spawn((
+        PointLightBundle {
+            point_light: PointLight {
+                // shadows_enabled: true,
+                intensity: 10_000_000.,
+                range: 100.0,
+                // shadow_depth_bias: 0.2,
                 ..default()
             },
-            Shape,
-        ));
-    }
-
-    let num_extrusions = extrusions.len();
-
-    for (i, shape) in extrusions.into_iter().enumerate() {
-        commands.spawn((
-            PbrBundle {
-                mesh: shape,
-                material: debug_material.clone(),
-                transform: Transform::from_xyz(
-                    -EXTRUSION_X_EXTENT / 2.
-                        + i as f32 / (num_extrusions - 1) as f32 * EXTRUSION_X_EXTENT,
-                    2.0,
-                    -Z_EXTENT / 2.,
-                )
-                .with_rotation(Quat::from_rotation_x(-PI / 4.)),
-                ..default()
-            },
-            Shape,
-        ));
-    }
-
-    commands.spawn(PointLightBundle {
-        point_light: PointLight {
-            shadows_enabled: true,
-            intensity: 10_000_000.,
-            range: 100.0,
-            shadow_depth_bias: 0.2,
+            transform: Transform::from_xyz(0.0, 16.0, 0.0),
             ..default()
         },
-        transform: Transform::from_xyz(8.0, 16.0, 8.0),
-        ..default()
-    });
-
-    // ground plane
-    // commands.spawn(PbrBundle {
-    //     mesh: meshes.add(Plane3d::default().mesh().size(50.0, 50.0).subdivisions(10)),
-    //     material: materials.add(Color::from(SILVER)),
-    //     ..default()
-    // });
+        Name::new("PointLight"),
+    ));
 
     //////
-
-    // commands.spawn((
-    //     SceneBundle {
-    //         scene: my_assets.luckyball.clone(),
-    //         transform: Transform {
-    //             translation: vec3(0., 10., 0.),
-    //             scale: vec3(10., 10., 10.),
-    //             ..default()
-    //         },
-    //         ..default()
-    //     },
-    //     RigidBody::Static,
-    // ));
     if let Some(gltf) = assets_gltf.get(my_assets.luckyball.id()) {
         for (node_name, _node_handle) in gltf.named_nodes.iter() {
-            info!("node name: {:?}", node_name);
+            // info!("node name: {:?}", node_name);
             let GltfNode {
                 mesh, transform, ..
             } = assets_node.get(&gltf.named_nodes[node_name]).unwrap();
@@ -153,7 +149,6 @@ pub fn test_setup(
                             mesh: mesh_handle,
                             material: mat_handle,
                             transform,
-                            // transform: transform.with_scale(vec3(10., 10., 10.)), // .with_translation(vec3(0., 10., 0.)),
                             ..default()
                         })
                         .insert(RigidBody::Static)
@@ -165,45 +160,71 @@ pub fn test_setup(
                             mesh: mesh_handle,
                             material: mat_handle,
                             transform,
-                            // transform: transform.with_scale(vec3(10., 10., 10.)), // .with_translation(vec3(0., 10., 0.)),
                             ..default()
                         })
                         // .insert(RigidBody::Static)
                         // .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         .insert(Name::new("BallInletCover"));
-                } else if node_name == "BallMixer" {
+                } else if node_name == "BallMixer2" {
                     commands
                         .spawn(PbrBundle {
                             mesh: mesh_handle,
                             material: mat_handle,
                             transform,
-                            // transform: transform.with_scale(vec3(10., 10., 10.)), // .with_translation(vec3(0., 10., 0.)),
                             ..default()
                         })
                         .insert(RigidBody::Kinematic)
                         .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         .insert(BallMixer)
-                        .insert(AngularVelocity(vec3(0., 1., 0.)))
+                        .insert(AngularVelocity(vec3(0., 0., 0.)))
                         .insert(Name::new("BallMixer"));
-                } else if node_name == "BallInletGuide2" {
+                } else if node_name == "BallMixerColliderd" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: materials.add(StandardMaterial {
+                                base_color: Color::srgba(1.0, 1.0, 1.0, 0.0), // 투명한 색상
+                                alpha_mode: AlphaMode::Blend, // 알파 블렌딩 모드 설정
+                                ..default()
+                            }),
+                            transform,
+                            ..default()
+                        })
+                        .insert(RigidBody::Kinematic)
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(BallMixer)
+                        .insert(AngularVelocity(vec3(0., 0., 0.)))
+                        .insert(Name::new("BallMixerCollider"));
+                } else if node_name == "BallDrawStick" {
                     commands
                         .spawn(PbrBundle {
                             mesh: mesh_handle,
                             material: mat_handle,
                             transform,
-                            // transform: transform.with_scale(vec3(10., 10., 10.)), // .with_translation(vec3(0., 10., 0.)),
                             ..default()
                         })
-                        .insert(RigidBody::Static)
+                        // .insert(RigidBody::Static)
                         .insert(Collider::trimesh_from_mesh(mesh).unwrap())
-                        .insert(Name::new("BallInletCover"));
+                        .insert(BallDrawStick)
+                        .insert(Name::new("BallDrawStick"));
+                } else if node_name == "BallDrawStickIn" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            ..default()
+                        })
+                        // .insert(RigidBody::Static)
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(BallDrawStickIn)
+                        .insert(Name::new("BallDrawStickIn"));
                 } else if node_name == "pool" {
                     commands
                         .spawn(PbrBundle {
                             mesh: mesh_handle,
                             material: mat_handle,
                             transform,
-                            // transform: transform.with_scale(vec3(10., 10., 10.)), // .with_translation(vec3(0., 10., 0.)),
                             ..default()
                         })
                         .insert(RigidBody::Static)
@@ -215,152 +236,135 @@ pub fn test_setup(
                             mesh: mesh_handle,
                             material: mat_handle,
                             transform,
-                            // transform: transform.with_scale(vec3(10., 10., 10.)), // .with_translation(vec3(0., 10., 0.)),
                             ..default()
                         })
                         .insert(RigidBody::Static)
                         .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         .insert(Name::new("BottomSupport"));
-                } else if node_name == "BallTmp1_1"
-                    || node_name == "BallTmp1_2"
-                    || node_name == "BallTmp1_3"
-                    || node_name == "BallTmp1_4"
-                    || node_name == "BallTmp1_5"
-                    || node_name == "BallTmp1_6"
-                    || node_name == "BallTmp1_7"
-                    || node_name == "BallTmp1_8"
-                    || node_name == "BallTmp1_9"
-                    || node_name == "BallTmp1_10"
-                    || node_name == "BallTmp1_11"
-                    || node_name == "BallTmp1_12"
-                    || node_name == "BallTmp1_13"
-                    || node_name == "BallTmp1_14"
-                    || node_name == "BallTmp2_1"
-                    || node_name == "BallTmp2_2"
-                    || node_name == "BallTmp2_3"
-                    || node_name == "BallTmp2_4"
-                    || node_name == "BallTmp2_5"
-                    || node_name == "BallTmp2_6"
-                    || node_name == "BallTmp2_7"
-                    || node_name == "BallTmp2_8"
-                    || node_name == "BallTmp2_9"
-                    || node_name == "BallTmp2_10"
-                    || node_name == "BallTmp2_11"
-                    || node_name == "BallTmp2_12"
-                    || node_name == "BallTmp2_13"
-                    || node_name == "BallTmp2_14"
-                    || node_name == "BallTmp3_1"
-                    || node_name == "BallTmp3_2"
-                    || node_name == "BallTmp3_3"
-                    || node_name == "BallTmp3_4"
-                    || node_name == "BallTmp3_5"
-                    || node_name == "BallTmp3_6"
-                    || node_name == "BallTmp3_7"
-                    || node_name == "BallTmp3_8"
-                    || node_name == "BallTmp3_9"
-                    || node_name == "BallTmp3_10"
-                    || node_name == "BallTmp3_11"
-                    || node_name == "BallTmp3_12"
-                    || node_name == "BallTmp3_13"
-                    || node_name == "BallTmp3_14"
-                    || node_name == "BallTmp4_1"
-                    || node_name == "BallTmp4_2"
-                    || node_name == "BallTmp4_3"
-                    || node_name == "BallTmp4_4"
-                    || node_name == "BallTmp4_5"
-                    || node_name == "BallTmp4_6"
-                    || node_name == "BallTmp4_7"
-                    || node_name == "BallTmp4_8"
-                    || node_name == "BallTmp4_9"
-                    || node_name == "BallTmp4_10"
-                    || node_name == "BallTmp4_11"
-                    || node_name == "BallTmp4_12"
-                    || node_name == "BallTmp4_13"
-                    || node_name == "BallTmp4_14"
-                    || node_name == "BallTmp5_1"
-                    || node_name == "BallTmp5_2"
-                    || node_name == "BallTmp5_3"
-                    || node_name == "BallTmp5_4"
-                    || node_name == "BallTmp5_5"
-                    || node_name == "BallTmp5_6"
-                    || node_name == "BallTmp5_7"
-                    || node_name == "BallTmp5_8"
-                    || node_name == "BallTmp5_9"
-                    || node_name == "BallTmp5_10"
-                    || node_name == "BallTmp5_11"
-                    || node_name == "BallTmp5_12"
-                    || node_name == "BallTmp5_13"
-                    || node_name == "BallTmp5_14"
-                {
-                    commands
-                        .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
-                            transform,
-                            // transform: transform.with_scale(vec3(1., 1., 1.)),
-                            ..default()
-                        })
-                        .insert(RigidBody::Dynamic)
-                        // .insert(Collider::trimesh_from_mesh(mesh).unwrap());
-                        .insert(Collider::sphere(1.))
-                        .insert(Name::new("BallTmp"));
                 }
             }
         }
     }
 
-    // commands.spawn((
-    //     PbrBundle {
-    //         mesh: meshes.add(Sphere::default()),
-    //         material: materials.add(StandardMaterial::default()),
-    //         transform: Transform::from_xyz(0., 25.0, 0.),
-    //         ..default()
-    //     },
-    //     RigidBody::Dynamic,
-    //     Collider::sphere(0.5),
-    // ));
+    commands.spawn((
+        Name::new("BallCatchSensor"),
+        Sensor,
+        Collider::sphere(0.01),
+        BallCatchSensor,
+        TransformBundle::from_transform(Transform::from_xyz(0., -0.9, 0.)),
+    ));
 }
-pub fn rotate(mut query: Query<&mut Transform, With<Shape>>, time: Res<Time>) {
-    for mut transform in &mut query {
-        transform.rotate_y(time.delta_seconds() / 2.);
+
+pub fn draw_stick_up_event(
+    mut er: EventReader<DrawStickUpEvent>,
+    mut commands: Commands,
+    q_stick: Query<Entity, With<BallDrawStick>>,
+    q_stick_in: Query<Entity, With<BallDrawStickIn>>,
+) {
+    for _ in er.read() {
+        let tween = Tween::new(
+            EaseFunction::QuarticInOut,
+            Duration::from_secs(3),
+            TransformPositionLens {
+                start: vec3(0., -2., 0.),
+                end: vec3(0., 0., 0.),
+            },
+        );
+        if let Ok(entity) = q_stick.get_single() {
+            commands.entity(entity).insert(Animator::new(tween));
+        }
+        let tween = Tween::new(
+            EaseFunction::QuarticInOut,
+            Duration::from_secs(3),
+            TransformPositionLens {
+                start: vec3(0., -2. + 0.65, 0.),
+                end: vec3(0., 0.65, 0.),
+            },
+        );
+        if let Ok(entity) = q_stick_in.get_single() {
+            commands.entity(entity).insert(Animator::new(tween));
+        }
     }
 }
 
-/// Creates a colorful test pattern
-fn uv_debug_texture() -> Image {
-    const TEXTURE_SIZE: usize = 8;
-
-    let mut palette: [u8; 32] = [
-        255, 102, 159, 255, 255, 159, 102, 255, 236, 255, 102, 255, 121, 255, 102, 255, 102, 255,
-        198, 255, 102, 198, 255, 255, 121, 102, 255, 255, 236, 102, 255, 255,
-    ];
-
-    let mut texture_data = [0; TEXTURE_SIZE * TEXTURE_SIZE * 4];
-    for y in 0..TEXTURE_SIZE {
-        let offset = TEXTURE_SIZE * y * 4;
-        texture_data[offset..(offset + TEXTURE_SIZE * 4)].copy_from_slice(&palette);
-        palette.rotate_right(4);
+pub fn draw_stick_down_event(
+    mut er: EventReader<DrawStickDownEvent>,
+    mut commands: Commands,
+    q_stick: Query<Entity, With<BallDrawStick>>,
+    q_stick_in: Query<Entity, With<BallDrawStickIn>>,
+) {
+    for _ in er.read() {
+        let tween = Tween::new(
+            EaseFunction::QuarticInOut,
+            Duration::from_secs(3),
+            TransformPositionLens {
+                start: vec3(0., 0., 0.),
+                end: vec3(0., -1.85, 0.),
+            },
+        );
+        if let Ok(entity) = q_stick.get_single() {
+            commands.entity(entity).insert(Animator::new(tween));
+        }
+        let tween = Tween::new(
+            EaseFunction::QuarticInOut,
+            Duration::from_secs(3),
+            TransformPositionLens {
+                start: vec3(0., 0.65, 0.),
+                end: vec3(0., -1.85 + 0.65, 0.),
+            },
+        );
+        if let Ok(entity) = q_stick_in.get_single() {
+            commands.entity(entity).insert(Animator::new(tween));
+        }
     }
-
-    Image::new_fill(
-        Extent3d {
-            width: TEXTURE_SIZE as u32,
-            height: TEXTURE_SIZE as u32,
-            depth_or_array_layers: 1,
-        },
-        TextureDimension::D2,
-        &texture_data,
-        TextureFormat::Rgba8UnormSrgb,
-        RenderAssetUsages::RENDER_WORLD,
-    )
 }
 
-#[derive(Component)]
-pub struct BallMixer;
+pub fn ball_catch_sensor_collding(
+    q_sensor: Query<(Entity, &CollidingEntities), With<BallCatchSensor>>,
+) {
+    for (_entity, colliding_entities) in &q_sensor {
+        for e in colliding_entities.iter() {
+            for entity in colliding_entities.iter() {
+                info!("colliding_entities {entity:?}");
+            }
+            info!("=====");
+            // if let Ok(_) = q_lotto_ball.get(*e) {
+            //     let mut impulse = ExternalImpulse::default();
+            //     impulse.apply_impulse(Vec3::new(0.0, 0.01, 0.0));
+            //     commands.entity(*e).insert(impulse);
+            // }
+        }
+    }
+}
 
-pub fn ball_mixer_rotate(mut q_mixer: Query<&mut Transform, With<BallMixer>>, time: Res<Time>) {
-    for mut tr in &mut q_mixer {
-        info!("zzz {:?}, {:?}", tr.rotation.y, time.elapsed_seconds());
-        tr.rotation.y = time.elapsed_seconds();
+/// true: dynamic
+/// false: static
+pub fn er_ball_rigid_change(
+    mut commands: Commands,
+    q_ball: Query<Entity, With<Ball>>,
+    mut er: EventReader<BallRigidChange>,
+) {
+    for evt in er.read() {
+        for entity in &q_ball {
+            if evt.0 {
+                commands.entity(entity).insert(RigidBody::Dynamic);
+            } else {
+                commands.entity(entity).insert(RigidBody::Static);
+            }
+        }
+    }
+}
+
+pub fn ball_mixer_rotate(
+    mut commands: Commands,
+    mut er_mixer_rotate: EventReader<BallMixerRotateEvent>,
+    q_mixer: Query<Entity, With<BallMixer>>,
+) {
+    for evt in er_mixer_rotate.read() {
+        if let Ok(entity) = q_mixer.get_single() {
+            commands
+                .entity(entity)
+                .insert(AngularVelocity(vec3(0., evt.0, 0.)));
+        }
     }
 }

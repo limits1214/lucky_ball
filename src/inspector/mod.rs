@@ -5,6 +5,10 @@ use bevy_inspector_egui::{
 };
 use iyes_perf_ui::{entries::PerfUiBundle, PerfUiPlugin};
 
+use crate::game::event::{
+    BallMixerRotateEvent, BallRigidChange, DrawStickDownEvent, DrawStickUpEvent,
+};
+
 pub struct InspectorPlugin;
 
 impl Plugin for InspectorPlugin {
@@ -42,6 +46,34 @@ fn inspector_ui(world: &mut World) {
 
             // ui.heading("Entities");
             // bevy_inspector_egui::bevy_inspector::ui_for_world_entities(world, ui);
+
+            if ui.button("mixer 0").clicked() {
+                world.send_event(BallMixerRotateEvent(0.));
+            }
+
+            if ui.button("mixer 1").clicked() {
+                world.send_event(BallMixerRotateEvent(1.));
+            }
+
+            if ui.button("mixer 10").clicked() {
+                world.send_event(BallMixerRotateEvent(10.));
+            }
+
+            if ui.button("stick down").clicked() {
+                world.send_event(DrawStickDownEvent);
+            }
+
+            if ui.button("stick up").clicked() {
+                world.send_event(DrawStickUpEvent);
+            }
+
+            if ui.button("ball static").clicked() {
+                world.send_event(BallRigidChange(false));
+            }
+
+            if ui.button("ball dynamci").clicked() {
+                world.send_event(BallRigidChange(true));
+            }
         });
     });
 }

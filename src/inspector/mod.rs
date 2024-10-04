@@ -6,7 +6,9 @@ use bevy_inspector_egui::{
 use iyes_perf_ui::{entries::PerfUiBundle, PerfUiPlugin};
 
 use crate::game::event::{
-    BallMixerRotateEvent, BallRigidChange, DrawStickDownEvent, DrawStickUpEvent,
+    BallCatchEvent, BallMixerRotateEvent, BallReleaseEvent, BallRigidChange,
+    DrawInnerStickDownEvent, DrawInnerStickUpEvent, DrawStickDownEvent, DrawStickRigidChangeEvent,
+    DrawStickUpEvent,
 };
 
 pub struct InspectorPlugin;
@@ -67,12 +69,42 @@ fn inspector_ui(world: &mut World) {
                 world.send_event(DrawStickUpEvent);
             }
 
+            if ui.button("stick inner down").clicked() {
+                world.send_event(DrawInnerStickDownEvent);
+            }
+
+            if ui.button("stick inner up").clicked() {
+                world.send_event(DrawInnerStickUpEvent);
+            }
+
+            //
+
+            if ui.button("stick static").clicked() {
+                world.send_event(DrawStickRigidChangeEvent(true));
+            }
+
+            if ui.button("stick static remove").clicked() {
+                world.send_event(DrawStickRigidChangeEvent(false));
+            }
+
+            //
+
             if ui.button("ball static").clicked() {
                 world.send_event(BallRigidChange(false));
             }
 
             if ui.button("ball dynamci").clicked() {
                 world.send_event(BallRigidChange(true));
+            }
+
+            //
+
+            if ui.button("ball catch").clicked() {
+                world.send_event(BallCatchEvent);
+            }
+
+            if ui.button("ball release").clicked() {
+                world.send_event(BallReleaseEvent);
             }
         });
     });

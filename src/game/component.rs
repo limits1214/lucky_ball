@@ -14,3 +14,15 @@ pub struct BallDrawStickIn;
 
 #[derive(Component, Debug)]
 pub struct Ball(pub u8);
+
+#[derive(Component)]
+pub struct Catched;
+
+#[derive(Component)]
+pub struct Picked;
+
+#[derive(Component)]
+pub struct BallOutletGuideHolderLast;
+
+#[derive(Component)]
+pub struct PickedStatic;

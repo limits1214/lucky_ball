@@ -10,14 +10,19 @@ use std::time::Duration;
 use crate::{
     assets::resources::MyAsstes,
     game::{
-        component::{Ball, BallDrawStick, BallDrawStickIn, BallMixer},
+        component::{Ball, BallDrawStick, BallDrawStickIn, BallMixer, BallOutletGuideHolderLast},
         constant::BALL_NAMES,
     },
 };
 
 use super::{
-    component::BallCatchSensor,
-    event::{BallMixerRotateEvent, BallRigidChange, DrawStickDownEvent, DrawStickUpEvent},
+    component::{BallCatchSensor, Catched, Picked, PickedStatic},
+    event::{
+        BallCatchDoneEvent, BallCatchEvent, BallMixerRotateEvent, BallReleaseEvent,
+        BallRigidChange, DrawInnerStickDownEvent, DrawInnerStickUpEvent, DrawStickDownEvent,
+        DrawStickRigidChangeEvent, DrawStickUpEvent,
+    },
+    resource::GameConfig,
 };
 
 pub fn spawn_balls(
@@ -126,7 +131,7 @@ pub fn spawn_setup(
     //////
     if let Some(gltf) = assets_gltf.get(my_assets.luckyball.id()) {
         for (node_name, _node_handle) in gltf.named_nodes.iter() {
-            // info!("node name: {:?}", node_name);
+            info!("node name: {:?}", node_name);
             let GltfNode {
                 mesh, transform, ..
             } = assets_node.get(&gltf.named_nodes[node_name]).unwrap();
@@ -203,7 +208,7 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        // .insert(RigidBody::Static)
+                        .insert(RigidBody::Static)
                         .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         .insert(BallDrawStick)
                         .insert(Name::new("BallDrawStick"));
@@ -215,7 +220,7 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        // .insert(RigidBody::Static)
+                        .insert(RigidBody::Static)
                         .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         .insert(BallDrawStickIn)
                         .insert(Name::new("BallDrawStickIn"));
@@ -238,9 +243,58 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
+                        // .insert(RigidBody::Static)
+                        // .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(Name::new("BottomSupport"));
+                } else if node_name == "BallOutletGuide" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            ..default()
+                        })
                         .insert(RigidBody::Static)
                         .insert(Collider::trimesh_from_mesh(mesh).unwrap())
-                        .insert(Name::new("BottomSupport"));
+                        .insert(Name::new("test3"));
+                } else if node_name == "BallOutletGuideHolder1"
+                    || node_name == "BallOutletGuideHolder2"
+                    || node_name == "BallOutletGuideHolder3"
+                    || node_name == "BallOutletGuideHolder4"
+                {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            ..default()
+                        })
+                        // .insert(RigidBody::Static)
+                        // .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(Name::new("BallOutletGuideHolder"));
+                } else if node_name == "BallOutletGuard" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            ..default()
+                        })
+                        .insert(RigidBody::Static)
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(Name::new("BallOutletGuard"));
+                } else if node_name == "BallOutletGuideHolderLast" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            ..default()
+                        })
+                        .insert(RigidBody::Static)
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(BallOutletGuideHolderLast)
+                        .insert(Name::new("BallOutletGuideHolderLast"));
                 }
             }
         }
@@ -260,14 +314,15 @@ pub fn draw_stick_up_event(
     mut commands: Commands,
     q_stick: Query<Entity, With<BallDrawStick>>,
     q_stick_in: Query<Entity, With<BallDrawStickIn>>,
+    q_catched_ball: Query<(Entity, &Transform), (With<Ball>, With<Catched>)>,
 ) {
     for _ in er.read() {
         let tween = Tween::new(
             EaseFunction::QuarticInOut,
-            Duration::from_secs(3),
+            Duration::from_secs(2),
             TransformPositionLens {
-                start: vec3(0., -2., 0.),
-                end: vec3(0., 0., 0.),
+                start: vec3(0., -1.85, 0.),
+                end: vec3(0., 0.001, 0.),
             },
         );
         if let Ok(entity) = q_stick.get_single() {
@@ -275,13 +330,24 @@ pub fn draw_stick_up_event(
         }
         let tween = Tween::new(
             EaseFunction::QuarticInOut,
-            Duration::from_secs(3),
+            Duration::from_secs(2),
             TransformPositionLens {
-                start: vec3(0., -2. + 0.65, 0.),
+                start: vec3(0., -1.85 + 0.65, 0.),
                 end: vec3(0., 0.65, 0.),
             },
         );
         if let Ok(entity) = q_stick_in.get_single() {
+            commands.entity(entity).insert(Animator::new(tween));
+        }
+        if let Ok((entity, transform)) = q_catched_ball.get_single() {
+            let tween = Tween::new(
+                EaseFunction::QuarticInOut,
+                Duration::from_secs(2),
+                TransformPositionLens {
+                    start: transform.translation,
+                    end: vec3(0., 1.0, 0.),
+                },
+            );
             commands.entity(entity).insert(Animator::new(tween));
         }
     }
@@ -296,9 +362,9 @@ pub fn draw_stick_down_event(
     for _ in er.read() {
         let tween = Tween::new(
             EaseFunction::QuarticInOut,
-            Duration::from_secs(3),
+            Duration::from_secs(2),
             TransformPositionLens {
-                start: vec3(0., 0., 0.),
+                start: vec3(0., 0.001, 0.),
                 end: vec3(0., -1.85, 0.),
             },
         );
@@ -307,7 +373,7 @@ pub fn draw_stick_down_event(
         }
         let tween = Tween::new(
             EaseFunction::QuarticInOut,
-            Duration::from_secs(3),
+            Duration::from_secs(2),
             TransformPositionLens {
                 start: vec3(0., 0.65, 0.),
                 end: vec3(0., -1.85 + 0.65, 0.),
@@ -319,20 +385,168 @@ pub fn draw_stick_down_event(
     }
 }
 
+pub fn draw_inner_stick_up_event(
+    mut er: EventReader<DrawInnerStickUpEvent>,
+    mut commands: Commands,
+    q_stick_in: Query<Entity, With<BallDrawStickIn>>,
+    q_catched_ball: Query<(Entity, &Transform), (With<Ball>, With<Catched>)>,
+) {
+    for _ in er.read() {
+        let tween = Tween::new(
+            EaseFunction::QuarticInOut,
+            Duration::from_millis(500),
+            TransformPositionLens {
+                start: vec3(0., 0.65, 0.),
+                end: vec3(0., 0.73, 0.),
+            },
+        );
+        if let Ok(entity) = q_stick_in.get_single() {
+            commands.entity(entity).insert(Animator::new(tween));
+        }
+
+        if let Ok((entity, transform)) = q_catched_ball.get_single() {
+            let tween = Tween::new(
+                EaseFunction::QuarticInOut,
+                Duration::from_millis(500),
+                TransformPositionLens {
+                    start: transform.translation,
+                    end: vec3(0., 1.1, 0.),
+                },
+            );
+            commands.entity(entity).insert(Animator::new(tween));
+        }
+    }
+}
+
+pub fn draw_inner_stick_down_event(
+    mut er: EventReader<DrawInnerStickDownEvent>,
+    mut commands: Commands,
+    q_stick_in: Query<Entity, With<BallDrawStickIn>>,
+) {
+    for _ in er.read() {
+        let tween = Tween::new(
+            EaseFunction::QuarticInOut,
+            Duration::from_millis(500),
+            TransformPositionLens {
+                start: vec3(0., 0.73, 0.),
+                end: vec3(0., 0.65, 0.),
+            },
+        );
+        if let Ok(entity) = q_stick_in.get_single() {
+            commands.entity(entity).insert(Animator::new(tween));
+        }
+    }
+}
+
 pub fn ball_catch_sensor_collding(
     q_sensor: Query<(Entity, &CollidingEntities), With<BallCatchSensor>>,
+    q_ball: Query<&Ball>,
 ) {
     for (_entity, colliding_entities) in &q_sensor {
-        for e in colliding_entities.iter() {
-            for entity in colliding_entities.iter() {
-                info!("colliding_entities {entity:?}");
+        for entity in colliding_entities.iter() {
+            // info!("colliding_entities {entity:?}");
+            if let Ok(ball) = q_ball.get(*entity) {
+                // info!("colliding ball {:?}", ball.0);
             }
-            info!("=====");
-            // if let Ok(_) = q_lotto_ball.get(*e) {
-            //     let mut impulse = ExternalImpulse::default();
-            //     impulse.apply_impulse(Vec3::new(0.0, 0.01, 0.0));
-            //     commands.entity(*e).insert(impulse);
-            // }
+        }
+    }
+}
+
+pub fn ball_holder_last_collding(
+    mut commands: Commands,
+    q_last_holder: Query<(Entity, &CollidingEntities), With<BallOutletGuideHolderLast>>,
+    q_ball: Query<Entity, With<Ball>>,
+) {
+    for (_entity, colliding_entities) in &q_last_holder {
+        for entity in colliding_entities.iter() {
+            // info!("colliding_entities {entity:?}");
+            if let Ok(entity) = q_ball.get(*entity) {
+                // info!("colliding ball {:?}", ball.0);
+                commands
+                    .entity(entity)
+                    .insert(PickedStatic)
+                    .insert(RigidBody::Static);
+            }
+        }
+    }
+}
+
+pub fn ball_picked_static(
+    mut commands: Commands,
+    q_picked_static: Query<(Entity, &CollidingEntities), With<PickedStatic>>,
+    q_ball: Query<Entity, (With<Ball>, Without<PickedStatic>)>,
+) {
+    for (_entity, colliding_entities) in &q_picked_static {
+        for entity in colliding_entities.iter() {
+            // info!("colliding_entities {entity:?}");
+            if let Ok(entity) = q_ball.get(*entity) {
+                // info!("colliding ball {:?}", ball.0);
+                commands
+                    .entity(entity)
+                    .insert(PickedStatic)
+                    .insert(RigidBody::Static);
+            }
+        }
+    }
+}
+
+pub fn er_ball_catch(mut er: EventReader<BallCatchEvent>, mut config: ResMut<GameConfig>) {
+    for _ in er.read() {
+        config.is_catching = true;
+    }
+}
+
+pub fn ball_catch(
+    mut commands: Commands,
+    mut config: ResMut<GameConfig>,
+    q_sensor: Query<(Entity, &CollidingEntities), With<BallCatchSensor>>,
+    q_ball: Query<(Entity, &Transform, &Ball), With<Ball>>,
+    mut ew: EventWriter<BallCatchDoneEvent>,
+) {
+    if config.is_catching {
+        for (_entity, colliding_entities) in &q_sensor {
+            for entity in colliding_entities.iter() {
+                if let Ok((entity, transform, ball)) = q_ball.get(*entity) {
+                    config.is_catching = false;
+                    let tween = Tween::new(
+                        EaseFunction::QuadraticInOut,
+                        Duration::from_millis(100),
+                        TransformPositionLens {
+                            start: transform.translation,
+                            end: vec3(0., -0.9, 0.),
+                        },
+                    );
+                    commands
+                        .entity(entity)
+                        .insert(RigidBody::Static)
+                        .insert(Catched)
+                        .insert(Picked)
+                        .insert(Animator::new(tween));
+                    ew.send(BallCatchDoneEvent);
+                    info!("catched!! {:?}", ball.0);
+                }
+            }
+        }
+    }
+}
+
+pub fn er_ball_release(
+    mut commands: Commands,
+    mut er: EventReader<BallReleaseEvent>,
+    q_catched_ball: Query<(Entity, &Transform), (With<Ball>, With<Catched>)>,
+) {
+    for _ in er.read() {
+        if let Ok((entity, transform)) = q_catched_ball.get_single() {
+            commands
+                .entity(entity)
+                .remove::<Catched>()
+                .insert(Restitution::new(0.))
+                // .insert(CollisionMargin(0.001))
+                .insert(RigidBody::Dynamic);
+
+            let mut impulse = ExternalImpulse::default();
+            impulse.apply_impulse(Vec3::NEG_Z * 0.002);
+            commands.entity(entity).insert(impulse);
         }
     }
 }
@@ -350,6 +564,31 @@ pub fn er_ball_rigid_change(
                 commands.entity(entity).insert(RigidBody::Dynamic);
             } else {
                 commands.entity(entity).insert(RigidBody::Static);
+            }
+        }
+    }
+}
+
+pub fn draw_stick_rigid_change(
+    mut commands: Commands,
+    mut er: EventReader<DrawStickRigidChangeEvent>,
+    q_stick: Query<Entity, With<BallDrawStick>>,
+    q_stick_in: Query<Entity, With<BallDrawStickIn>>,
+) {
+    for evt in er.read() {
+        if evt.0 {
+            if let Ok(entity) = q_stick.get_single() {
+                commands.entity(entity).insert(RigidBody::Static);
+            }
+            if let Ok(entity) = q_stick_in.get_single() {
+                commands.entity(entity).insert(RigidBody::Static);
+            }
+        } else {
+            if let Ok(entity) = q_stick.get_single() {
+                commands.entity(entity).remove::<RigidBody>();
+            }
+            if let Ok(entity) = q_stick_in.get_single() {
+                commands.entity(entity).remove::<RigidBody>();
             }
         }
     }

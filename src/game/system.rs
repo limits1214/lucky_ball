@@ -330,9 +330,8 @@ pub fn spawn_setup(
                         .spawn(Name::new("BallOutletGuideResultCollider"))
                         .insert(RigidBody::Static)
                         .insert(Collider::trimesh_from_mesh(mesh).unwrap())
-                        .insert(TransformBundle::from_transform(transform))
-                        // .insert(BallOutletGuideHolderLast)
-                        .insert(PoolOutletCover);
+                        .insert(TransformBundle::from_transform(transform));
+                    // .insert(BallOutletGuideHolderLast);
                 } else if node_name == "poolSupport" {
                     commands
                         .spawn(PbrBundle {
@@ -366,7 +365,7 @@ pub fn spawn_setup(
         .insert(TransformBundle::from_transform(Transform::from_xyz(
             -1., 1., 0.,
         )))
-        .insert(Collider::cuboid(0.1, 2., 1.));
+        .insert(Collider::cuboid(0.1, 2., 1.2));
 }
 
 pub fn draw_stick_up_event(

@@ -74,3 +74,10 @@ pub const BALL_NAMES: [(&str, u8); 70] = [
     ("BallTmp5_13", 69),
     ("BallTmp5_14", 70),
 ];
+
+//
+pub const TWEEN_POOL_OUTLET_OPEN_END: u64 = 1;
+
+pub const STEP_POOL_BALL_ZERO: u64 = 2;
+
+pub const STEP_POOL_OUTLET_OPEN_END: u64 = 3;

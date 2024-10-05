@@ -17,7 +17,9 @@ impl Plugin for AppPlugin {
             .add_plugins(TweeningPlugin)
             .add_plugins(PhysicsPlugins::default());
 
-        app.add_plugins(AssetsPlugin).add_plugins(GamePlugin);
+        app.add_plugins(AssetsPlugin)
+            .add_plugins(GamePlugin)
+            .insert_resource(ClearColor(Color::srgb(0.53, 0.81, 0.92)));
 
         app.add_systems(Startup, camera_light_setup);
 
@@ -25,7 +27,8 @@ impl Plugin for AppPlugin {
         {
             use super::inspector::InspectorPlugin;
             app.add_plugins(InspectorPlugin)
-                .add_plugins(PhysicsDebugPlugin::default());
+                // .add_plugins(PhysicsDebugPlugin::default())
+                ;
         }
     }
 }

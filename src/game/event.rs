@@ -33,3 +33,24 @@ pub struct BallCatchDoneEvent;
 
 #[derive(Event)]
 pub struct BallReleaseEvent;
+
+#[derive(Event)]
+pub struct PoolOutletCoverOpenEvent;
+
+#[derive(Event)]
+pub struct PoolOutletCoverCloseEvent;
+
+#[derive(Event)]
+pub struct GameResetEvent;
+
+#[derive(Event)]
+pub struct GameRunEvent;
+
+#[derive(Event)]
+pub struct GameEndEvent;
+
+#[derive(Event)]
+pub struct GameStepFinishEvent(pub u64);
+
+#[derive(Event)]
+pub struct PoolBallCntZeroEvent;

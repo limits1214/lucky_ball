@@ -8,7 +8,7 @@ use iyes_perf_ui::{entries::PerfUiBundle, PerfUiPlugin};
 use crate::game::event::{
     BallCatchEvent, BallMixerRotateEvent, BallReleaseEvent, BallRigidChange,
     DrawInnerStickDownEvent, DrawInnerStickUpEvent, DrawStickDownEvent, DrawStickRigidChangeEvent,
-    DrawStickUpEvent,
+    DrawStickUpEvent, GameRunEvent, PoolOutletCoverCloseEvent, PoolOutletCoverOpenEvent,
 };
 
 pub struct InspectorPlugin;
@@ -105,6 +105,22 @@ fn inspector_ui(world: &mut World) {
 
             if ui.button("ball release").clicked() {
                 world.send_event(BallReleaseEvent);
+            }
+
+            //
+
+            if ui.button("pool outlet  open").clicked() {
+                world.send_event(PoolOutletCoverOpenEvent);
+            }
+
+            if ui.button("pool outlet  close").clicked() {
+                world.send_event(PoolOutletCoverCloseEvent);
+            }
+
+            //
+
+            if ui.button("game run").clicked() {
+                world.send_event(GameRunEvent);
             }
         });
     });

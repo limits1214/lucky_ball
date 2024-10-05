@@ -4,23 +4,28 @@ use bevy::{
     math::vec3,
     prelude::*,
 };
-use bevy_tweening::{lens::TransformPositionLens, Animator, EaseFunction, Tween};
+use bevy_tweening::{lens::TransformPositionLens, Animator, EaseFunction, Tween, TweenCompleted};
 use std::time::Duration;
 
 use crate::{
     assets::resources::MyAsstes,
     game::{
-        component::{Ball, BallDrawStick, BallDrawStickIn, BallMixer, BallOutletGuideHolderLast},
+        component::{
+            Ball, BallDrawStick, BallDrawStickIn, BallMixer, BallOutletGuideHolderLast,
+            PoolOutletCover,
+        },
         constant::BALL_NAMES,
     },
 };
 
 use super::{
-    component::{BallCatchSensor, Catched, Picked, PickedStatic},
+    component::{BallCatchSensor, Catched, Picked, PickedStatic, PoolBallCntSensor},
+    constant::{STEP_POOL_BALL_ZERO, STEP_POOL_OUTLET_OPEN_END, TWEEN_POOL_OUTLET_OPEN_END},
     event::{
         BallCatchDoneEvent, BallCatchEvent, BallMixerRotateEvent, BallReleaseEvent,
         BallRigidChange, DrawInnerStickDownEvent, DrawInnerStickUpEvent, DrawStickDownEvent,
-        DrawStickRigidChangeEvent, DrawStickUpEvent,
+        DrawStickRigidChangeEvent, DrawStickUpEvent, GameEndEvent, GameResetEvent, GameRunEvent,
+        GameStepFinishEvent, PoolOutletCoverCloseEvent, PoolOutletCoverOpenEvent,
     },
     resource::GameConfig,
 };
@@ -295,6 +300,51 @@ pub fn spawn_setup(
                         .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         .insert(BallOutletGuideHolderLast)
                         .insert(Name::new("BallOutletGuideHolderLast"));
+                } else if node_name == "Base" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            ..default()
+                        })
+                        // .insert(RigidBody::Static)
+                        // .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        // .insert(BallOutletGuideHolderLast)
+                        .insert(Name::new("Base"));
+                } else if node_name == "poolOutletCover" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            ..default()
+                        })
+                        // .insert(RigidBody::Static)
+                        // .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        // .insert(BallOutletGuideHolderLast)
+                        .insert(PoolOutletCover)
+                        .insert(Name::new("poolOutletCover"));
+                } else if node_name == "BallOutletGuideResultCollider" {
+                    commands
+                        .spawn(Name::new("BallOutletGuideResultCollider"))
+                        .insert(RigidBody::Static)
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(TransformBundle::from_transform(transform))
+                        // .insert(BallOutletGuideHolderLast)
+                        .insert(PoolOutletCover);
+                } else if node_name == "poolSupport" {
+                    commands
+                        .spawn(PbrBundle {
+                            mesh: mesh_handle,
+                            material: mat_handle,
+                            transform,
+                            ..default()
+                        })
+                        // .insert(RigidBody::Static)
+                        // .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        // .insert(BallOutletGuideHolderLast)
+                        .insert(Name::new("poolSupport"));
                 }
             }
         }
@@ -307,6 +357,16 @@ pub fn spawn_setup(
         BallCatchSensor,
         TransformBundle::from_transform(Transform::from_xyz(0., -0.9, 0.)),
     ));
+
+    commands
+        .spawn_empty()
+        .insert(Name::new("pool ball cnt sensor"))
+        .insert(PoolBallCntSensor)
+        .insert(Sensor)
+        .insert(TransformBundle::from_transform(Transform::from_xyz(
+            -1., 1., 0.,
+        )))
+        .insert(Collider::cuboid(0.1, 2., 1.));
 }
 
 pub fn draw_stick_up_event(
@@ -410,7 +470,7 @@ pub fn draw_inner_stick_up_event(
                 Duration::from_millis(500),
                 TransformPositionLens {
                     start: transform.translation,
-                    end: vec3(0., 1.1, 0.),
+                    end: vec3(0., 1.09, 0.),
                 },
             );
             commands.entity(entity).insert(Animator::new(tween));
@@ -490,6 +550,29 @@ pub fn ball_picked_static(
     }
 }
 
+pub fn pool_ball_cnt_zero_sensor(
+    mut config: ResMut<GameConfig>,
+    q_sensor: Query<(Entity, &CollidingEntities), With<PoolBallCntSensor>>,
+    q_ball: Query<&Ball>,
+    mut ew: EventWriter<GameStepFinishEvent>,
+) {
+    if config.is_pool_ball_cnt_sensor {
+        for (_entity, colliding_entitiles) in &q_sensor {
+            let mut ball_cnt = 0;
+            for entity in colliding_entitiles.iter() {
+                if let Ok(_) = q_ball.get(*entity) {
+                    ball_cnt += 1;
+                }
+            }
+
+            if ball_cnt == 0 {
+                config.is_pool_ball_cnt_sensor = false;
+                ew.send(GameStepFinishEvent(STEP_POOL_BALL_ZERO));
+            }
+        }
+    }
+}
+
 pub fn er_ball_catch(mut er: EventReader<BallCatchEvent>, mut config: ResMut<GameConfig>) {
     for _ in er.read() {
         config.is_catching = true;
@@ -551,6 +634,58 @@ pub fn er_ball_release(
     }
 }
 
+pub fn er_pool_outlet_cover_open(
+    mut commands: Commands,
+    mut er: EventReader<PoolOutletCoverOpenEvent>,
+    q_cover: Query<Entity, With<PoolOutletCover>>,
+) {
+    for _ in er.read() {
+        if let Ok(entity) = q_cover.get_single() {
+            let tween = Tween::new(
+                EaseFunction::QuadraticInOut,
+                Duration::from_millis(500),
+                TransformPositionLens {
+                    start: vec3(-0.86, 0.1, 0.0),
+                    end: vec3(-0.86, -0.1, 0.0),
+                },
+            )
+            .with_completed_event(TWEEN_POOL_OUTLET_OPEN_END);
+            commands.entity(entity).insert(Animator::new(tween));
+        }
+    }
+}
+
+pub fn tcb_pool_outlet_open_end(
+    mut er: EventReader<TweenCompleted>,
+    mut ew: EventWriter<GameStepFinishEvent>,
+) {
+    for TweenCompleted { user_data, .. } in er.read() {
+        if *user_data == TWEEN_POOL_OUTLET_OPEN_END {
+            ew.send(GameStepFinishEvent(STEP_POOL_OUTLET_OPEN_END));
+        }
+    }
+}
+
+pub fn er_pool_outlet_cover_close(
+    mut commands: Commands,
+    mut er: EventReader<PoolOutletCoverCloseEvent>,
+    q_cover: Query<Entity, With<PoolOutletCover>>,
+) {
+    for _ in er.read() {
+        if let Ok(entity) = q_cover.get_single() {
+            let tween = Tween::new(
+                EaseFunction::QuadraticInOut,
+                Duration::from_millis(500),
+                TransformPositionLens {
+                    start: vec3(-0.86, -0.1, 0.0),
+                    end: vec3(-0.86, 0.1, 0.0),
+                },
+            );
+            commands.entity(entity).insert(Animator::new(tween));
+        }
+    }
+}
+
 /// true: dynamic
 /// false: static
 pub fn er_ball_rigid_change(
@@ -604,6 +739,55 @@ pub fn ball_mixer_rotate(
             commands
                 .entity(entity)
                 .insert(AngularVelocity(vec3(0., evt.0, 0.)));
+        }
+    }
+}
+
+pub fn er_game_run(
+    mut er: EventReader<GameRunEvent>,
+    mut config: ResMut<GameConfig>,
+    mut ew: EventWriter<PoolOutletCoverOpenEvent>,
+) {
+    for _ in er.read() {
+        config.is_running = true;
+        ew.send(PoolOutletCoverOpenEvent);
+    }
+}
+
+pub fn er_game_end(mut er: EventReader<GameEndEvent>) {
+    for _ in er.read() {
+        //
+    }
+}
+
+pub fn er_game_reset(mut er: EventReader<GameResetEvent>) {
+    for _ in er.read() {
+        //
+    }
+}
+
+/// 1. open pooloutlet
+/// 2. ball rigid to dynamic
+/// check pool ball zero
+/// close pooloutlet
+
+pub fn game_run(
+    mut er: EventReader<GameStepFinishEvent>,
+    mut config: ResMut<GameConfig>,
+    mut ew_ball_rigid_change: EventWriter<BallRigidChange>,
+    mut ew_close_pool_outlet: EventWriter<PoolOutletCoverCloseEvent>,
+) {
+    if config.is_running {
+        for GameStepFinishEvent(step) in er.read() {
+            //
+            if *step == STEP_POOL_OUTLET_OPEN_END {
+                config.is_pool_ball_cnt_sensor = true;
+                ew_ball_rigid_change.send(BallRigidChange(true));
+            }
+
+            if *step == STEP_POOL_BALL_ZERO {
+                ew_close_pool_outlet.send(PoolOutletCoverCloseEvent);
+            }
         }
     }
 }

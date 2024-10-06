@@ -4,7 +4,9 @@ use bevy::{
     math::vec3,
     prelude::*,
 };
-use bevy_tweening::{lens::TransformPositionLens, Animator, EaseFunction, Tween, TweenCompleted};
+use bevy_tweening::{
+    lens::TransformPositionLens, Animator, Delay, EaseFunction, Tween, TweenCompleted,
+};
 use std::time::Duration;
 
 use crate::{
@@ -14,98 +16,33 @@ use crate::{
             Ball, BallDrawStick, BallDrawStickIn, BallMixer, BallOutletGuideHolderLast,
             PoolOutletCover,
         },
-        constant::BALL_NAMES,
+        constant::{BALL_NAMES, STEP_BALL_CATCH_DONE, STEP_INNER_DRAW_STICK_DOWN_END},
     },
 };
 
 use super::{
     component::{BallCatchSensor, Catched, Picked, PickedStatic, PoolBallCntSensor},
-    constant::{STEP_POOL_BALL_ZERO, STEP_POOL_OUTLET_OPEN_END, TWEEN_POOL_OUTLET_OPEN_END},
+    constant::{
+        STEP_BALL_CATCH, STEP_BALL_MIXER_ROTATE, STEP_BALL_MIXER_ROTATE_END, STEP_BALL_RELEASE,
+        STEP_BALL_RIGID_TO_DYNAMIC, STEP_BALL_RIGID_TO_STATIC, STEP_BALL_STICK_RIGID_TO_EMPTY,
+        STEP_BALL_STICK_RIGID_TO_STATIC, STEP_DRAW_STICK_DOWN, STEP_DRAW_STICK_DOWN_END,
+        STEP_DRAW_STICK_UP, STEP_DRAW_STICK_UP_END, STEP_GAME_RUN_COMMAND,
+        STEP_INNER_DRAW_STICK_DOWN, STEP_INNER_DRAW_STICK_UP, STEP_INNER_DRAW_STICK_UP_END,
+        STEP_POOL_BALL_ZERO, STEP_POOL_OUTLET_CLOSE_END, STEP_POOL_OUTLET_CLOSE_START,
+        STEP_POOL_OUTLET_OPEN_END, STEP_POOL_OUTLET_OPEN_START, TWEEN_BALL_MIXER_ROTATE_END,
+        TWEEN_DRAW_STICK_DOWN_END, TWEEN_DRAW_STICK_UP_END, TWEEN_INNER_DRAW_STICK_DOWN_END,
+        TWEEN_INNER_DRAW_STICK_UP_END, TWEEN_POOL_OUTLET_CLOSE_END, TWEEN_POOL_OUTLET_OPEN_END,
+    },
     event::{
-        BallCatchDoneEvent, BallCatchEvent, BallMixerRotateEvent, BallReleaseEvent,
-        BallRigidChange, DrawInnerStickDownEvent, DrawInnerStickUpEvent, DrawStickDownEvent,
-        DrawStickRigidChangeEvent, DrawStickUpEvent, GameEndEvent, GameResetEvent, GameRunEvent,
-        GameStepFinishEvent, PoolOutletCoverCloseEvent, PoolOutletCoverOpenEvent,
+        BallClearEvent, BallSpawnEvent, GameEndEvent, GameResetEvent, GameRunEvent, GameStepData,
+        GameStepFinishEvent, GameStepStartEvent,
     },
     resource::GameConfig,
+    MyAngularVelocityYLens,
 };
 
-pub fn spawn_balls(
-    mut commands: Commands,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    //
-    my_assets: Res<MyAsstes>,
-    assets_gltf: Res<Assets<Gltf>>,
-    assets_node: Res<Assets<GltfNode>>,
-    assets_gltfmesh: Res<Assets<GltfMesh>>,
-) {
-    if let Some(gltf) = assets_gltf.get(my_assets.luckyball.id()) {
-        struct Balls {
-            node_name: String,
-            transform: Transform,
-            number: u8,
-            mesh_handle: Handle<Mesh>,
-            mat_handle: Handle<StandardMaterial>,
-        }
-
-        let mut balls: Vec<Balls> = Vec::new();
-
-        // collect balls
-        for (node_name, _node_handle) in gltf.named_nodes.iter() {
-            let GltfNode {
-                mesh, transform, ..
-            } = assets_node.get(&gltf.named_nodes[node_name]).unwrap();
-
-            if let Some(a) = mesh {
-                let b = assets_gltfmesh.get(a.id()).unwrap();
-                let mat = match &b.primitives[0].material {
-                    Some(a) => a.clone(),
-                    None => materials.add(StandardMaterial::default()),
-                };
-
-                let mat_handle = mat;
-                let mesh_handle = b.primitives[0].mesh.clone();
-                let transform = *transform;
-                let node_name = node_name.as_ref();
-
-                for (name, num) in BALL_NAMES {
-                    if name == node_name {
-                        balls.push(Balls {
-                            node_name: name.to_owned(),
-                            transform,
-                            number: num,
-                            mat_handle: mat_handle.clone(),
-                            mesh_handle: mesh_handle.clone(),
-                        });
-                    }
-                }
-            }
-        }
-
-        // spawn balls
-        for Balls {
-            node_name,
-            transform,
-            number,
-            mat_handle,
-            mesh_handle,
-        } in balls
-        {
-            commands
-                .spawn(PbrBundle {
-                    mesh: mesh_handle,
-                    material: mat_handle,
-                    transform,
-                    ..default()
-                })
-                .insert(RigidBody::Static)
-                .insert(Friction::new(0.4))
-                .insert(Restitution::new(0.9))
-                .insert(Collider::sphere(1.))
-                .insert(Ball(number))
-                .insert(Name::new(node_name));
-        }
-    }
+pub fn spawn_balls(mut ew: EventWriter<BallSpawnEvent>) {
+    ew.send(BallSpawnEvent);
 }
 
 pub fn spawn_setup(
@@ -175,7 +112,7 @@ pub fn spawn_setup(
                         // .insert(RigidBody::Static)
                         // .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         .insert(Name::new("BallInletCover"));
-                } else if node_name == "BallMixer2" {
+                } else if node_name == "BallMixer3" {
                     commands
                         .spawn(PbrBundle {
                             mesh: mesh_handle,
@@ -186,7 +123,7 @@ pub fn spawn_setup(
                         .insert(RigidBody::Kinematic)
                         .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         .insert(BallMixer)
-                        .insert(AngularVelocity(vec3(0., 0., 0.)))
+                        .insert(AngularVelocity(vec3(0., 1., 0.)))
                         .insert(Name::new("BallMixer"));
                 } else if node_name == "BallMixerColliderd" {
                     commands
@@ -368,131 +305,237 @@ pub fn spawn_setup(
         .insert(Collider::cuboid(0.1, 2., 1.2));
 }
 
+pub fn er_ball_spawn(
+    mut er: EventReader<BallSpawnEvent>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    //
+    my_assets: Res<MyAsstes>,
+    assets_gltf: Res<Assets<Gltf>>,
+    assets_node: Res<Assets<GltfNode>>,
+    assets_gltfmesh: Res<Assets<GltfMesh>>,
+) {
+    for _ in er.read() {
+        if let Some(gltf) = assets_gltf.get(my_assets.luckyball.id()) {
+            struct Balls {
+                node_name: String,
+                transform: Transform,
+                number: u8,
+                mesh_handle: Handle<Mesh>,
+                mat_handle: Handle<StandardMaterial>,
+            }
+
+            let mut balls: Vec<Balls> = Vec::new();
+
+            // collect balls
+            for (node_name, _node_handle) in gltf.named_nodes.iter() {
+                let GltfNode {
+                    mesh, transform, ..
+                } = assets_node.get(&gltf.named_nodes[node_name]).unwrap();
+
+                if let Some(a) = mesh {
+                    let b = assets_gltfmesh.get(a.id()).unwrap();
+                    let mat = match &b.primitives[0].material {
+                        Some(a) => a.clone(),
+                        None => materials.add(StandardMaterial::default()),
+                    };
+
+                    let mat_handle = mat;
+                    let mesh_handle = b.primitives[0].mesh.clone();
+                    let transform = *transform;
+                    let node_name = node_name.as_ref();
+
+                    for (name, num) in BALL_NAMES {
+                        if name == node_name {
+                            balls.push(Balls {
+                                node_name: name.to_owned(),
+                                transform,
+                                number: num,
+                                mat_handle: mat_handle.clone(),
+                                mesh_handle: mesh_handle.clone(),
+                            });
+                        }
+                    }
+                }
+            }
+
+            // spawn balls
+            for Balls {
+                node_name,
+                transform,
+                number,
+                mat_handle,
+                mesh_handle,
+            } in balls
+            {
+                commands
+                    .spawn(PbrBundle {
+                        mesh: mesh_handle,
+                        material: mat_handle,
+                        transform,
+                        ..default()
+                    })
+                    .insert(RigidBody::Static)
+                    .insert(Friction::new(0.4))
+                    .insert(Restitution::new(0.9))
+                    .insert(Collider::sphere(1.))
+                    .insert(Ball(number))
+                    .insert(Name::new(node_name));
+            }
+        }
+    }
+}
+
+pub fn er_ball_clear(
+    mut commands: Commands,
+    mut er: EventReader<BallClearEvent>,
+    q_ball: Query<Entity, With<Ball>>,
+) {
+    for _ in er.read() {
+        for entity in &q_ball {
+            commands.entity(entity).despawn_recursive();
+        }
+    }
+}
+
 pub fn draw_stick_up_event(
-    mut er: EventReader<DrawStickUpEvent>,
+    mut er: EventReader<GameStepStartEvent>,
     mut commands: Commands,
     q_stick: Query<Entity, With<BallDrawStick>>,
     q_stick_in: Query<Entity, With<BallDrawStickIn>>,
     q_catched_ball: Query<(Entity, &Transform), (With<Ball>, With<Catched>)>,
 ) {
-    for _ in er.read() {
-        let tween = Tween::new(
-            EaseFunction::QuarticInOut,
-            Duration::from_secs(2),
-            TransformPositionLens {
-                start: vec3(0., -1.85, 0.),
-                end: vec3(0., 0.001, 0.),
-            },
-        );
-        if let Ok(entity) = q_stick.get_single() {
-            commands.entity(entity).insert(Animator::new(tween));
-        }
-        let tween = Tween::new(
-            EaseFunction::QuarticInOut,
-            Duration::from_secs(2),
-            TransformPositionLens {
-                start: vec3(0., -1.85 + 0.65, 0.),
-                end: vec3(0., 0.65, 0.),
-            },
-        );
-        if let Ok(entity) = q_stick_in.get_single() {
-            commands.entity(entity).insert(Animator::new(tween));
-        }
-        if let Ok((entity, transform)) = q_catched_ball.get_single() {
+    for GameStepStartEvent { event_id, .. } in er.read() {
+        if *event_id == STEP_DRAW_STICK_UP {
             let tween = Tween::new(
                 EaseFunction::QuarticInOut,
                 Duration::from_secs(2),
                 TransformPositionLens {
-                    start: transform.translation,
-                    end: vec3(0., 1.0, 0.),
+                    start: vec3(0., -1.85, 0.),
+                    end: vec3(0., 0.001, 0.),
+                },
+            )
+            .with_completed_event(TWEEN_DRAW_STICK_UP_END);
+            if let Ok(entity) = q_stick.get_single() {
+                commands.entity(entity).insert(Animator::new(tween));
+            }
+            let tween = Tween::new(
+                EaseFunction::QuarticInOut,
+                Duration::from_secs(2),
+                TransformPositionLens {
+                    start: vec3(0., -1.85 + 0.65, 0.),
+                    end: vec3(0., 0.65, 0.),
                 },
             );
-            commands.entity(entity).insert(Animator::new(tween));
+            if let Ok(entity) = q_stick_in.get_single() {
+                commands.entity(entity).insert(Animator::new(tween));
+            }
+            if let Ok((entity, transform)) = q_catched_ball.get_single() {
+                let tween = Tween::new(
+                    EaseFunction::QuarticInOut,
+                    Duration::from_secs(2),
+                    TransformPositionLens {
+                        start: transform.translation,
+                        end: vec3(0., 1.0, 0.),
+                    },
+                );
+                commands.entity(entity).insert(Animator::new(tween));
+            }
         }
     }
 }
 
 pub fn draw_stick_down_event(
-    mut er: EventReader<DrawStickDownEvent>,
+    mut er: EventReader<GameStepStartEvent>,
     mut commands: Commands,
     q_stick: Query<Entity, With<BallDrawStick>>,
     q_stick_in: Query<Entity, With<BallDrawStickIn>>,
 ) {
-    for _ in er.read() {
-        let tween = Tween::new(
-            EaseFunction::QuarticInOut,
-            Duration::from_secs(2),
-            TransformPositionLens {
-                start: vec3(0., 0.001, 0.),
-                end: vec3(0., -1.85, 0.),
-            },
-        );
-        if let Ok(entity) = q_stick.get_single() {
-            commands.entity(entity).insert(Animator::new(tween));
-        }
-        let tween = Tween::new(
-            EaseFunction::QuarticInOut,
-            Duration::from_secs(2),
-            TransformPositionLens {
-                start: vec3(0., 0.65, 0.),
-                end: vec3(0., -1.85 + 0.65, 0.),
-            },
-        );
-        if let Ok(entity) = q_stick_in.get_single() {
-            commands.entity(entity).insert(Animator::new(tween));
+    for GameStepStartEvent { event_id, .. } in er.read() {
+        if *event_id == STEP_DRAW_STICK_DOWN {
+            let tween = Tween::new(
+                EaseFunction::QuarticInOut,
+                Duration::from_secs(2),
+                TransformPositionLens {
+                    start: vec3(0., 0.001, 0.),
+                    end: vec3(0., -1.85, 0.),
+                },
+            )
+            .with_completed_event(TWEEN_DRAW_STICK_DOWN_END);
+            if let Ok(entity) = q_stick.get_single() {
+                commands.entity(entity).insert(Animator::new(tween));
+            }
+            let tween = Tween::new(
+                EaseFunction::QuarticInOut,
+                Duration::from_secs(2),
+                TransformPositionLens {
+                    start: vec3(0., 0.65, 0.),
+                    end: vec3(0., -1.85 + 0.65, 0.),
+                },
+            );
+            if let Ok(entity) = q_stick_in.get_single() {
+                commands.entity(entity).insert(Animator::new(tween));
+            }
         }
     }
 }
 
 pub fn draw_inner_stick_up_event(
-    mut er: EventReader<DrawInnerStickUpEvent>,
+    mut er: EventReader<GameStepStartEvent>,
     mut commands: Commands,
     q_stick_in: Query<Entity, With<BallDrawStickIn>>,
     q_catched_ball: Query<(Entity, &Transform), (With<Ball>, With<Catched>)>,
 ) {
-    for _ in er.read() {
-        let tween = Tween::new(
-            EaseFunction::QuarticInOut,
-            Duration::from_millis(500),
-            TransformPositionLens {
-                start: vec3(0., 0.65, 0.),
-                end: vec3(0., 0.73, 0.),
-            },
-        );
-        if let Ok(entity) = q_stick_in.get_single() {
-            commands.entity(entity).insert(Animator::new(tween));
-        }
-
-        if let Ok((entity, transform)) = q_catched_ball.get_single() {
+    for GameStepStartEvent { event_id, .. } in er.read() {
+        if *event_id == STEP_INNER_DRAW_STICK_UP {
             let tween = Tween::new(
                 EaseFunction::QuarticInOut,
                 Duration::from_millis(500),
                 TransformPositionLens {
-                    start: transform.translation,
-                    end: vec3(0., 1.09, 0.),
+                    start: vec3(0., 0.65, 0.),
+                    end: vec3(0., 0.73, 0.),
                 },
-            );
-            commands.entity(entity).insert(Animator::new(tween));
+            )
+            .with_completed_event(TWEEN_INNER_DRAW_STICK_UP_END);
+            if let Ok(entity) = q_stick_in.get_single() {
+                commands.entity(entity).insert(Animator::new(tween));
+            }
+
+            if let Ok((entity, transform)) = q_catched_ball.get_single() {
+                let tween = Tween::new(
+                    EaseFunction::QuarticInOut,
+                    Duration::from_millis(500),
+                    TransformPositionLens {
+                        start: transform.translation,
+                        end: vec3(0., 1.09, 0.),
+                    },
+                );
+                commands.entity(entity).insert(Animator::new(tween));
+            }
         }
     }
 }
 
 pub fn draw_inner_stick_down_event(
-    mut er: EventReader<DrawInnerStickDownEvent>,
+    mut er: EventReader<GameStepStartEvent>,
     mut commands: Commands,
     q_stick_in: Query<Entity, With<BallDrawStickIn>>,
 ) {
-    for _ in er.read() {
-        let tween = Tween::new(
-            EaseFunction::QuarticInOut,
-            Duration::from_millis(500),
-            TransformPositionLens {
-                start: vec3(0., 0.73, 0.),
-                end: vec3(0., 0.65, 0.),
-            },
-        );
-        if let Ok(entity) = q_stick_in.get_single() {
-            commands.entity(entity).insert(Animator::new(tween));
+    for GameStepStartEvent { event_id, .. } in er.read() {
+        if *event_id == STEP_INNER_DRAW_STICK_DOWN {
+            let tween = Tween::new(
+                EaseFunction::QuarticInOut,
+                Duration::from_millis(500),
+                TransformPositionLens {
+                    start: vec3(0., 0.73, 0.),
+                    end: vec3(0., 0.65, 0.),
+                },
+            )
+            .with_completed_event(TWEEN_INNER_DRAW_STICK_DOWN_END);
+            if let Ok(entity) = q_stick_in.get_single() {
+                commands.entity(entity).insert(Animator::new(tween));
+            }
         }
     }
 }
@@ -566,15 +609,17 @@ pub fn pool_ball_cnt_zero_sensor(
 
             if ball_cnt == 0 {
                 config.is_pool_ball_cnt_sensor = false;
-                ew.send(GameStepFinishEvent(STEP_POOL_BALL_ZERO));
+                ew.send(GameStepFinishEvent::new(STEP_POOL_BALL_ZERO));
             }
         }
     }
 }
 
-pub fn er_ball_catch(mut er: EventReader<BallCatchEvent>, mut config: ResMut<GameConfig>) {
-    for _ in er.read() {
-        config.is_catching = true;
+pub fn er_ball_catch(mut er: EventReader<GameStepStartEvent>, mut config: ResMut<GameConfig>) {
+    for GameStepStartEvent { event_id, .. } in er.read() {
+        if *event_id == STEP_BALL_CATCH {
+            config.is_catching = true;
+        }
     }
 }
 
@@ -583,7 +628,7 @@ pub fn ball_catch(
     mut config: ResMut<GameConfig>,
     q_sensor: Query<(Entity, &CollidingEntities), With<BallCatchSensor>>,
     q_ball: Query<(Entity, &Transform, &Ball), With<Ball>>,
-    mut ew: EventWriter<BallCatchDoneEvent>,
+    mut ew: EventWriter<GameStepFinishEvent>,
 ) {
     if config.is_catching {
         for (_entity, colliding_entities) in &q_sensor {
@@ -604,7 +649,7 @@ pub fn ball_catch(
                         .insert(Catched)
                         .insert(Picked)
                         .insert(Animator::new(tween));
-                    ew.send(BallCatchDoneEvent);
+                    ew.send(GameStepFinishEvent::new(STEP_BALL_CATCH_DONE));
                     info!("catched!! {:?}", ball.0);
                 }
             }
@@ -614,73 +659,69 @@ pub fn ball_catch(
 
 pub fn er_ball_release(
     mut commands: Commands,
-    mut er: EventReader<BallReleaseEvent>,
+    mut er: EventReader<GameStepStartEvent>,
     q_catched_ball: Query<(Entity, &Transform), (With<Ball>, With<Catched>)>,
 ) {
-    for _ in er.read() {
-        if let Ok((entity, transform)) = q_catched_ball.get_single() {
-            commands
-                .entity(entity)
-                .remove::<Catched>()
-                .insert(Restitution::new(0.))
-                // .insert(CollisionMargin(0.001))
-                .insert(RigidBody::Dynamic);
+    for GameStepStartEvent { event_id, .. } in er.read() {
+        if *event_id == STEP_BALL_RELEASE {
+            if let Ok((entity, transform)) = q_catched_ball.get_single() {
+                commands
+                    .entity(entity)
+                    .remove::<Catched>()
+                    .insert(Restitution::new(0.))
+                    // .insert(CollisionMargin(0.001))
+                    .insert(RigidBody::Dynamic);
 
-            let mut impulse = ExternalImpulse::default();
-            impulse.apply_impulse(Vec3::NEG_Z * 0.002);
-            commands.entity(entity).insert(impulse);
+                let mut impulse = ExternalImpulse::default();
+                impulse.apply_impulse(Vec3::NEG_Z * 0.002);
+                commands.entity(entity).insert(impulse);
+            }
         }
     }
 }
 
 pub fn er_pool_outlet_cover_open(
     mut commands: Commands,
-    mut er: EventReader<PoolOutletCoverOpenEvent>,
+    mut er: EventReader<GameStepStartEvent>,
     q_cover: Query<Entity, With<PoolOutletCover>>,
 ) {
-    for _ in er.read() {
-        if let Ok(entity) = q_cover.get_single() {
-            let tween = Tween::new(
-                EaseFunction::QuadraticInOut,
-                Duration::from_millis(500),
-                TransformPositionLens {
-                    start: vec3(-0.86, 0.1, 0.0),
-                    end: vec3(-0.86, -0.1, 0.0),
-                },
-            )
-            .with_completed_event(TWEEN_POOL_OUTLET_OPEN_END);
-            commands.entity(entity).insert(Animator::new(tween));
-        }
-    }
-}
-
-pub fn tcb_pool_outlet_open_end(
-    mut er: EventReader<TweenCompleted>,
-    mut ew: EventWriter<GameStepFinishEvent>,
-) {
-    for TweenCompleted { user_data, .. } in er.read() {
-        if *user_data == TWEEN_POOL_OUTLET_OPEN_END {
-            ew.send(GameStepFinishEvent(STEP_POOL_OUTLET_OPEN_END));
+    for GameStepStartEvent { event_id, .. } in er.read() {
+        if *event_id == STEP_POOL_OUTLET_OPEN_START {
+            if let Ok(entity) = q_cover.get_single() {
+                let tween = Tween::new(
+                    EaseFunction::QuadraticInOut,
+                    Duration::from_millis(500),
+                    TransformPositionLens {
+                        start: vec3(-0.86, 0.1, 0.0),
+                        end: vec3(-0.86, -0.1, 0.0),
+                    },
+                )
+                .with_completed_event(TWEEN_POOL_OUTLET_OPEN_END);
+                commands.entity(entity).insert(Animator::new(tween));
+            }
         }
     }
 }
 
 pub fn er_pool_outlet_cover_close(
     mut commands: Commands,
-    mut er: EventReader<PoolOutletCoverCloseEvent>,
+    mut er: EventReader<GameStepStartEvent>,
     q_cover: Query<Entity, With<PoolOutletCover>>,
 ) {
-    for _ in er.read() {
-        if let Ok(entity) = q_cover.get_single() {
-            let tween = Tween::new(
-                EaseFunction::QuadraticInOut,
-                Duration::from_millis(500),
-                TransformPositionLens {
-                    start: vec3(-0.86, -0.1, 0.0),
-                    end: vec3(-0.86, 0.1, 0.0),
-                },
-            );
-            commands.entity(entity).insert(Animator::new(tween));
+    for GameStepStartEvent { event_id, .. } in er.read() {
+        if *event_id == STEP_POOL_OUTLET_CLOSE_START {
+            if let Ok(entity) = q_cover.get_single() {
+                let tween = Tween::new(
+                    EaseFunction::QuadraticInOut,
+                    Duration::from_millis(500),
+                    TransformPositionLens {
+                        start: vec3(-0.86, -0.1, 0.0),
+                        end: vec3(-0.86, 0.1, 0.0),
+                    },
+                )
+                .with_completed_event(TWEEN_POOL_OUTLET_CLOSE_END);
+                commands.entity(entity).insert(Animator::new(tween));
+            }
         }
     }
 }
@@ -690,34 +731,40 @@ pub fn er_pool_outlet_cover_close(
 pub fn er_ball_rigid_change(
     mut commands: Commands,
     q_ball: Query<Entity, With<Ball>>,
-    mut er: EventReader<BallRigidChange>,
+    mut er: EventReader<GameStepStartEvent>,
 ) {
-    for evt in er.read() {
-        for entity in &q_ball {
-            if evt.0 {
-                commands.entity(entity).insert(RigidBody::Dynamic);
-            } else {
-                commands.entity(entity).insert(RigidBody::Static);
+    for GameStepStartEvent { event_id, .. } in er.read() {
+        match *event_id {
+            STEP_BALL_RIGID_TO_DYNAMIC => {
+                for entity in &q_ball {
+                    commands.entity(entity).insert(RigidBody::Dynamic);
+                }
             }
+            STEP_BALL_RIGID_TO_STATIC => {
+                for entity in &q_ball {
+                    commands.entity(entity).insert(RigidBody::Static);
+                }
+            }
+            _ => {}
         }
     }
 }
 
 pub fn draw_stick_rigid_change(
     mut commands: Commands,
-    mut er: EventReader<DrawStickRigidChangeEvent>,
+    mut er: EventReader<GameStepStartEvent>,
     q_stick: Query<Entity, With<BallDrawStick>>,
     q_stick_in: Query<Entity, With<BallDrawStickIn>>,
 ) {
-    for evt in er.read() {
-        if evt.0 {
+    for GameStepStartEvent { event_id, .. } in er.read() {
+        if *event_id == STEP_BALL_STICK_RIGID_TO_STATIC {
             if let Ok(entity) = q_stick.get_single() {
                 commands.entity(entity).insert(RigidBody::Static);
             }
             if let Ok(entity) = q_stick_in.get_single() {
                 commands.entity(entity).insert(RigidBody::Static);
             }
-        } else {
+        } else if *event_id == STEP_BALL_STICK_RIGID_TO_EMPTY {
             if let Ok(entity) = q_stick.get_single() {
                 commands.entity(entity).remove::<RigidBody>();
             }
@@ -730,14 +777,29 @@ pub fn draw_stick_rigid_change(
 
 pub fn ball_mixer_rotate(
     mut commands: Commands,
-    mut er_mixer_rotate: EventReader<BallMixerRotateEvent>,
-    q_mixer: Query<Entity, With<BallMixer>>,
+    mut er: EventReader<GameStepStartEvent>,
+    q_mixer: Query<(Entity, &AngularVelocity), With<BallMixer>>,
 ) {
-    for evt in er_mixer_rotate.read() {
-        if let Ok(entity) = q_mixer.get_single() {
-            commands
-                .entity(entity)
-                .insert(AngularVelocity(vec3(0., evt.0, 0.)));
+    for evt in er.read() {
+        match evt {
+            GameStepStartEvent {
+                event_id: STEP_BALL_MIXER_ROTATE,
+                data: Some(GameStepData::Float(speed)),
+            } => {
+                if let Ok((entity, av)) = q_mixer.get_single() {
+                    let tween = Tween::new(
+                        EaseFunction::QuarticInOut,
+                        Duration::from_millis(500),
+                        MyAngularVelocityYLens {
+                            start: av.y,
+                            end: *speed,
+                        },
+                    )
+                    .with_completed_event(TWEEN_BALL_MIXER_ROTATE_END);
+                    commands.entity(entity).insert(Animator::new(tween));
+                }
+            }
+            _ => {}
         }
     }
 }
@@ -745,11 +807,11 @@ pub fn ball_mixer_rotate(
 pub fn er_game_run(
     mut er: EventReader<GameRunEvent>,
     mut config: ResMut<GameConfig>,
-    mut ew: EventWriter<PoolOutletCoverOpenEvent>,
+    mut ew: EventWriter<GameStepFinishEvent>,
 ) {
     for _ in er.read() {
         config.is_running = true;
-        ew.send(PoolOutletCoverOpenEvent);
+        ew.send(GameStepFinishEvent::new(STEP_GAME_RUN_COMMAND));
     }
 }
 
@@ -770,23 +832,107 @@ pub fn er_game_reset(mut er: EventReader<GameResetEvent>) {
 /// check pool ball zero
 /// close pooloutlet
 
-pub fn game_run(
+pub fn game_run_step_finish(
     mut er: EventReader<GameStepFinishEvent>,
     mut config: ResMut<GameConfig>,
-    mut ew_ball_rigid_change: EventWriter<BallRigidChange>,
-    mut ew_close_pool_outlet: EventWriter<PoolOutletCoverCloseEvent>,
+    mut ew_step_start: EventWriter<GameStepStartEvent>,
+    // mut ew_step_f32: EventWriter<GameStepEvent<f32>>,
+    // mut ew_ball_rigid_change: EventWriter<BallRigidChangeEvent>,
+    // mut ew_close_pool_outlet: EventWriter<PoolOutletCoverCloseEvent>,
+    // mut ew_mixer_rotate: EventWriter<BallMixerRotateEvent>,
+    // mut ew_stick_down: EventWriter<DrawStickDownEvent>,
+    // mut ew_ball_catch: EventWriter<BallCatchEvent>,
+    // mut ew_stick_up: EventWriter<DrawStickUpEvent>,
+    // mut ew_inner_stick_down: EventWriter<DrawInnerStickDownEvent>,
+    // mut ew_inner_stick_up: EventWriter<DrawInnerStickUpEvent>,
+    // mut ew_ball_release: EventWriter<BallReleaseEvent>,
 ) {
     if config.is_running {
-        for GameStepFinishEvent(step) in er.read() {
-            //
-            if *step == STEP_POOL_OUTLET_OPEN_END {
-                config.is_pool_ball_cnt_sensor = true;
-                ew_ball_rigid_change.send(BallRigidChange(true));
+        for GameStepFinishEvent { event_id, .. } in er.read() {
+            match *event_id {
+                STEP_GAME_RUN_COMMAND => {
+                    ew_step_start.send(GameStepStartEvent::new(STEP_POOL_OUTLET_OPEN_START));
+                }
+                STEP_POOL_OUTLET_OPEN_END => {
+                    config.is_pool_ball_cnt_sensor = true;
+                    ew_step_start.send(GameStepStartEvent::new(STEP_BALL_RIGID_TO_DYNAMIC));
+                }
+                STEP_POOL_BALL_ZERO => {
+                    ew_step_start.send(GameStepStartEvent::new(STEP_POOL_OUTLET_CLOSE_START));
+                }
+                STEP_POOL_OUTLET_CLOSE_END => {
+                    ew_step_start.send(GameStepStartEvent::new_with_data(
+                        STEP_BALL_MIXER_ROTATE,
+                        GameStepData::Float(10.),
+                    ));
+                    ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
+                }
+                STEP_BALL_MIXER_ROTATE_END => {
+                    // MIXER ROTATE를 자주하게되는데 이러면 이벤트가 계속발생하므로 사용은 x
+                    // ew_stick_down.send(DrawStickDownEvent);
+                }
+                STEP_DRAW_STICK_DOWN_END => {
+                    ew_step_start.send(GameStepStartEvent::new_with_data(
+                        STEP_BALL_MIXER_ROTATE,
+                        GameStepData::Float(1.),
+                    ));
+                    ew_step_start.send(GameStepStartEvent::new(STEP_BALL_CATCH));
+                    ew_step_start.send(GameStepStartEvent::new(STEP_BALL_STICK_RIGID_TO_EMPTY));
+                }
+                STEP_BALL_CATCH_DONE => {
+                    ew_step_start.send(GameStepStartEvent::new(STEP_BALL_STICK_RIGID_TO_STATIC));
+                    ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_UP));
+                }
+                STEP_DRAW_STICK_UP_END => {
+                    ew_step_start.send(GameStepStartEvent::new(STEP_INNER_DRAW_STICK_UP));
+                    ew_step_start.send(GameStepStartEvent::new_with_data(
+                        STEP_BALL_MIXER_ROTATE,
+                        GameStepData::Float(10.),
+                    ));
+                }
+                STEP_INNER_DRAW_STICK_UP_END => {
+                    ew_step_start.send(GameStepStartEvent::new(STEP_BALL_RELEASE));
+                    ew_step_start.send(GameStepStartEvent::new(STEP_INNER_DRAW_STICK_DOWN));
+                }
+                STEP_INNER_DRAW_STICK_DOWN_END => {
+                    //judge?
+                    ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
+                }
+                _ => {}
             }
+        }
+    }
+}
 
-            if *step == STEP_POOL_BALL_ZERO {
-                ew_close_pool_outlet.send(PoolOutletCoverCloseEvent);
+pub fn tcb_to_step_convert(
+    mut er: EventReader<TweenCompleted>,
+    mut ew: EventWriter<GameStepFinishEvent>,
+) {
+    for TweenCompleted { user_data, entity } in er.read() {
+        info!("entity {entity:?}");
+        match *user_data {
+            TWEEN_DRAW_STICK_UP_END => {
+                ew.send(GameStepFinishEvent::new(STEP_DRAW_STICK_UP_END));
             }
+            TWEEN_POOL_OUTLET_OPEN_END => {
+                ew.send(GameStepFinishEvent::new(STEP_POOL_OUTLET_OPEN_END));
+            }
+            TWEEN_POOL_OUTLET_CLOSE_END => {
+                ew.send(GameStepFinishEvent::new(STEP_POOL_OUTLET_CLOSE_END));
+            }
+            TWEEN_BALL_MIXER_ROTATE_END => {
+                ew.send(GameStepFinishEvent::new(STEP_BALL_MIXER_ROTATE_END));
+            }
+            TWEEN_DRAW_STICK_DOWN_END => {
+                ew.send(GameStepFinishEvent::new(STEP_DRAW_STICK_DOWN_END));
+            }
+            TWEEN_INNER_DRAW_STICK_UP_END => {
+                ew.send(GameStepFinishEvent::new(STEP_INNER_DRAW_STICK_UP_END));
+            }
+            TWEEN_INNER_DRAW_STICK_DOWN_END => {
+                ew.send(GameStepFinishEvent::new(STEP_INNER_DRAW_STICK_DOWN_END));
+            }
+            _ => {}
         }
     }
 }

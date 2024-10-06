@@ -1,18 +1,18 @@
+use avian3d::prelude::AngularVelocity;
 use bevy::prelude::*;
+use bevy_tweening::{component_animator_system, AnimationSystem, Lens};
 use event::{
-    BallCatchDoneEvent, BallCatchEvent, BallMixerRotateEvent, BallReleaseEvent, BallRigidChange,
-    DrawInnerStickDownEvent, DrawInnerStickUpEvent, DrawStickDownEvent, DrawStickRigidChangeEvent,
-    DrawStickUpEvent, GameEndEvent, GameResetEvent, GameRunEvent, GameStepFinishEvent,
-    PoolBallCntZeroEvent, PoolOutletCoverCloseEvent, PoolOutletCoverOpenEvent,
+    BallClearEvent, BallSpawnEvent, GameEndEvent, GameResetEvent, GameRunEvent,
+    GameStepFinishEvent, GameStepStartEvent, PoolBallCntZeroEvent,
 };
 use resource::GameConfig;
 use system::{
     ball_catch, ball_catch_sensor_collding, ball_holder_last_collding, ball_mixer_rotate,
     ball_picked_static, draw_inner_stick_down_event, draw_inner_stick_up_event,
     draw_stick_down_event, draw_stick_rigid_change, draw_stick_up_event, er_ball_catch,
-    er_ball_release, er_ball_rigid_change, er_game_end, er_game_reset, er_game_run,
-    er_pool_outlet_cover_close, er_pool_outlet_cover_open, game_run, pool_ball_cnt_zero_sensor,
-    spawn_balls, spawn_setup, tcb_pool_outlet_open_end,
+    er_ball_clear, er_ball_release, er_ball_rigid_change, er_ball_spawn, er_game_end,
+    er_game_reset, er_game_run, er_pool_outlet_cover_close, er_pool_outlet_cover_open,
+    game_run_step_finish, pool_ball_cnt_zero_sensor, spawn_balls, spawn_setup, tcb_to_step_convert,
 };
 
 use crate::app::states::MyStates;
@@ -27,23 +27,14 @@ pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<BallMixerRotateEvent>()
-            .add_event::<BallRigidChange>()
-            .add_event::<DrawStickDownEvent>()
-            .add_event::<DrawStickUpEvent>()
-            .add_event::<DrawInnerStickDownEvent>()
-            .add_event::<DrawInnerStickUpEvent>()
-            .add_event::<DrawStickRigidChangeEvent>()
-            .add_event::<BallCatchEvent>()
-            .add_event::<BallCatchDoneEvent>()
-            .add_event::<BallReleaseEvent>()
-            .add_event::<PoolOutletCoverCloseEvent>()
-            .add_event::<PoolOutletCoverOpenEvent>()
-            .add_event::<GameRunEvent>()
+        app.add_event::<GameRunEvent>()
             .add_event::<GameEndEvent>()
             .add_event::<GameResetEvent>()
+            .add_event::<GameStepStartEvent>()
             .add_event::<GameStepFinishEvent>()
             .add_event::<PoolBallCntZeroEvent>()
+            .add_event::<BallClearEvent>()
+            .add_event::<BallSpawnEvent>()
             .insert_resource(GameConfig {
                 is_running: false,
                 is_catching: false,
@@ -75,12 +66,30 @@ impl Plugin for GamePlugin {
                         er_game_run,
                         er_game_end,
                         er_game_reset,
-                        game_run,
+                        game_run_step_finish,
                         pool_ball_cnt_zero_sensor,
-                        tcb_pool_outlet_open_end,
+                        tcb_to_step_convert,
+                        er_ball_spawn,
+                        er_ball_clear,
                     ),
                 )
                     .run_if(in_state(MyStates::Game)),
+            )
+            .add_systems(
+                Update,
+                component_animator_system::<AngularVelocity>
+                    .in_set(AnimationSystem::AnimationUpdate),
             );
+    }
+}
+
+pub struct MyAngularVelocityYLens {
+    start: f32,
+    end: f32,
+}
+
+impl Lens<AngularVelocity> for MyAngularVelocityYLens {
+    fn lerp(&mut self, target: &mut dyn bevy_tweening::Targetable<AngularVelocity>, ratio: f32) {
+        target.y = self.start + (self.end - self.start) * ratio;
     }
 }

@@ -1,3 +1,48 @@
+//
+pub const TWEEN_POOL_OUTLET_OPEN_END: u64 = 1;
+pub const TWEEN_POOL_OUTLET_CLOSE_END: u64 = 2;
+pub const TWEEN_BALL_MIXER_ROTATE_END: u64 = 3;
+pub const TWEEN_DRAW_STICK_DOWN_END: u64 = 4;
+pub const TWEEN_DRAW_STICK_UP_END: u64 = 5;
+pub const TWEEN_INNER_DRAW_STICK_DOWN_END: u64 = 6;
+pub const TWEEN_INNER_DRAW_STICK_UP_END: u64 = 7;
+
+//
+pub const STEP_POOL_BALL_ZERO: u64 = 2;
+pub const STEP_POOL_OUTLET_OPEN_END: u64 = 3;
+pub const STEP_POOL_OUTLET_CLOSE_END: u64 = 4;
+pub const STEP_BALL_MIXER_ROTATE_END: u64 = 5;
+pub const STEP_DRAW_STICK_DOWN_END: u64 = 6;
+pub const STEP_BALL_CATCH_DONE: u64 = 7;
+pub const STEP_DRAW_STICK_UP_END: u64 = 8;
+pub const STEP_INNER_DRAW_STICK_DOWN_END: u64 = 9;
+pub const STEP_INNER_DRAW_STICK_UP_END: u64 = 10;
+
+//
+pub const STEP_BALL_RIGID_TO_STATIC: u64 = 100;
+pub const STEP_BALL_RIGID_TO_DYNAMIC: u64 = 101;
+pub const STEP_BALL_MIXER_ROTATE: u64 = 102;
+
+pub const STEP_POOL_OUTLET_OPEN_START: u64 = 200;
+pub const STEP_POOL_OUTLET_CLOSE_START: u64 = 201;
+
+pub const STEP_BALL_CATCH: u64 = 202;
+
+pub const STEP_DRAW_STICK_UP: u64 = 203;
+pub const STEP_DRAW_STICK_DOWN: u64 = 204;
+pub const STEP_INNER_DRAW_STICK_UP: u64 = 205;
+pub const STEP_INNER_DRAW_STICK_DOWN: u64 = 206;
+pub const STEP_BALL_RELEASE: u64 = 207;
+
+pub const STEP_BALL_STICK_RIGID_TO_STATIC: u64 = 208;
+pub const STEP_BALL_STICK_RIGID_TO_EMPTY: u64 = 209;
+
+pub const STEP_GAME_RUN_COMMAND: u64 = 9999;
+
+//
+// ----
+//
+
 pub const BALL_NAMES: [(&str, u8); 70] = [
     ("BallTmp1_1", 1),
     ("BallTmp1_2", 2),
@@ -74,10 +119,3 @@ pub const BALL_NAMES: [(&str, u8); 70] = [
     ("BallTmp5_13", 69),
     ("BallTmp5_14", 70),
 ];
-
-//
-pub const TWEEN_POOL_OUTLET_OPEN_END: u64 = 1;
-
-pub const STEP_POOL_BALL_ZERO: u64 = 2;
-
-pub const STEP_POOL_OUTLET_OPEN_END: u64 = 3;

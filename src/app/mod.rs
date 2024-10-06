@@ -75,7 +75,7 @@ fn camera_light_setup(mut commands: Commands) {
 
     commands.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(-0.0, 10.0, 10.0).looking_at(Vec3::Y * 2.0, Vec3::Y),
+            transform: Transform::from_xyz(5.0, 3.0, 0.0).looking_at(Vec3::Y * 2.0, Vec3::Y),
             ..default()
         },
         PanOrbitCamera::default(),

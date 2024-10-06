@@ -5,10 +5,14 @@ use bevy_inspector_egui::{
 };
 use iyes_perf_ui::{entries::PerfUiBundle, PerfUiPlugin};
 
-use crate::game::event::{
-    BallCatchEvent, BallMixerRotateEvent, BallReleaseEvent, BallRigidChange,
-    DrawInnerStickDownEvent, DrawInnerStickUpEvent, DrawStickDownEvent, DrawStickRigidChangeEvent,
-    DrawStickUpEvent, GameRunEvent, PoolOutletCoverCloseEvent, PoolOutletCoverOpenEvent,
+use crate::game::{
+    constant::{
+        STEP_BALL_CATCH, STEP_BALL_MIXER_ROTATE, STEP_BALL_RELEASE, STEP_BALL_RIGID_TO_DYNAMIC,
+        STEP_BALL_RIGID_TO_STATIC, STEP_BALL_STICK_RIGID_TO_EMPTY, STEP_BALL_STICK_RIGID_TO_STATIC,
+        STEP_DRAW_STICK_DOWN, STEP_DRAW_STICK_UP, STEP_INNER_DRAW_STICK_DOWN,
+        STEP_INNER_DRAW_STICK_UP, STEP_POOL_OUTLET_CLOSE_START, STEP_POOL_OUTLET_OPEN_START,
+    },
+    event::{BallClearEvent, BallSpawnEvent, GameRunEvent, GameStepData, GameStepStartEvent},
 };
 
 pub struct InspectorPlugin;
@@ -50,71 +54,90 @@ fn inspector_ui(world: &mut World) {
             // bevy_inspector_egui::bevy_inspector::ui_for_world_entities(world, ui);
 
             if ui.button("mixer 0").clicked() {
-                world.send_event(BallMixerRotateEvent(0.));
+                world.send_event(GameStepStartEvent::new_with_data(
+                    STEP_BALL_MIXER_ROTATE,
+                    GameStepData::Float(0.),
+                ));
             }
 
             if ui.button("mixer 1").clicked() {
-                world.send_event(BallMixerRotateEvent(1.));
+                world.send_event(GameStepStartEvent::new_with_data(
+                    STEP_BALL_MIXER_ROTATE,
+                    GameStepData::Float(1.),
+                ));
             }
 
             if ui.button("mixer 10").clicked() {
-                world.send_event(BallMixerRotateEvent(10.));
+                world.send_event(GameStepStartEvent::new_with_data(
+                    STEP_BALL_MIXER_ROTATE,
+                    GameStepData::Float(10.),
+                ));
             }
 
             if ui.button("stick down").clicked() {
-                world.send_event(DrawStickDownEvent);
+                world.send_event(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
             }
 
             if ui.button("stick up").clicked() {
-                world.send_event(DrawStickUpEvent);
+                world.send_event(GameStepStartEvent::new(STEP_DRAW_STICK_UP));
             }
 
             if ui.button("stick inner down").clicked() {
-                world.send_event(DrawInnerStickDownEvent);
+                world.send_event(GameStepStartEvent::new(STEP_INNER_DRAW_STICK_DOWN));
             }
 
             if ui.button("stick inner up").clicked() {
-                world.send_event(DrawInnerStickUpEvent);
+                world.send_event(GameStepStartEvent::new(STEP_INNER_DRAW_STICK_UP));
             }
 
             //
 
             if ui.button("stick static").clicked() {
-                world.send_event(DrawStickRigidChangeEvent(true));
+                world.send_event(GameStepStartEvent::new(STEP_BALL_STICK_RIGID_TO_STATIC));
             }
 
             if ui.button("stick static remove").clicked() {
-                world.send_event(DrawStickRigidChangeEvent(false));
+                world.send_event(GameStepStartEvent::new(STEP_BALL_STICK_RIGID_TO_EMPTY));
             }
 
             //
 
             if ui.button("ball static").clicked() {
-                world.send_event(BallRigidChange(false));
+                world.send_event(GameStepStartEvent::new(STEP_BALL_RIGID_TO_STATIC));
             }
 
             if ui.button("ball dynamci").clicked() {
-                world.send_event(BallRigidChange(true));
+                world.send_event(GameStepStartEvent::new(STEP_BALL_RIGID_TO_DYNAMIC));
             }
 
             //
 
             if ui.button("ball catch").clicked() {
-                world.send_event(BallCatchEvent);
+                world.send_event(GameStepStartEvent::new(STEP_BALL_CATCH));
             }
 
             if ui.button("ball release").clicked() {
-                world.send_event(BallReleaseEvent);
+                world.send_event(GameStepStartEvent::new(STEP_BALL_RELEASE));
             }
 
             //
 
             if ui.button("pool outlet  open").clicked() {
-                world.send_event(PoolOutletCoverOpenEvent);
+                world.send_event(GameStepStartEvent::new(STEP_POOL_OUTLET_OPEN_START));
             }
 
             if ui.button("pool outlet  close").clicked() {
-                world.send_event(PoolOutletCoverCloseEvent);
+                world.send_event(GameStepStartEvent::new(STEP_POOL_OUTLET_CLOSE_START));
+            }
+
+            //
+
+            if ui.button("ball spawn").clicked() {
+                world.send_event(BallSpawnEvent);
+            }
+
+            if ui.button("ball clear").clicked() {
+                world.send_event(BallClearEvent);
             }
 
             //

@@ -1,45 +1,5 @@
 use bevy::prelude::*;
 
-/// true: dynamic
-/// false: static
-#[derive(Event)]
-pub struct BallRigidChange(pub bool);
-
-#[derive(Event)]
-pub struct BallMixerRotateEvent(pub f32);
-
-#[derive(Event)]
-pub struct DrawStickDownEvent;
-
-#[derive(Event)]
-pub struct DrawStickUpEvent;
-
-#[derive(Event)]
-pub struct DrawInnerStickDownEvent;
-
-#[derive(Event)]
-pub struct DrawInnerStickUpEvent;
-
-/// true: static
-/// false: remove
-#[derive(Event)]
-pub struct DrawStickRigidChangeEvent(pub bool);
-
-#[derive(Event)]
-pub struct BallCatchEvent;
-
-#[derive(Event)]
-pub struct BallCatchDoneEvent;
-
-#[derive(Event)]
-pub struct BallReleaseEvent;
-
-#[derive(Event)]
-pub struct PoolOutletCoverOpenEvent;
-
-#[derive(Event)]
-pub struct PoolOutletCoverCloseEvent;
-
 #[derive(Event)]
 pub struct GameResetEvent;
 
@@ -50,7 +10,55 @@ pub struct GameRunEvent;
 pub struct GameEndEvent;
 
 #[derive(Event)]
-pub struct GameStepFinishEvent(pub u64);
+pub struct GameStepFinishEvent {
+    pub event_id: u64,
+    pub data: Option<GameStepData>,
+}
+impl GameStepFinishEvent {
+    pub fn new(event_id: u64) -> Self {
+        Self {
+            event_id,
+            data: None,
+        }
+    }
+    pub fn new_with_data(event_id: u64, data: GameStepData) -> Self {
+        Self {
+            event_id,
+            data: Some(data),
+        }
+    }
+}
+#[derive(Debug)]
+pub enum GameStepData {
+    Int(u32),
+    Float(f32),
+}
+#[derive(Event, Debug)]
+pub struct GameStepStartEvent {
+    pub event_id: u64,
+    pub data: Option<GameStepData>,
+}
+
+impl GameStepStartEvent {
+    pub fn new(event_id: u64) -> Self {
+        Self {
+            event_id,
+            data: None,
+        }
+    }
+    pub fn new_with_data(event_id: u64, data: GameStepData) -> Self {
+        Self {
+            event_id,
+            data: Some(data),
+        }
+    }
+}
 
 #[derive(Event)]
 pub struct PoolBallCntZeroEvent;
+
+#[derive(Event)]
+pub struct BallClearEvent;
+
+#[derive(Event)]
+pub struct BallSpawnEvent;

@@ -16,22 +16,27 @@ use crate::{
             Ball, BallDrawStick, BallDrawStickIn, BallMixer, BallOutletGuideHolderLast,
             PoolOutletCover,
         },
-        constant::{BALL_NAMES, STEP_BALL_CATCH_DONE, STEP_INNER_DRAW_STICK_DOWN_END},
+        constant::{
+            BALL_NAMES, STEP_BALL_CATCH_DONE, STEP_INNER_DRAW_STICK_DOWN_END, TWEEN_BALL_CATCH_END,
+        },
     },
 };
 
 use super::{
-    component::{BallCatchSensor, Catched, Picked, PickedStatic, PoolBallCntSensor},
+    component::{
+        BallCatchSensor, BallReleaseSensor, Catched, Picked, PickedStatic, PoolBallCntSensor,
+    },
     constant::{
         STEP_BALL_CATCH, STEP_BALL_MIXER_ROTATE, STEP_BALL_MIXER_ROTATE_END, STEP_BALL_RELEASE,
-        STEP_BALL_RIGID_TO_DYNAMIC, STEP_BALL_RIGID_TO_STATIC, STEP_BALL_STICK_RIGID_TO_EMPTY,
-        STEP_BALL_STICK_RIGID_TO_STATIC, STEP_DRAW_STICK_DOWN, STEP_DRAW_STICK_DOWN_END,
-        STEP_DRAW_STICK_UP, STEP_DRAW_STICK_UP_END, STEP_GAME_RUN_COMMAND,
-        STEP_INNER_DRAW_STICK_DOWN, STEP_INNER_DRAW_STICK_UP, STEP_INNER_DRAW_STICK_UP_END,
-        STEP_POOL_BALL_ZERO, STEP_POOL_OUTLET_CLOSE_END, STEP_POOL_OUTLET_CLOSE_START,
-        STEP_POOL_OUTLET_OPEN_END, STEP_POOL_OUTLET_OPEN_START, TWEEN_BALL_MIXER_ROTATE_END,
-        TWEEN_DRAW_STICK_DOWN_END, TWEEN_DRAW_STICK_UP_END, TWEEN_INNER_DRAW_STICK_DOWN_END,
-        TWEEN_INNER_DRAW_STICK_UP_END, TWEEN_POOL_OUTLET_CLOSE_END, TWEEN_POOL_OUTLET_OPEN_END,
+        STEP_BALL_RELEASE_DONE, STEP_BALL_RIGID_TO_DYNAMIC, STEP_BALL_RIGID_TO_STATIC,
+        STEP_BALL_STICK_RIGID_TO_EMPTY, STEP_BALL_STICK_RIGID_TO_STATIC, STEP_DRAW_STICK_DOWN,
+        STEP_DRAW_STICK_DOWN_END, STEP_DRAW_STICK_UP, STEP_DRAW_STICK_UP_END,
+        STEP_GAME_RUN_COMMAND, STEP_INNER_DRAW_STICK_DOWN, STEP_INNER_DRAW_STICK_UP,
+        STEP_INNER_DRAW_STICK_UP_END, STEP_POOL_BALL_ZERO, STEP_POOL_OUTLET_CLOSE_END,
+        STEP_POOL_OUTLET_CLOSE_START, STEP_POOL_OUTLET_OPEN_END, STEP_POOL_OUTLET_OPEN_START,
+        TWEEN_BALL_MIXER_ROTATE_END, TWEEN_DRAW_STICK_DOWN_END, TWEEN_DRAW_STICK_UP_END,
+        TWEEN_INNER_DRAW_STICK_DOWN_END, TWEEN_INNER_DRAW_STICK_UP_END,
+        TWEEN_POOL_OUTLET_CLOSE_END, TWEEN_POOL_OUTLET_OPEN_END,
     },
     event::{
         BallClearEvent, BallSpawnEvent, GameEndEvent, GameResetEvent, GameRunEvent, GameStepData,
@@ -112,7 +117,7 @@ pub fn spawn_setup(
                         // .insert(RigidBody::Static)
                         // .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         .insert(Name::new("BallInletCover"));
-                } else if node_name == "BallMixer3" {
+                } else if node_name == "BallMixer2" {
                     commands
                         .spawn(PbrBundle {
                             mesh: mesh_handle,
@@ -299,10 +304,19 @@ pub fn spawn_setup(
         .insert(Name::new("pool ball cnt sensor"))
         .insert(PoolBallCntSensor)
         .insert(Sensor)
+        .insert(TransformBundle::from_transform(
+            Transform::from_xyz(-1., 1., 0.).with_scale(vec3(4., 1., 1.)),
+        ))
+        .insert(Collider::cuboid(0.1, 2., 1.0));
+
+    commands
+        .spawn_empty()
+        .insert(Name::new("ball release sensor"))
         .insert(TransformBundle::from_transform(Transform::from_xyz(
-            -1., 1., 0.,
+            0., 1.1, 0.,
         )))
-        .insert(Collider::cuboid(0.1, 2., 1.2));
+        .insert(BallReleaseSensor)
+        .insert(Collider::cuboid(0.3, 0.3, 0.3));
 }
 
 pub fn er_ball_spawn(
@@ -615,6 +629,30 @@ pub fn pool_ball_cnt_zero_sensor(
     }
 }
 
+pub fn ball_release_sensor(
+    mut config: ResMut<GameConfig>,
+    q_sensor: Query<(Entity, &CollidingEntities), With<BallReleaseSensor>>,
+    q_ball: Query<&Ball>,
+    mut ew: EventWriter<GameStepFinishEvent>,
+) {
+    if config.is_ball_release_sensor {
+        for (_entity, colliding_entitiles) in &q_sensor {
+            let mut is_ball_released = true;
+
+            for entity in colliding_entitiles.iter() {
+                if let Ok(_) = q_ball.get(*entity) {
+                    is_ball_released = false;
+                }
+            }
+
+            if is_ball_released {
+                config.is_ball_release_sensor = false;
+                ew.send(GameStepFinishEvent::new(STEP_BALL_RELEASE_DONE));
+            }
+        }
+    }
+}
+
 pub fn er_ball_catch(mut er: EventReader<GameStepStartEvent>, mut config: ResMut<GameConfig>) {
     for GameStepStartEvent { event_id, .. } in er.read() {
         if *event_id == STEP_BALL_CATCH {
@@ -628,7 +666,6 @@ pub fn ball_catch(
     mut config: ResMut<GameConfig>,
     q_sensor: Query<(Entity, &CollidingEntities), With<BallCatchSensor>>,
     q_ball: Query<(Entity, &Transform, &Ball), With<Ball>>,
-    mut ew: EventWriter<GameStepFinishEvent>,
 ) {
     if config.is_catching {
         for (_entity, colliding_entities) in &q_sensor {
@@ -642,15 +679,16 @@ pub fn ball_catch(
                             start: transform.translation,
                             end: vec3(0., -0.9, 0.),
                         },
-                    );
+                    )
+                    .with_completed_event(TWEEN_BALL_CATCH_END);
                     commands
                         .entity(entity)
                         .insert(RigidBody::Static)
                         .insert(Catched)
                         .insert(Picked)
                         .insert(Animator::new(tween));
-                    ew.send(GameStepFinishEvent::new(STEP_BALL_CATCH_DONE));
                     info!("catched!! {:?}", ball.0);
+                    config.picked_ball.push(ball.0);
                 }
             }
         }
@@ -836,16 +874,6 @@ pub fn game_run_step_finish(
     mut er: EventReader<GameStepFinishEvent>,
     mut config: ResMut<GameConfig>,
     mut ew_step_start: EventWriter<GameStepStartEvent>,
-    // mut ew_step_f32: EventWriter<GameStepEvent<f32>>,
-    // mut ew_ball_rigid_change: EventWriter<BallRigidChangeEvent>,
-    // mut ew_close_pool_outlet: EventWriter<PoolOutletCoverCloseEvent>,
-    // mut ew_mixer_rotate: EventWriter<BallMixerRotateEvent>,
-    // mut ew_stick_down: EventWriter<DrawStickDownEvent>,
-    // mut ew_ball_catch: EventWriter<BallCatchEvent>,
-    // mut ew_stick_up: EventWriter<DrawStickUpEvent>,
-    // mut ew_inner_stick_down: EventWriter<DrawInnerStickDownEvent>,
-    // mut ew_inner_stick_up: EventWriter<DrawInnerStickUpEvent>,
-    // mut ew_ball_release: EventWriter<BallReleaseEvent>,
 ) {
     if config.is_running {
         for GameStepFinishEvent { event_id, .. } in er.read() {
@@ -863,7 +891,7 @@ pub fn game_run_step_finish(
                 STEP_POOL_OUTLET_CLOSE_END => {
                     ew_step_start.send(GameStepStartEvent::new_with_data(
                         STEP_BALL_MIXER_ROTATE,
-                        GameStepData::Float(10.),
+                        GameStepData::Float(15.),
                     ));
                     ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
                 }
@@ -887,16 +915,28 @@ pub fn game_run_step_finish(
                     ew_step_start.send(GameStepStartEvent::new(STEP_INNER_DRAW_STICK_UP));
                     ew_step_start.send(GameStepStartEvent::new_with_data(
                         STEP_BALL_MIXER_ROTATE,
-                        GameStepData::Float(10.),
+                        GameStepData::Float(15.),
                     ));
                 }
                 STEP_INNER_DRAW_STICK_UP_END => {
+                    config.is_ball_release_sensor = true;
                     ew_step_start.send(GameStepStartEvent::new(STEP_BALL_RELEASE));
+                }
+                STEP_BALL_RELEASE_DONE => {
+                    info!("ball release done!");
                     ew_step_start.send(GameStepStartEvent::new(STEP_INNER_DRAW_STICK_DOWN));
                 }
                 STEP_INNER_DRAW_STICK_DOWN_END => {
                     //judge?
-                    ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
+                    if config.picked_ball.len() < config.rule_taken_ball as usize {
+                        ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
+                    } else {
+                        info!("end! picked ball is {:?}", config.picked_ball);
+                        ew_step_start.send(GameStepStartEvent::new_with_data(
+                            STEP_BALL_MIXER_ROTATE,
+                            GameStepData::Float(1.),
+                        ));
+                    }
                 }
                 _ => {}
             }
@@ -931,6 +971,9 @@ pub fn tcb_to_step_convert(
             }
             TWEEN_INNER_DRAW_STICK_DOWN_END => {
                 ew.send(GameStepFinishEvent::new(STEP_INNER_DRAW_STICK_DOWN_END));
+            }
+            TWEEN_BALL_CATCH_END => {
+                ew.send(GameStepFinishEvent::new(STEP_BALL_CATCH_DONE));
             }
             _ => {}
         }

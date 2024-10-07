@@ -1,6 +1,7 @@
-use crate::{assets::AssetsPlugin, game::GamePlugin};
+use crate::{assets::AssetsPlugin, ffi::FfiPlugin, game::GamePlugin, ui::MyUiPlugin};
 use avian3d::prelude::*;
 use bevy::prelude::*;
+use bevy_mod_picking::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use bevy_tweening::TweeningPlugin;
 use states::{Loading, MyStates};
@@ -15,10 +16,13 @@ impl Plugin for AppPlugin {
 
         app.add_plugins(PanOrbitCameraPlugin)
             .add_plugins(TweeningPlugin)
+            .add_plugins(DefaultPickingPlugins)
             .add_plugins(PhysicsPlugins::default());
 
         app.add_plugins(AssetsPlugin)
             .add_plugins(GamePlugin)
+            .add_plugins(MyUiPlugin)
+            .add_plugins(FfiPlugin)
             .insert_resource(ClearColor(Color::srgb(0.53, 0.81, 0.92)));
 
         app.add_systems(Startup, camera_light_setup);

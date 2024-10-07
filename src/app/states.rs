@@ -11,6 +11,11 @@ pub enum Loading {
     Loading,
     Gen,
 }
+#[derive(Clone, Eq, PartialEq, Debug, Hash)]
+pub enum Menu {
+    Main,
+    GameSetting,
+}
 
 // #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 // pub enum Gaming {

@@ -44,7 +44,7 @@ impl Plugin for GamePlugin {
                 rule_given_ball: vec![],
                 rule_taken_ball: 5,
             })
-            .add_systems(OnEnter(MyStates::Game), (spawn_setup, spawn_balls))
+            .add_systems(OnEnter(MyStates::Game), (spawn_setup /*spawn_balls*/,))
             .add_systems(
                 Update,
                 (

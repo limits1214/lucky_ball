@@ -13,6 +13,9 @@ pub struct BallCatchSensor;
 pub struct PoolBallCntSensor;
 
 #[derive(Component)]
+pub struct BallReleaseSensor;
+
+#[derive(Component)]
 pub struct BallDrawStickIn;
 
 #[derive(Component, Debug)]

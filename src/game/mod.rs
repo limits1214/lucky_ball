@@ -8,10 +8,10 @@ use event::{
 use resource::GameConfig;
 use system::{
     ball_catch, ball_catch_sensor_collding, ball_holder_last_collding, ball_mixer_rotate,
-    ball_picked_static, draw_inner_stick_down_event, draw_inner_stick_up_event,
-    draw_stick_down_event, draw_stick_rigid_change, draw_stick_up_event, er_ball_catch,
-    er_ball_clear, er_ball_release, er_ball_rigid_change, er_ball_spawn, er_game_end,
-    er_game_reset, er_game_run, er_pool_outlet_cover_close, er_pool_outlet_cover_open,
+    ball_picked_static, ball_release_sensor, draw_inner_stick_down_event,
+    draw_inner_stick_up_event, draw_stick_down_event, draw_stick_rigid_change, draw_stick_up_event,
+    er_ball_catch, er_ball_clear, er_ball_release, er_ball_rigid_change, er_ball_spawn,
+    er_game_end, er_game_reset, er_game_run, er_pool_outlet_cover_close, er_pool_outlet_cover_open,
     game_run_step_finish, pool_ball_cnt_zero_sensor, spawn_balls, spawn_setup, tcb_to_step_convert,
 };
 
@@ -36,6 +36,7 @@ impl Plugin for GamePlugin {
             .add_event::<BallClearEvent>()
             .add_event::<BallSpawnEvent>()
             .insert_resource(GameConfig {
+                is_ball_release_sensor: false,
                 is_running: false,
                 is_catching: false,
                 is_pool_ball_cnt_sensor: false,
@@ -71,6 +72,7 @@ impl Plugin for GamePlugin {
                         tcb_to_step_convert,
                         er_ball_spawn,
                         er_ball_clear,
+                        ball_release_sensor,
                     ),
                 )
                     .run_if(in_state(MyStates::Game)),

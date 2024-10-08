@@ -10,36 +10,107 @@ impl From<ListenerInput<Pointer<Click>>> for ButtonClickEvent {
     }
 }
 #[derive(Event, Debug)]
-pub struct GameButtonClickEvent(pub Entity, pub f32);
+pub struct GameRuleSelectButtonClickEvent(pub Entity, pub f32);
 
-impl From<ListenerInput<Pointer<Click>>> for GameButtonClickEvent {
+impl From<ListenerInput<Pointer<Click>>> for GameRuleSelectButtonClickEvent {
     fn from(event: ListenerInput<Pointer<Click>>) -> Self {
         Self(event.target, event.hit.depth)
     }
 }
 
 #[derive(Event, Debug)]
-pub struct GameBackButtonClickEvent(pub Entity, pub f32);
+pub struct BackToMainMenuBtnClickEvent(pub Entity, pub f32);
 
-impl From<ListenerInput<Pointer<Click>>> for GameBackButtonClickEvent {
+impl From<ListenerInput<Pointer<Click>>> for BackToMainMenuBtnClickEvent {
     fn from(event: ListenerInput<Pointer<Click>>) -> Self {
         Self(event.target, event.hit.depth)
     }
 }
 
 #[derive(Event, Debug)]
-pub struct Load70Fire5BtnClick(pub Entity, pub f32);
+pub struct Load69Fire5BtnClick(pub Entity, pub f32);
 
-impl From<ListenerInput<Pointer<Click>>> for Load70Fire5BtnClick {
+impl From<ListenerInput<Pointer<Click>>> for Load69Fire5BtnClick {
     fn from(event: ListenerInput<Pointer<Click>>) -> Self {
         Self(event.target, event.hit.depth)
     }
 }
 
 #[derive(Event, Debug)]
-pub struct RuleSelectBackBtnClick(pub Entity, pub f32);
+pub struct Load26Fire1BtnClick(pub Entity, pub f32);
 
-impl From<ListenerInput<Pointer<Click>>> for RuleSelectBackBtnClick {
+impl From<ListenerInput<Pointer<Click>>> for Load26Fire1BtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct Load45Fire6BtnClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for Load45Fire6BtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct CustomGameRuleBtnClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for CustomGameRuleBtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct BackToGameRuleSelectBtnClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for BackToGameRuleSelectBtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct GameRunBtnClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for GameRunBtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct CustomRuleBallClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for CustomRuleBallClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct CustomRuleFireCntDownClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for CustomRuleFireCntDownClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+#[derive(Event, Debug)]
+pub struct CustomRuleFireCntUpClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for CustomRuleFireCntUpClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct CustomRuleRunBtnClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for CustomRuleRunBtnClick {
     fn from(event: ListenerInput<Pointer<Click>>) -> Self {
         Self(event.target, event.hit.depth)
     }

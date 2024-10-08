@@ -449,7 +449,7 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
             style: bottom_btn_style.clone(),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
+        On::<Pointer<Click>>::send_event::<CustomRuleRunBtnClick>(),
     );
     let run_btn_text = (
         Name::new("back_btn_text"),

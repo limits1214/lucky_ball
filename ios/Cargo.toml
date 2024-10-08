@@ -3,4 +3,9 @@ name = "ios"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+crate-type = ["staticlib"]
+
 [dependencies]
+bevy = "0.14.2"
+lucky_ball = { path = "..", default-features = false }

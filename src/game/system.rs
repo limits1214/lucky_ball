@@ -571,13 +571,13 @@ pub fn ball_catch_sensor_collding(
 pub fn ball_holder_last_collding(
     mut commands: Commands,
     q_last_holder: Query<(Entity, &CollidingEntities), With<BallOutletGuideHolderLast>>,
-    q_ball: Query<Entity, With<Ball>>,
+    q_ball: Query<Entity, (With<Ball>, Without<PickedStatic>)>,
 ) {
     for (_entity, colliding_entities) in &q_last_holder {
         for entity in colliding_entities.iter() {
             // info!("colliding_entities {entity:?}");
             if let Ok(entity) = q_ball.get(*entity) {
-                // info!("colliding ball {:?}", ball.0);
+                info!("colliding ball ");
                 commands
                     .entity(entity)
                     .insert(PickedStatic)

@@ -16,9 +16,8 @@ use crate::{
             Ball, BallDrawStick, BallDrawStickIn, BallMixer, BallOutletGuideHolderLast,
             PoolOutletCover,
         },
-        constant::{
-            BALL_NAMES, STEP_BALL_CATCH_DONE, STEP_INNER_DRAW_STICK_DOWN_END, TWEEN_BALL_CATCH_END,
-        },
+        constant::{STEP_BALL_CATCH_DONE, STEP_INNER_DRAW_STICK_DOWN_END, TWEEN_BALL_CATCH_END},
+        resource::GivenBall,
     },
 };
 
@@ -329,6 +328,7 @@ pub fn er_ball_spawn(
     assets_gltf: Res<Assets<Gltf>>,
     assets_node: Res<Assets<GltfNode>>,
     assets_gltfmesh: Res<Assets<GltfMesh>>,
+    mut config: ResMut<GameConfig>,
 ) {
     for _ in er.read() {
         if let Some(gltf) = assets_gltf.get(my_assets.luckyball.id()) {
@@ -360,12 +360,12 @@ pub fn er_ball_spawn(
                     let transform = *transform;
                     let node_name = node_name.as_ref();
 
-                    for (name, num) in BALL_NAMES {
+                    for GivenBall(num, name) in &config.rule_given_ball {
                         if name == node_name {
                             balls.push(Balls {
-                                node_name: name.to_owned(),
+                                node_name: name.clone(),
                                 transform,
-                                number: num,
+                                number: num.clone(),
                                 mat_handle: mat_handle.clone(),
                                 mesh_handle: mesh_handle.clone(),
                             });

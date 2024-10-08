@@ -5,7 +5,7 @@ use event::{
     BallClearEvent, BallSpawnEvent, GameEndEvent, GameResetEvent, GameRunEvent,
     GameStepFinishEvent, GameStepStartEvent, PoolBallCntZeroEvent,
 };
-use resource::GameConfig;
+use resource::{ball70, make_given_ball, GameConfig};
 use system::{
     ball_catch, ball_catch_sensor_collding, ball_holder_last_collding, ball_mixer_rotate,
     ball_picked_static, ball_release_sensor, draw_inner_stick_down_event,
@@ -41,7 +41,7 @@ impl Plugin for GamePlugin {
                 is_catching: false,
                 is_pool_ball_cnt_sensor: false,
                 picked_ball: vec![],
-                rule_given_ball: vec![],
+                rule_given_ball: make_given_ball(ball70()),
                 rule_taken_ball: 5,
             })
             .add_systems(OnEnter(MyStates::Game), (spawn_setup /*spawn_balls*/,))

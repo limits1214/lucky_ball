@@ -1,14 +1,28 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+use bevy::{prelude::*, window::WindowMode};
+use lucky_ball::AppPlugin;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[bevy_main]
+fn main() {
+    App::new()
+        .insert_resource(Msaa::Off)
+        .add_plugins(
+            DefaultPlugins
+                // .set(RenderPlugin {
+                //     render_creation: RenderCreation::Automatic(WgpuSettings {
+                //         backends: Some(Backends::VULKAN),
+                //         ..default()
+                //     }),
+                //     ..default()
+                // })
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        resizable: false,
+                        mode: WindowMode::BorderlessFullscreen,
+                        ..default()
+                    }),
+                    ..default()
+                }),
+        )
+        .add_plugins(AppPlugin)
+        .run();
 }

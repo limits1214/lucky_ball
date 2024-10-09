@@ -5,14 +5,18 @@ use bevy_inspector_egui::{
 };
 use iyes_perf_ui::{entries::PerfUiBundle, PerfUiPlugin};
 
-use crate::game::{
-    constant::{
-        STEP_BALL_CATCH, STEP_BALL_MIXER_ROTATE, STEP_BALL_RELEASE, STEP_BALL_RIGID_TO_DYNAMIC,
-        STEP_BALL_RIGID_TO_STATIC, STEP_BALL_STICK_RIGID_TO_EMPTY, STEP_BALL_STICK_RIGID_TO_STATIC,
-        STEP_DRAW_STICK_DOWN, STEP_DRAW_STICK_UP, STEP_INNER_DRAW_STICK_DOWN,
-        STEP_INNER_DRAW_STICK_UP, STEP_POOL_OUTLET_CLOSE_START, STEP_POOL_OUTLET_OPEN_START,
+use crate::{
+    ffi::ffi_fn::{kv_delete, kv_exists, kv_get, kv_set},
+    game::{
+        constant::{
+            STEP_BALL_CATCH, STEP_BALL_MIXER_ROTATE, STEP_BALL_RELEASE, STEP_BALL_RIGID_TO_DYNAMIC,
+            STEP_BALL_RIGID_TO_STATIC, STEP_BALL_STICK_RIGID_TO_EMPTY,
+            STEP_BALL_STICK_RIGID_TO_STATIC, STEP_DRAW_STICK_DOWN, STEP_DRAW_STICK_UP,
+            STEP_INNER_DRAW_STICK_DOWN, STEP_INNER_DRAW_STICK_UP, STEP_POOL_OUTLET_CLOSE_START,
+            STEP_POOL_OUTLET_OPEN_START,
+        },
+        event::{BallClearEvent, BallSpawnEvent, GameRunEvent, GameStepData, GameStepStartEvent},
     },
-    event::{BallClearEvent, BallSpawnEvent, GameRunEvent, GameStepData, GameStepStartEvent},
 };
 
 pub struct InspectorPlugin;
@@ -144,6 +148,37 @@ fn inspector_ui(world: &mut World) {
 
             if ui.button("game run").clicked() {
                 world.send_event(GameRunEvent);
+            }
+
+            //
+
+            #[cfg(any(target_os = "android", target_os = "ios"))]
+            {
+                use super::ffi::ffi_fn::{admob_interstitial_load, admob_interstitial_show};
+                if ui.button("admob interstital load").clicked() {
+                    admob_interstitial_load();
+                }
+
+                if ui.button("admob interstital show").clicked() {
+                    admob_interstitial_show();
+                }
+            }
+
+            if ui.button("kvset").clicked() {
+                kv_set("test!", "1");
+            }
+
+            if ui.button("kvget").clicked() {
+                let s = kv_get("test!");
+                info!("kvget s: {s:?}");
+            }
+
+            if ui.button("kvdelete").clicked() {
+                kv_delete("test!");
+            }
+            if ui.button("kvexists").clicked() {
+                let b = kv_exists("test!");
+                info!("kvget b: {b:?}");
             }
         });
     });

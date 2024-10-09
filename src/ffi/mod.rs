@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+pub mod ffi_fn;
 pub mod ffi_trait;
 mod platform;
 pub struct FfiPlugin;

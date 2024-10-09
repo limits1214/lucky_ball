@@ -3,12 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		134866208A035F8615C99114 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96A1E5B62F48B379829E8A0D /* Metal.framework */; };
 		2604C99FAB5A8322EDCABB9F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE71FBCAA714DB4F42459106 /* UIKit.framework */; };
+		3D402A9C2CB6C55400C40B08 /* lucky_ball.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D402A9B2CB6C55400C40B08 /* lucky_ball.swift */; };
 		442540D056ADB9AE61A0A590 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F1B41978FA53999AA836D0F /* Security.framework */; };
 		55892F1396056740E1AF9685 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AF7DE91055EBD05ED77E57F9 /* main.m */; };
 		55B7188F81C3C4183F81D3AE /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A39528EB2CCB182F5328223A /* libc++.tbd */; };
@@ -28,6 +29,8 @@
 
 /* Begin PBXFileReference section */
 		160DB77300A3F1806F024D47 /* bindings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bindings.h; sourceTree = "<group>"; };
+		3D402A9A2CB6C55400C40B08 /* lucky ball-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "lucky ball-Bridging-Header.h"; sourceTree = "<group>"; };
+		3D402A9B2CB6C55400C40B08 /* lucky_ball.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lucky_ball.swift; sourceTree = "<group>"; };
 		55EAC02897847195D2F44C15 /* lucky ball.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "lucky ball.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		57CD6305253C7A940098CD4A /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		57CD630A253C7F5F0098CD4A /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../../../assets; sourceTree = "<group>"; };
@@ -70,6 +73,8 @@
 				160DB77300A3F1806F024D47 /* bindings.h */,
 				8EE7F1E3B0303533925D7E33 /* Info.plist */,
 				AF7DE91055EBD05ED77E57F9 /* main.m */,
+				3D402A9B2CB6C55400C40B08 /* lucky_ball.swift */,
+				3D402A9A2CB6C55400C40B08 /* lucky ball-Bridging-Header.h */,
 			);
 			path = "ios-src";
 			sourceTree = "<group>";
@@ -141,6 +146,11 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1240;
+				TargetAttributes = {
+					3BDB8152E4962373181B4FE5 = {
+						LastSwiftMigration = 1600;
+					};
+				};
 			};
 			buildConfigurationList = 9D43D41707A5C30B227B83F9 /* Build configuration list for PBXProject "lucky ball" */;
 			compatibilityVersion = "Xcode 10.0";
@@ -150,6 +160,9 @@
 				en,
 			);
 			mainGroup = 8F2E3E6040EAD2EC9F3FA530;
+			packageReferences = (
+				3D402A9D2CB6C59000C40B08 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -176,6 +189,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				55892F1396056740E1AF9685 /* main.m in Sources */,
+				3D402A9C2CB6C55400C40B08 /* lucky_ball.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,6 +278,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = DXLJDSFC2D;
@@ -273,7 +288,7 @@
 					"ios-src/",
 				);
 				INFOPLIST_FILE = "ios-src/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -299,6 +314,8 @@
 				PRODUCT_NAME = "lucky ball";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "ios-src/lucky ball-Bridging-Header.h";
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -375,6 +392,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = DXLJDSFC2D;
@@ -384,7 +402,7 @@
 					"ios-src/",
 				);
 				INFOPLIST_FILE = "ios-src/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -410,6 +428,9 @@
 				PRODUCT_NAME = "lucky ball";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "ios-src/lucky ball-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -458,6 +479,17 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3D402A9D2CB6C59000C40B08 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = 8DBF1E2B5C613DA41701F6D9 /* Project object */;
 }

@@ -8,4 +8,4 @@ crate-type = ["staticlib"]
 
 [dependencies]
 bevy = "0.14.2"
-lucky_ball = { path = "..", default-features = false }
+lucky_ball = { path = "..", default-features = true }

@@ -17,8 +17,11 @@ class AdmobInterstitial: NSObject, @preconcurrency GADFullScreenContentDelegate 
                interstitial = try await GADInterstitialAd.load(
                 withAdUnitID: "ca-app-pub-3940256099942544/4411468910", request: GADRequest())
                 interstitial?.fullScreenContentDelegate = self;
+                ffi_callback_admob_interstitial_load_success();
             } catch {
-              print("Failed to load interstitial ad with error: \(error.localizedDescription)")
+                let errMsg = error.localizedDescription;
+                print("Failed to load interstitial ad with error: \(errMsg)")
+                ffi_callback_admob_interstitial_load_fail(errMsg);
             }
         }
     }
@@ -32,20 +35,33 @@ class AdmobInterstitial: NSObject, @preconcurrency GADFullScreenContentDelegate 
         interstitial.present(fromRootViewController: nil)
     }
     
+    func isReady() -> Bool {
+        return interstitial != nil
+    }
+    
+    func clear() {
+        interstitial = nil
+    }
+    
     /// Tells the delegate that the ad failed to present full screen content.
      func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-       print("Ad did fail to present full screen content.")
+         let errMsg = error.localizedDescription;
+         print("Ad did fail to present full screen content. err: \(errMsg)")
+         ffi_callback_admob_interstitial_show_fail(errMsg);
+         interstitial = nil
      }
 
      /// Tells the delegate that the ad will present full screen content.
      func adWillPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-       print("Ad will present full screen content.")
+         print("Ad will present full screen content.")
+         ffi_callback_admob_interstitial_showed()
      }
 
      /// Tells the delegate that the ad dismissed full screen content.
      func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-       print("Ad did dismiss full screen content.")
-         
+         print("Ad did dismiss full screen content.")
+         ffi_callback_admob_interstitial_dismissed()
+         interstitial = nil
      }
 }
 
@@ -58,14 +74,24 @@ public func ffi_ad_init() {
     }
 }
 
-@MainActor @_cdecl("ffi_admob_interstial_show")
-func ffi_admob_interstial_show() {
+@MainActor @_cdecl("ffi_admob_interstitial_show")
+func ffi_admob_interstitial_show() {
     admobInterstitial.show();
 }
 
-@MainActor @_cdecl("ffi_admob_interstial_load")
+@MainActor @_cdecl("ffi_admob_interstitial_load")
 func ffi_admob_interstial_load() {
     admobInterstitial.load();
+}
+
+@MainActor @_cdecl("ffi_admob_interstititial_is_ready")
+func ffi_admob_interstititial_is_ready() -> Bool{
+    return admobInterstitial.isReady();
+}
+
+@MainActor @_cdecl("ffi_admob_interstititial_clear")
+func ffi_admob_interstititial_clear() {
+    admobInterstitial.clear();
 }
 
 @_cdecl("ffi_kv_get")

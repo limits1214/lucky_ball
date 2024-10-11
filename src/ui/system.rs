@@ -4,21 +4,29 @@ use bevy::{prelude::*, window::WindowResized};
 use bevy_color::palettes::css;
 use bevy_mod_picking::prelude::*;
 
-use crate::game::{
-    event::{BallClearEvent, BallSpawnEvent, GameRunEvent},
-    resource::{ball26, ball45, ball69, ball70, make_given_ball, GameConfig},
+use crate::{
+    ffi::ffi_fn::quit_app,
+    game::{
+        event::{BallClearEvent, BallSpawnEvent, GameRunEvent},
+        resource::{ball26, ball45, ball69, ball70, make_given_ball, GameConfig},
+    },
+    ui::utils::paginate_with_total,
 };
 
 use super::{
     component::{
-        CustomRuleBall, CustomRuleFireCnt, GameBtn, NumbersBtn, QuitBtn, RootNode, TextResize,
+        CustomRuleBall, CustomRuleFireCnt, GameBtn, NumbersBtn, NumbersContentNode, NumbersItem,
+        NumbersPagination, QuitBtn, RootNode, TextResize,
     },
     event::{
         BackToGameRuleSelectBtnClick, BackToMainMenuBtnClickEvent, ButtonClickEvent,
         CustomGameRuleBtnClick, CustomRuleBallClick, CustomRuleFireCntDownClick,
         CustomRuleFireCntUpClick, CustomRuleRunBtnClick, GameRuleSelectButtonClickEvent,
         GameRunBtnClick, Load26Fire1BtnClick, Load45Fire6BtnClick, Load69Fire5BtnClick,
+        NumbersBtnClick, NumbersItemDeleteBtnClick, NumbersPagingNextBtnClick,
+        NumbersPagingPrevBtnClick, QuitBtnClick,
     },
+    resource::{BallNumber, SavedCustomRule, UiConfig, VecBallNumberExt},
     utils::make_text,
 };
 
@@ -55,7 +63,7 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands) {
             background_color: BackgroundColor(css::BLACK.into()),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<ButtonClickEvent>(),
+        On::<Pointer<Click>>::send_event::<NumbersBtnClick>(),
     );
     let numbers_btn_text = (
         Name::new("numbers_btn_text"),
@@ -71,7 +79,7 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands) {
             background_color: BackgroundColor(css::BLACK.into()),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<ButtonClickEvent>(),
+        On::<Pointer<Click>>::send_event::<QuitBtnClick>(),
     );
     let quit_btn_text = (
         Name::new("quit_btn_text"),
@@ -284,11 +292,297 @@ fn spawn_game_menu(root_entity: Entity, mut commands: Commands) {
     });
 }
 
-fn spawn_numbers_menu(root_entity: Entity, mut commands: Commands) {
-    //
+fn spawn_numbers_menu(root_entity: Entity, mut commands: Commands, ball_numbers: &Vec<BallNumber>) {
+    let (paginated_ball_numbers, total_size) = paginate_with_total(&ball_numbers, 0, 5);
+
+    let wrap = (NodeBundle {
+        style: Style {
+            width: Val::Percent(90.),
+            height: Val::Percent(90.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            flex_direction: FlexDirection::Column,
+            ..default()
+        },
+        ..default()
+    });
+
+    let title_wrap = (NodeBundle {
+        style: Style {
+            width: Val::Percent(100.),
+            height: Val::Percent(10.),
+            ..default()
+        },
+        background_color: BackgroundColor(css::BISQUE.into()),
+        ..default()
+    });
+
+    let back_btn = (
+        Name::new("back_btn"),
+        ButtonBundle {
+            style: Style {
+                width: Val::Percent(10.),
+                height: Val::Percent(100.),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            ..default()
+        },
+        On::<Pointer<Click>>::send_event::<BackToMainMenuBtnClickEvent>(),
+    );
+
+    let back_btn_text = (
+        Name::new("back_btn_text"),
+        TextBundle::from_section("<", TextStyle { ..default() }),
+        Pickable::IGNORE,
+    );
+    let title_txt_wrap = (NodeBundle {
+        style: Style {
+            width: Val::Percent(90.),
+            height: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            ..default()
+        },
+        ..default()
+    });
+
+    let title = (TextBundle::from_section("numbers", TextStyle::default()));
+
+    let content_wrap = (
+        Name::new("NumbersContentNode"),
+        NodeBundle {
+            style: Style {
+                width: Val::Percent(100.),
+                height: Val::Percent(80.),
+                flex_direction: FlexDirection::Column,
+                ..default()
+            },
+            background_color: BackgroundColor(css::BLACK.into()),
+            ..default()
+        },
+        NumbersContentNode,
+    );
+
+    let paging_wrap = (NodeBundle {
+        style: Style {
+            width: Val::Percent(100.),
+            height: Val::Percent(10.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            ..default()
+        },
+        background_color: BackgroundColor(css::YELLOW_GREEN.into()),
+        ..default()
+    });
+
+    let paging_prev_btn = (
+        NodeBundle {
+            style: Style {
+                width: Val::Percent(20.),
+                height: Val::Percent(100.),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            ..default()
+        },
+        On::<Pointer<Click>>::send_event::<NumbersPagingPrevBtnClick>(),
+    );
+
+    let paging_prev_btn_txt = (
+        TextBundle::from_section("Prev", TextStyle::default()),
+        Pickable::IGNORE,
+    );
+
+    let paging_txt_wrap = (NodeBundle {
+        style: Style {
+            width: Val::Percent(20.),
+            height: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            ..default()
+        },
+        ..default()
+    },);
+
+    let paging_txt = (
+        TextBundle::from_section(
+            format!("1/{}", if total_size < 1 { 1 } else { total_size }),
+            TextStyle::default(),
+        ),
+        NumbersPagination {
+            now: 0,
+            last: total_size,
+        },
+    );
+
+    let paging_next_btn = (
+        NodeBundle {
+            style: Style {
+                width: Val::Percent(20.),
+                height: Val::Percent(100.),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            ..default()
+        },
+        On::<Pointer<Click>>::send_event::<NumbersPagingNextBtnClick>(),
+    );
+
+    let paging_next_btn_txt = (
+        TextBundle::from_section("Next", TextStyle::default()),
+        Pickable::IGNORE,
+    );
+
+    let mut content_entity = commands.spawn_empty().id();
+
+    commands.entity(root_entity).with_children(|parent| {
+        parent.spawn(wrap).with_children(|parent| {
+            parent.spawn(title_wrap).with_children(|parent| {
+                parent.spawn(back_btn).with_children(|parent| {
+                    parent.spawn(back_btn_text);
+                });
+
+                parent.spawn(title_txt_wrap).with_children(|parent| {
+                    parent.spawn(title);
+                });
+            });
+
+            content_entity = parent.spawn(content_wrap).id();
+
+            parent.spawn(paging_wrap).with_children(|parent| {
+                parent.spawn(paging_prev_btn).with_children(|parent| {
+                    parent.spawn(paging_prev_btn_txt);
+                });
+
+                parent.spawn(paging_txt_wrap).with_children(|parent| {
+                    parent.spawn(paging_txt);
+                });
+
+                parent.spawn(paging_next_btn).with_children(|parent| {
+                    parent.spawn(paging_next_btn_txt);
+                });
+            });
+        });
+    });
+
+    spawn_numbers_contents(content_entity, commands, paginated_ball_numbers);
 }
 
-fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
+fn spawn_numbers_contents(
+    content_entity: Entity,
+    mut commands: Commands,
+    ball_nums: &[BallNumber],
+) {
+    let content_item_wrap = (NodeBundle {
+        style: Style {
+            width: Val::Percent(100.),
+            height: Val::Percent(20.),
+            ..default()
+        },
+        ..default()
+    });
+
+    let content_item_number_wrap = (NodeBundle {
+        style: Style {
+            width: Val::Percent(10.),
+            height: Val::Percent(100.),
+            ..default()
+        },
+        ..default()
+    });
+
+    let content_item_number_txt = (TextBundle::from_section("1", TextStyle::default()));
+
+    let content_item_body_wrap = (NodeBundle {
+        style: Style {
+            width: Val::Percent(70.),
+            height: Val::Percent(100.),
+            flex_direction: FlexDirection::Column,
+            ..default()
+        },
+        ..default()
+    });
+    let contnet_item_body_type_txt =
+        (TextBundle::from_section("45load6fire", TextStyle::default()));
+    let contnet_item_body_numbers_txt =
+        (TextBundle::from_section("1,2,3,4,5,6,11,2,3,4,5,6,", TextStyle::default()));
+    let contnet_item_body_time_txt: TextBundle =
+        (TextBundle::from_section("2024.12.3", TextStyle::default()));
+    let content_item_remove_btn = (ButtonBundle {
+        style: Style {
+            width: Val::Percent(20.),
+            height: Val::Percent(100.),
+            ..default()
+        },
+        ..default()
+    },);
+    let content_item_remove_btn_txt = (TextBundle::from_section("rm", TextStyle::default()));
+    commands.entity(content_entity).with_children(|parent| {
+        for (
+            i,
+            BallNumber {
+                numbers,
+                game_type,
+                time,
+                id,
+            },
+        ) in ball_nums.iter().enumerate()
+        {
+            parent
+                .spawn(content_item_wrap.clone())
+                .insert(NumbersItem {
+                    game_type: game_type.clone(),
+                    id: id.clone(),
+                    numbers: numbers.clone(),
+                    time: time.clone(),
+                })
+                .with_children(|parent| {
+                    parent
+                        .spawn(content_item_number_wrap.clone())
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle::from_section(
+                                i.to_string(),
+                                TextStyle::default(),
+                            ));
+                        });
+                    parent
+                        .spawn(content_item_body_wrap.clone())
+                        .with_children(|parent| {
+                            parent.spawn(TextBundle::from_section(
+                                format!("{game_type}"),
+                                TextStyle::default(),
+                            ));
+                            parent.spawn(TextBundle::from_section(
+                                format!("{numbers:?}"),
+                                TextStyle::default(),
+                            ));
+                            parent.spawn(TextBundle::from_section(
+                                format!("{time}"),
+                                TextStyle::default(),
+                            ));
+                        });
+                    parent
+                        .spawn(content_item_remove_btn.clone())
+                        .insert(On::<Pointer<Click>>::send_event::<NumbersItemDeleteBtnClick>())
+                        .with_children(|parent| {
+                            parent
+                                .spawn(TextBundle::from_section("rm", TextStyle::default()))
+                                .insert(Pickable::IGNORE);
+                        });
+                });
+        }
+    });
+}
+
+fn spawn_custom_rule_menu(
+    root_entity: Entity,
+    mut commands: Commands,
+    custom_rule: &SavedCustomRule,
+) {
     let buttons_style = Style {
         width: Val::Percent(10.),
         height: Val::Percent(10.),
@@ -396,7 +690,7 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
     let left_btn_txt = (make_text("<"));
 
     let fire_cnt_txt = (TextBundle::from_section(
-        "5",
+        custom_rule.fire.to_string(),
         TextStyle {
             font_size: 30.,
             color: css::BLACK.into(),
@@ -465,10 +759,12 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
                     .spawn(custom_line_1_wrap.clone())
                     .with_children(|parent| {
                         for i in 1..=14 {
+                            let custom_ball = custom_rule.load[i - 1].clone();
+                            let ox = if custom_ball.1 { "[O]" } else { "[X]" };
                             parent.spawn(circle_1.clone()).with_children(|parent| {
                                 parent
                                     .spawn(circle_btn.clone())
-                                    .insert(CustomRuleBall(i, true))
+                                    .insert(custom_ball)
                                     .insert(
                                         On::<Pointer<Click>>::send_event::<CustomRuleBallClick>(),
                                     )
@@ -479,7 +775,7 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
                                                     &i.to_string(),
                                                     TextStyle::default(),
                                                 ),
-                                                TextSection::new("[O]", TextStyle::default()),
+                                                TextSection::new(ox, TextStyle::default()),
                                             ]))
                                             .insert(Pickable::IGNORE);
                                     });
@@ -491,10 +787,12 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
                     .spawn(custom_line_1_wrap.clone())
                     .with_children(|parent| {
                         for i in 15..=28 {
+                            let custom_ball = custom_rule.load[i - 1].clone();
+                            let ox = if custom_ball.1 { "[O]" } else { "[X]" };
                             parent.spawn(circle_1.clone()).with_children(|parent| {
                                 parent
                                     .spawn(circle_btn.clone())
-                                    .insert(CustomRuleBall(i, true))
+                                    .insert(custom_ball)
                                     .insert(
                                         On::<Pointer<Click>>::send_event::<CustomRuleBallClick>(),
                                     )
@@ -505,7 +803,7 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
                                                     &i.to_string(),
                                                     TextStyle::default(),
                                                 ),
-                                                TextSection::new("[O]", TextStyle::default()),
+                                                TextSection::new(ox, TextStyle::default()),
                                             ]))
                                             .insert(Pickable::IGNORE);
                                     });
@@ -517,10 +815,12 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
                     .spawn(custom_line_1_wrap.clone())
                     .with_children(|parent| {
                         for i in 29..=42 {
+                            let custom_ball = custom_rule.load[i - 1].clone();
+                            let ox = if custom_ball.1 { "[O]" } else { "[X]" };
                             parent.spawn(circle_1.clone()).with_children(|parent| {
                                 parent
                                     .spawn(circle_btn.clone())
-                                    .insert(CustomRuleBall(i, true))
+                                    .insert(custom_ball)
                                     .insert(
                                         On::<Pointer<Click>>::send_event::<CustomRuleBallClick>(),
                                     )
@@ -531,7 +831,7 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
                                                     &i.to_string(),
                                                     TextStyle::default(),
                                                 ),
-                                                TextSection::new("[O]", TextStyle::default()),
+                                                TextSection::new(ox, TextStyle::default()),
                                             ]))
                                             .insert(Pickable::IGNORE);
                                     });
@@ -543,10 +843,12 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
                     .spawn(custom_line_1_wrap.clone())
                     .with_children(|parent| {
                         for i in 43..=56 {
+                            let custom_ball = custom_rule.load[i - 1].clone();
+                            let ox = if custom_ball.1 { "[O]" } else { "[X]" };
                             parent.spawn(circle_1.clone()).with_children(|parent| {
                                 parent
                                     .spawn(circle_btn.clone())
-                                    .insert(CustomRuleBall(i, true))
+                                    .insert(custom_ball)
                                     .insert(
                                         On::<Pointer<Click>>::send_event::<CustomRuleBallClick>(),
                                     )
@@ -557,7 +859,7 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
                                                     &i.to_string(),
                                                     TextStyle::default(),
                                                 ),
-                                                TextSection::new("[O]", TextStyle::default()),
+                                                TextSection::new(ox, TextStyle::default()),
                                             ]))
                                             .insert(Pickable::IGNORE);
                                     });
@@ -569,10 +871,12 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
                     .spawn(custom_line_1_wrap.clone())
                     .with_children(|parent| {
                         for i in 57..=70 {
+                            let custom_ball = custom_rule.load[i - 1].clone();
+                            let ox = if custom_ball.1 { "[O]" } else { "[X]" };
                             parent.spawn(circle_1.clone()).with_children(|parent| {
                                 parent
                                     .spawn(circle_btn.clone())
-                                    .insert(CustomRuleBall(i, true))
+                                    .insert(custom_ball)
                                     .insert(
                                         On::<Pointer<Click>>::send_event::<CustomRuleBallClick>(),
                                     )
@@ -583,7 +887,7 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
                                                     &i.to_string(),
                                                     TextStyle::default(),
                                                 ),
-                                                TextSection::new("[O]", TextStyle::default()),
+                                                TextSection::new(ox, TextStyle::default()),
                                             ]))
                                             .insert(Pickable::IGNORE);
                                     });
@@ -601,7 +905,9 @@ fn spawn_custom_rule_menu(root_entity: Entity, mut commands: Commands) {
                         parent.spawn(left_btn_txt);
                     });
                 // fire_cnt
-                parent.spawn(fire_cnt_txt).insert(CustomRuleFireCnt(5));
+                parent
+                    .spawn(fire_cnt_txt)
+                    .insert(CustomRuleFireCnt(custom_rule.fire));
                 // >
                 parent
                     .spawn(right_btn)
@@ -768,6 +1074,7 @@ pub fn custom_game_rule_btn_click(
     mut commands: Commands,
     mut er: EventReader<CustomGameRuleBtnClick>,
     q_root_node: Query<(Entity, &Children), With<RootNode>>,
+    ui_config: Res<UiConfig>,
 ) {
     for _ in er.read() {
         if let Ok((entity, children)) = q_root_node.get_single() {
@@ -775,7 +1082,12 @@ pub fn custom_game_rule_btn_click(
                 commands.entity(entity).despawn_recursive();
             }
 
-            return spawn_custom_rule_menu(entity, commands);
+            // info!(
+            //     "ui_config.saved_custom_rule {:?}",
+            //     ui_config.saved_custom_rule
+            // );
+
+            return spawn_custom_rule_menu(entity, commands, &ui_config.saved_custom_rule);
         }
     }
 }
@@ -864,11 +1176,16 @@ pub fn custom_rule_ball_click(
     mut q_custom_ball: Query<(&mut CustomRuleBall)>,
     q_child: Query<&Children>,
     mut q_text: Query<&mut Text>,
+    mut ui_config: ResMut<UiConfig>,
 ) {
     for evt in er.read() {
         info!("custom_rule_ball_click");
         if let Ok((mut cb)) = q_custom_ball.get_mut(evt.0) {
             cb.1 = !cb.1;
+
+            ui_config.saved_custom_rule.load[(cb.0 - 1) as usize].1 = cb.1;
+            ui_config.saved_custom_rule.save_custom_rule();
+
             if let Ok(child) = q_child.get(evt.0) {
                 if let Ok(mut txt) = q_text.get_mut(child[0]) {
                     if cb.1 {
@@ -885,12 +1202,17 @@ pub fn custom_rule_ball_click(
 pub fn custom_rule_fire_down_click(
     mut er: EventReader<CustomRuleFireCntDownClick>,
     mut q_firecnt: Query<(&mut CustomRuleFireCnt, &mut Text)>,
+    mut ui_config: ResMut<UiConfig>,
 ) {
     for _ in er.read() {
         info!("custom_rule_fire_down_click");
         if let Ok((mut fc, mut text)) = q_firecnt.get_single_mut() {
             if fc.0 > 1 {
                 fc.0 -= 1;
+
+                ui_config.saved_custom_rule.fire = fc.0;
+                ui_config.saved_custom_rule.save_custom_rule();
+
                 text.sections[0].value = fc.0.to_string();
             }
         }
@@ -901,6 +1223,7 @@ pub fn custom_rule_fire_up_click(
     mut er: EventReader<CustomRuleFireCntUpClick>,
     mut q_firecnt: Query<(&mut CustomRuleFireCnt, &mut Text)>,
     q_custom_balls: Query<&CustomRuleBall>,
+    mut ui_config: ResMut<UiConfig>,
 ) {
     for _ in er.read() {
         info!("custom_rule_fire_up_click");
@@ -918,7 +1241,159 @@ pub fn custom_rule_fire_up_click(
 
             if fc.0 < cnt {
                 fc.0 += 1;
+
+                ui_config.saved_custom_rule.fire = fc.0;
+                ui_config.saved_custom_rule.save_custom_rule();
+
                 text.sections[0].value = fc.0.to_string();
+            }
+        }
+    }
+}
+
+pub fn quit_btn_click(
+    mut er: EventReader<QuitBtnClick>,
+    #[cfg(not(any(target_os = "android", target_os = "ios")))] mut exit: EventWriter<AppExit>,
+) {
+    for _ in er.read() {
+        #[cfg(any(target_os = "android", target_os = "ios"))]
+        {
+            quit_app();
+        }
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
+        {
+            exit.send(AppExit::Success);
+        }
+    }
+}
+
+pub fn numbers_btn_click(
+    mut commands: Commands,
+    mut er: EventReader<NumbersBtnClick>,
+    q_root_node: Query<(Entity, &Children), With<RootNode>>,
+    ui_config: Res<UiConfig>,
+) {
+    for _ in er.read() {
+        if let Ok((entity, children)) = q_root_node.get_single() {
+            for &entity in children.iter() {
+                commands.entity(entity).despawn_recursive();
+            }
+
+            return spawn_numbers_menu(entity, commands, &ui_config.saved_ball_numbers);
+        }
+    }
+}
+
+pub fn numbers_paging_prev_click(
+    mut commands: Commands,
+    mut er: EventReader<NumbersPagingPrevBtnClick>,
+    q_content_node: Query<(Entity, &Children), With<NumbersContentNode>>,
+    ui_config: Res<UiConfig>,
+    mut q_number_pagination: Query<(&mut NumbersPagination, &mut Text)>,
+) {
+    for _ in er.read() {
+        if let Ok((entity, children)) = q_content_node.get_single() {
+            for &entity in children.iter() {
+                commands.entity(entity).despawn_recursive();
+            }
+
+            if let Ok((mut pagination, mut text)) = q_number_pagination.get_single_mut() {
+                if pagination.now > 0 {
+                    pagination.now -= 1;
+                }
+
+                text.sections[0].value = format!("{}/{}", pagination.now + 1, pagination.last);
+
+                let (ball_nums, total_size) =
+                    paginate_with_total(&ui_config.saved_ball_numbers, pagination.now, 5);
+                return spawn_numbers_contents(entity, commands, ball_nums);
+            }
+        }
+    }
+}
+
+pub fn numbers_paging_next_click(
+    mut commands: Commands,
+    mut er: EventReader<NumbersPagingNextBtnClick>,
+    q_content_node: Query<(Entity, &Children), With<NumbersContentNode>>,
+    ui_config: Res<UiConfig>,
+    mut q_number_pagination: Query<(&mut NumbersPagination, &mut Text)>,
+) {
+    for _ in er.read() {
+        if let Ok((entity, children)) = q_content_node.get_single() {
+            for &entity in children.iter() {
+                commands.entity(entity).despawn_recursive();
+            }
+
+            if let Ok((mut pagination, mut text)) = q_number_pagination.get_single_mut() {
+                if pagination.now + 1 < pagination.last {
+                    pagination.now += 1;
+                }
+
+                text.sections[0].value = format!("{}/{}", pagination.now + 1, pagination.last);
+                let (ball_nums, total_size) =
+                    paginate_with_total(&ui_config.saved_ball_numbers, pagination.now, 5);
+                return spawn_numbers_contents(entity, commands, ball_nums);
+            }
+        }
+    }
+}
+
+pub fn numbers_item_delete_btn_click(
+    mut commands: Commands,
+    mut er: EventReader<NumbersItemDeleteBtnClick>,
+    q_parent: Query<&Parent>,
+    q_number_item: Query<&NumbersItem>,
+    mut ui_config: ResMut<UiConfig>,
+    q_content_node: Query<(Entity, &Children), With<NumbersContentNode>>,
+    mut q_number_pagination: Query<(&mut NumbersPagination, &mut Text)>,
+) {
+    for evt in er.read() {
+        for anc in q_parent.iter_ancestors(evt.0) {
+            if let Ok(number_item) = q_number_item.get(anc) {
+                ui_config
+                    .saved_ball_numbers
+                    .delete_item(number_item.id.clone());
+
+                // commands.entity(anc).despawn_recursive();
+            }
+
+            if let Ok((entity, children)) = q_content_node.get_single() {
+                for &entity in children.iter() {
+                    commands.entity(entity).despawn_recursive();
+                }
+
+                if let Ok((mut pagination, mut text)) = q_number_pagination.get_single_mut() {
+                    // if pagination.now + 1 < pagination.last {
+                    //     pagination.now += 1;
+                    // }
+
+                    let (ball_nums, total_size) =
+                        paginate_with_total(&ui_config.saved_ball_numbers, pagination.now, 5);
+
+                    pagination.last = total_size;
+                    info!("pagination {pagination:?}");
+                    if pagination.now + 1 > total_size {
+                        pagination.now = total_size - 1;
+                    }
+                    let (ball_nums, total_size) =
+                        paginate_with_total(&ui_config.saved_ball_numbers, pagination.now, 5);
+
+                    text.sections[0].value = format!(
+                        "{}/{}",
+                        if pagination.now + 1 < 1 {
+                            1
+                        } else {
+                            pagination.now + 1
+                        },
+                        if pagination.last < 1 {
+                            1
+                        } else {
+                            pagination.last
+                        }
+                    );
+                    return spawn_numbers_contents(entity, commands, ball_nums);
+                }
             }
         }
     }

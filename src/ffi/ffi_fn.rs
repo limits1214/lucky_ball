@@ -23,3 +23,5 @@ pub fn kv_delete(key: &str) {
 pub fn kv_exists(key: &str) -> bool {
     Kv::exists(key)
 }
+
+pub fn quit_app() {}

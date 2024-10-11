@@ -136,8 +136,12 @@ fn inspector_ui(world: &mut World) {
 
             //
 
-            if ui.button("ball spawn").clicked() {
-                world.send_event(BallSpawnEvent);
+            if ui.button("ball spawn normal").clicked() {
+                world.send_event(BallSpawnEvent(false));
+            }
+
+            if ui.button("ball spawn shuffle").clicked() {
+                world.send_event(BallSpawnEvent(true));
             }
 
             if ui.button("ball clear").clicked() {

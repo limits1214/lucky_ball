@@ -11,7 +11,7 @@ use system::{
     ball_picked_static, ball_release_sensor, draw_inner_stick_down_event,
     draw_inner_stick_up_event, draw_stick_down_event, draw_stick_rigid_change, draw_stick_up_event,
     er_ball_catch, er_ball_clear, er_ball_release, er_ball_rigid_change, er_ball_spawn,
-    er_game_end, er_game_reset, er_game_run, er_pool_outlet_cover_close, er_pool_outlet_cover_open,
+    er_game_reset, er_game_run, er_pool_outlet_cover_close, er_pool_outlet_cover_open,
     game_run_step_finish, pool_ball_cnt_zero_sensor, spawn_balls, spawn_setup, tcb_to_step_convert,
 };
 
@@ -65,7 +65,6 @@ impl Plugin for GamePlugin {
                     er_pool_outlet_cover_close,
                     (
                         er_game_run,
-                        er_game_end,
                         er_game_reset,
                         game_run_step_finish,
                         pool_ball_cnt_zero_sensor,

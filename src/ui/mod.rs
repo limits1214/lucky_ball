@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use event::{
     BackToGameRuleSelectBtnClick, BackToMainMenuBtnClickEvent, ButtonClickEvent,
     CustomGameRuleBtnClick, CustomRuleBallClick, CustomRuleFireCntDownClick,
-    CustomRuleFireCntUpClick, CustomRuleRunBtnClick, GameRuleSelectButtonClickEvent,
+    CustomRuleFireCntUpClick, CustomRuleRunBtnClick, GameMenuShuffleBtnClick,
+    GameResultRetryBtnClick, GameResultSaveBtnClick, GameRuleSelectButtonClickEvent,
     GameRunBtnClick, Load26Fire1BtnClick, Load45Fire6BtnClick, Load69Fire5BtnClick,
     NumbersBtnClick, NumbersItemDeleteBtnClick, NumbersPagingNextBtnClick,
     NumbersPagingPrevBtnClick, QuitBtnClick,
@@ -11,11 +12,12 @@ use resource::UiConfig;
 use system::{
     back_to_game_rule_select_btn_click, back_to_main_menu_btn_click, button_interaction,
     custom_game_rule_btn_click, custom_rule_ball_click, custom_rule_fire_down_click,
-    custom_rule_fire_up_click, custom_rule_run_btn_click, game_rule_select_button_click,
-    game_run_btn_click, loaded_26_fire_1_btn_click, loaded_45_fire_6_btn_click,
-    loaded_69_fire_5_btn_click, numbers_btn_click, numbers_item_delete_btn_click,
-    numbers_paging_next_click, numbers_paging_prev_click, quit_btn_click,
-    resize_text_based_on_window, setup_main_ui,
+    custom_rule_fire_up_click, custom_rule_run_btn_click, er_game_end, game_menu_shuffle_btn_click,
+    game_result_menu_retry_btn_click, game_result_menu_save_btn_click,
+    game_rule_select_button_click, game_run_btn_click, loaded_26_fire_1_btn_click,
+    loaded_45_fire_6_btn_click, loaded_69_fire_5_btn_click, numbers_btn_click,
+    numbers_item_delete_btn_click, numbers_paging_next_click, numbers_paging_prev_click,
+    quit_btn_click, resize_text_based_on_window, setup_main_ui,
 };
 
 pub mod component;
@@ -46,6 +48,9 @@ impl Plugin for MyUiPlugin {
             .add_event::<NumbersPagingPrevBtnClick>()
             .add_event::<NumbersPagingNextBtnClick>()
             .add_event::<NumbersItemDeleteBtnClick>()
+            .add_event::<GameMenuShuffleBtnClick>()
+            .add_event::<GameResultRetryBtnClick>()
+            .add_event::<GameResultSaveBtnClick>()
             .add_systems(Startup, setup_main_ui)
             .add_systems(
                 Update,
@@ -69,6 +74,12 @@ impl Plugin for MyUiPlugin {
                     numbers_paging_prev_click,
                     numbers_paging_next_click,
                     numbers_item_delete_btn_click,
+                    (
+                        game_menu_shuffle_btn_click,
+                        er_game_end,
+                        game_result_menu_retry_btn_click,
+                        game_result_menu_save_btn_click,
+                    ),
                 ),
             );
     }

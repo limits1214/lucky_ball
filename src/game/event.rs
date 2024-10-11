@@ -60,5 +60,6 @@ pub struct PoolBallCntZeroEvent;
 #[derive(Event)]
 pub struct BallClearEvent;
 
+/// tuple 0 (bool): is_shuffle
 #[derive(Event)]
-pub struct BallSpawnEvent;
+pub struct BallSpawnEvent(pub bool);

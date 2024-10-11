@@ -42,3 +42,12 @@ pub struct NumbersItem {
     pub game_type: String,
     pub time: u64,
 }
+
+#[derive(Component)]
+pub struct ShuffleBtn;
+
+#[derive(Component)]
+pub struct SaveBtn;
+
+#[derive(Component)]
+pub struct GameRunBtn;

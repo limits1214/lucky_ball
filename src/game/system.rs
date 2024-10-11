@@ -7,6 +7,7 @@ use bevy::{
 use bevy_tweening::{
     lens::TransformPositionLens, Animator, Delay, EaseFunction, Tween, TweenCompleted,
 };
+use rand::Rng;
 use std::time::Duration;
 
 use crate::{
@@ -26,10 +27,10 @@ use super::{
         BallCatchSensor, BallReleaseSensor, Catched, Picked, PickedStatic, PoolBallCntSensor,
     },
     constant::{
-        STEP_BALL_CATCH, STEP_BALL_MIXER_ROTATE, STEP_BALL_MIXER_ROTATE_END, STEP_BALL_RELEASE,
-        STEP_BALL_RELEASE_DONE, STEP_BALL_RIGID_TO_DYNAMIC, STEP_BALL_RIGID_TO_STATIC,
-        STEP_BALL_STICK_RIGID_TO_EMPTY, STEP_BALL_STICK_RIGID_TO_STATIC, STEP_DRAW_STICK_DOWN,
-        STEP_DRAW_STICK_DOWN_END, STEP_DRAW_STICK_UP, STEP_DRAW_STICK_UP_END,
+        BALL_REFS, STEP_BALL_CATCH, STEP_BALL_MIXER_ROTATE, STEP_BALL_MIXER_ROTATE_END,
+        STEP_BALL_RELEASE, STEP_BALL_RELEASE_DONE, STEP_BALL_RIGID_TO_DYNAMIC,
+        STEP_BALL_RIGID_TO_STATIC, STEP_BALL_STICK_RIGID_TO_EMPTY, STEP_BALL_STICK_RIGID_TO_STATIC,
+        STEP_DRAW_STICK_DOWN, STEP_DRAW_STICK_DOWN_END, STEP_DRAW_STICK_UP, STEP_DRAW_STICK_UP_END,
         STEP_GAME_RUN_COMMAND, STEP_INNER_DRAW_STICK_DOWN, STEP_INNER_DRAW_STICK_UP,
         STEP_INNER_DRAW_STICK_UP_END, STEP_POOL_BALL_ZERO, STEP_POOL_OUTLET_CLOSE_END,
         STEP_POOL_OUTLET_CLOSE_START, STEP_POOL_OUTLET_OPEN_END, STEP_POOL_OUTLET_OPEN_START,
@@ -46,7 +47,7 @@ use super::{
 };
 
 pub fn spawn_balls(mut ew: EventWriter<BallSpawnEvent>) {
-    ew.send(BallSpawnEvent);
+    ew.send(BallSpawnEvent(false));
 }
 
 pub fn spawn_setup(
@@ -329,8 +330,13 @@ pub fn er_ball_spawn(
     assets_node: Res<Assets<GltfNode>>,
     assets_gltfmesh: Res<Assets<GltfMesh>>,
     mut config: ResMut<GameConfig>,
+    q_ball: Query<Entity, With<Ball>>,
 ) {
-    for _ in er.read() {
+    for BallSpawnEvent(is_shuffle) in er.read() {
+        for entity in &q_ball {
+            commands.entity(entity).despawn_recursive();
+        }
+
         if let Some(gltf) = assets_gltf.get(my_assets.luckyball.id()) {
             struct Balls {
                 node_name: String,
@@ -341,6 +347,8 @@ pub fn er_ball_spawn(
             }
 
             let mut balls: Vec<Balls> = Vec::new();
+
+            let mut transforms: Vec<Transform> = Vec::new();
 
             // collect balls
             for (node_name, _node_handle) in gltf.named_nodes.iter() {
@@ -359,7 +367,9 @@ pub fn er_ball_spawn(
                     let mesh_handle = b.primitives[0].mesh.clone();
                     let transform = *transform;
                     let node_name = node_name.as_ref();
-
+                    if node_name.contains("BallTmp") {
+                        transforms.push(transform);
+                    }
                     for GivenBall(num, name) in &config.rule_given_ball {
                         if name == node_name {
                             balls.push(Balls {
@@ -371,6 +381,19 @@ pub fn er_ball_spawn(
                             });
                         }
                     }
+                }
+            }
+
+            // shuffle
+            if *is_shuffle {
+                for Balls { transform, .. } in balls.iter_mut() {
+                    // info!("transfroms: {transforms:?} {}", transforms.len());
+                    let mut rng = rand::thread_rng();
+                    let idx = rng.gen_range(0..transforms.len());
+                    let tr = transforms.remove(idx);
+                    transform.translation = tr.translation;
+                    transform.scale = tr.scale;
+                    transform.rotation = tr.rotation;
                 }
             }
 
@@ -853,11 +876,11 @@ pub fn er_game_run(
     }
 }
 
-pub fn er_game_end(mut er: EventReader<GameEndEvent>) {
-    for _ in er.read() {
-        //
-    }
-}
+// pub fn er_game_end(mut er: EventReader<GameEndEvent>) {
+//     for _ in er.read() {
+//         //
+//     }
+// }
 
 pub fn er_game_reset(mut er: EventReader<GameResetEvent>) {
     for _ in er.read() {
@@ -874,6 +897,7 @@ pub fn game_run_step_finish(
     mut er: EventReader<GameStepFinishEvent>,
     mut config: ResMut<GameConfig>,
     mut ew_step_start: EventWriter<GameStepStartEvent>,
+    mut ew_game_end: EventWriter<GameEndEvent>,
 ) {
     if config.is_running {
         for GameStepFinishEvent { event_id, .. } in er.read() {
@@ -927,15 +951,20 @@ pub fn game_run_step_finish(
                     ew_step_start.send(GameStepStartEvent::new(STEP_INNER_DRAW_STICK_DOWN));
                 }
                 STEP_INNER_DRAW_STICK_DOWN_END => {
-                    //judge?
+                    //JUDGE
                     if config.picked_ball.len() < config.rule_taken_ball as usize {
+                        // KEEP GOING
                         ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
                     } else {
+                        // END
+                        // todo rotate speed down is must worked before step
                         info!("end! picked ball is {:?}", config.picked_ball);
                         ew_step_start.send(GameStepStartEvent::new_with_data(
                             STEP_BALL_MIXER_ROTATE,
                             GameStepData::Float(1.),
                         ));
+
+                        ew_game_end.send(GameEndEvent);
                     }
                 }
                 _ => {}
@@ -949,7 +978,7 @@ pub fn tcb_to_step_convert(
     mut ew: EventWriter<GameStepFinishEvent>,
 ) {
     for TweenCompleted { user_data, entity } in er.read() {
-        info!("entity {entity:?}");
+        // info!("entity {entity:?}");
         match *user_data {
             TWEEN_DRAW_STICK_UP_END => {
                 ew.send(GameStepFinishEvent::new(STEP_DRAW_STICK_UP_END));

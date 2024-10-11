@@ -3,11 +3,15 @@ use std::slice::Windows;
 use bevy::{prelude::*, window::WindowResized};
 use bevy_color::palettes::css;
 use bevy_mod_picking::prelude::*;
+use uuid::Uuid;
 
 use crate::{
-    ffi::ffi_fn::quit_app,
+    ffi::{
+        ffi_fn::{kv_set, quit_app},
+        ffi_trait::{AppFfi, AppFfiTrait},
+    },
     game::{
-        event::{BallClearEvent, BallSpawnEvent, GameRunEvent},
+        event::{BallClearEvent, BallSpawnEvent, GameEndEvent, GameRunEvent},
         resource::{ball26, ball45, ball69, ball70, make_given_ball, GameConfig},
     },
     ui::utils::paginate_with_total,
@@ -15,13 +19,14 @@ use crate::{
 
 use super::{
     component::{
-        CustomRuleBall, CustomRuleFireCnt, GameBtn, NumbersBtn, NumbersContentNode, NumbersItem,
-        NumbersPagination, QuitBtn, RootNode, TextResize,
+        CustomRuleBall, CustomRuleFireCnt, GameBtn, GameRunBtn, NumbersBtn, NumbersContentNode,
+        NumbersItem, NumbersPagination, QuitBtn, RootNode, SaveBtn, ShuffleBtn, TextResize,
     },
     event::{
         BackToGameRuleSelectBtnClick, BackToMainMenuBtnClickEvent, ButtonClickEvent,
         CustomGameRuleBtnClick, CustomRuleBallClick, CustomRuleFireCntDownClick,
-        CustomRuleFireCntUpClick, CustomRuleRunBtnClick, GameRuleSelectButtonClickEvent,
+        CustomRuleFireCntUpClick, CustomRuleRunBtnClick, GameMenuShuffleBtnClick,
+        GameResultRetryBtnClick, GameResultSaveBtnClick, GameRuleSelectButtonClickEvent,
         GameRunBtnClick, Load26Fire1BtnClick, Load45Fire6BtnClick, Load69Fire5BtnClick,
         NumbersBtnClick, NumbersItemDeleteBtnClick, NumbersPagingNextBtnClick,
         NumbersPagingPrevBtnClick, QuitBtnClick,
@@ -238,6 +243,8 @@ fn spawn_game_menu(root_entity: Entity, mut commands: Commands) {
             style: buttons_style.clone(),
             ..default()
         },
+        ShuffleBtn,
+        On::<Pointer<Click>>::send_event::<GameMenuShuffleBtnClick>(),
     );
 
     let ball_shuffle_btn_text = (
@@ -252,6 +259,7 @@ fn spawn_game_menu(root_entity: Entity, mut commands: Commands) {
             style: buttons_style.clone(),
             ..default()
         },
+        GameRunBtn,
         On::<Pointer<Click>>::send_event::<GameRunBtnClick>(),
     );
 
@@ -930,6 +938,113 @@ fn spawn_custom_rule_menu(
     });
 }
 
+fn spawn_game_result_menu(root_entity: Entity, mut commands: Commands, picked_numbers: &[u8]) {
+    // retry_btn <- x
+    // back_btn
+    // result
+    // save btn
+
+    let wrap = (NodeBundle {
+        style: Style {
+            width: Val::Percent(100.),
+            height: Val::Percent(100.),
+            flex_direction: FlexDirection::Column,
+            justify_content: JustifyContent::End,
+            align_items: AlignItems::Center,
+            ..default()
+        },
+        ..default()
+    });
+    let result_wrap = (NodeBundle {
+        style: Style {
+            width: Val::Percent(100.),
+            height: Val::Percent(20.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            ..default()
+        },
+        ..default()
+    });
+
+    let result_txt =
+        (TextBundle::from_section(format!("{picked_numbers:?}"), TextStyle::default()));
+
+    let btn_wrap = (NodeBundle {
+        style: Style {
+            width: Val::Percent(100.),
+            height: Val::Percent(20.),
+            flex_direction: FlexDirection::Row,
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            ..default()
+        },
+        ..default()
+    });
+
+    let retry_btn = (
+        ButtonBundle {
+            style: Style {
+                width: Val::Percent(20.),
+                height: Val::Percent(100.),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            ..default()
+        },
+        On::<Pointer<Click>>::send_event::<GameResultRetryBtnClick>(),
+    );
+    let retry_btn_txt = (TextBundle::from_section("retry", TextStyle::default()));
+    let save_btn = (
+        ButtonBundle {
+            style: Style {
+                width: Val::Percent(20.),
+                height: Val::Percent(100.),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            ..default()
+        },
+        SaveBtn,
+        On::<Pointer<Click>>::send_event::<GameResultSaveBtnClick>(),
+    );
+    let save_btn_txt = (TextBundle::from_section("save", TextStyle::default()));
+    let back_btn = (
+        ButtonBundle {
+            style: Style {
+                width: Val::Percent(20.),
+                height: Val::Percent(100.),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            ..default()
+        },
+        On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
+    );
+    let back_btn_txt = (TextBundle::from_section("back", TextStyle::default()));
+    commands.entity(root_entity).with_children(|parent| {
+        parent.spawn(wrap).with_children(|parent| {
+            parent.spawn(result_wrap).with_children(|parent| {
+                parent.spawn(result_txt);
+            });
+            parent.spawn(btn_wrap).with_children(|parent| {
+                // 의미 없어보임
+                // parent.spawn(retry_btn).with_children(|parent| {
+                //     parent.spawn(retry_btn_txt);
+                // });
+                parent.spawn(save_btn).with_children(|parent| {
+                    parent.spawn(save_btn_txt);
+                });
+                parent.spawn(back_btn).with_children(|parent| {
+                    parent.spawn(back_btn_txt);
+                });
+            });
+        });
+    });
+}
+
 pub fn setup_main_ui(mut commands: Commands) {
     let root_node = (
         Name::new("root_node"),
@@ -1019,7 +1134,7 @@ pub fn loaded_69_fire_5_btn_click(
 
             config.rule_given_ball = make_given_ball(ball69());
             config.rule_taken_ball = 5;
-            ew.send(BallSpawnEvent);
+            ew.send(BallSpawnEvent(false));
 
             return spawn_game_menu(entity, commands);
         }
@@ -1041,7 +1156,7 @@ pub fn loaded_26_fire_1_btn_click(
 
             config.rule_given_ball = make_given_ball(ball26());
             config.rule_taken_ball = 1;
-            ew.send(BallSpawnEvent);
+            ew.send(BallSpawnEvent(false));
 
             return spawn_game_menu(entity, commands);
         }
@@ -1063,7 +1178,7 @@ pub fn loaded_45_fire_6_btn_click(
 
             config.rule_given_ball = make_given_ball(ball45());
             config.rule_taken_ball = 6;
-            ew.send(BallSpawnEvent);
+            ew.send(BallSpawnEvent(false));
 
             return spawn_game_menu(entity, commands);
         }
@@ -1116,10 +1231,17 @@ pub fn back_to_game_rule_select_btn_click(
 pub fn game_run_btn_click(
     mut commands: Commands,
     mut er: EventReader<GameRunBtnClick>,
-    q_root_node: Query<(Entity, &Children), With<RootNode>>,
     mut ew: EventWriter<GameRunEvent>,
+    q_shuffle_btn: Query<Entity, With<ShuffleBtn>>,
+    q_game_run_btn: Query<Entity, With<GameRunBtn>>,
 ) {
     for _ in er.read() {
+        if let Ok(entity) = q_shuffle_btn.get_single() {
+            commands.entity(entity).insert(Visibility::Hidden);
+        }
+        if let Ok(entity) = q_game_run_btn.get_single() {
+            commands.entity(entity).insert(Visibility::Hidden);
+        }
         ew.send(GameRunEvent);
     }
 }
@@ -1165,7 +1287,7 @@ pub fn custom_rule_run_btn_click(
                 config.rule_taken_ball = fc.0;
             }
 
-            ew.send(BallSpawnEvent);
+            ew.send(BallSpawnEvent(false));
             return spawn_game_menu(entity, commands);
         }
     }
@@ -1395,6 +1517,80 @@ pub fn numbers_item_delete_btn_click(
                     return spawn_numbers_contents(entity, commands, ball_nums);
                 }
             }
+        }
+    }
+}
+
+pub fn game_menu_shuffle_btn_click(
+    mut er: EventReader<GameMenuShuffleBtnClick>,
+    mut ew: EventWriter<BallSpawnEvent>,
+) {
+    for _ in er.read() {
+        ew.send(BallSpawnEvent(true));
+    }
+}
+
+pub fn er_game_end(
+    mut commands: Commands,
+    mut er: EventReader<GameEndEvent>,
+    q_root_node: Query<(Entity, &Children), With<RootNode>>,
+    config: Res<GameConfig>,
+) {
+    for _ in er.read() {
+        if let Ok((entity, children)) = q_root_node.get_single() {
+            for &entity in children.iter() {
+                commands.entity(entity).despawn_recursive();
+            }
+
+            return spawn_game_result_menu(entity, commands, &config.picked_ball);
+        }
+    }
+}
+
+pub fn game_result_menu_retry_btn_click(
+    mut commands: Commands,
+    mut er: EventReader<GameResultRetryBtnClick>,
+    q_root_node: Query<(Entity, &Children), With<RootNode>>,
+) {
+    for _ in er.read() {
+        if let Ok((entity, children)) = q_root_node.get_single() {
+            for &entity in children.iter() {
+                commands.entity(entity).despawn_recursive();
+            }
+
+            return spawn_game_menu(entity, commands);
+        }
+    }
+}
+
+pub fn game_result_menu_save_btn_click(
+    mut commands: Commands,
+    mut er: EventReader<GameResultSaveBtnClick>,
+    q_root_node: Query<(Entity, &Children), With<RootNode>>,
+    q_save_btn: Query<Entity, With<SaveBtn>>,
+    config: Res<GameConfig>,
+    mut ui_config: ResMut<UiConfig>,
+) {
+    for _ in er.read() {
+        // if let Ok((entity, children)) = q_root_node.get_single() {
+        //     // for &entity in children.iter() {
+        //     //     commands.entity(entity).despawn_recursive();
+        //     // }
+        // }
+
+        let numbers = &config.picked_ball;
+        let ball_num = BallNumber {
+            game_type: "".to_string(),
+            id: Uuid::new_v4().to_string(),
+            numbers: numbers.clone(),
+            time: AppFfi::get_current_epoch_time(),
+        };
+
+        ui_config.saved_ball_numbers.save_item(ball_num);
+
+        //to
+        if let Ok(entity) = q_save_btn.get_single() {
+            commands.entity(entity).insert(Visibility::Hidden);
         }
     }
 }

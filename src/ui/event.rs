@@ -160,3 +160,28 @@ impl From<ListenerInput<Pointer<Click>>> for NumbersItemDeleteBtnClick {
         Self(event.target, event.hit.depth)
     }
 }
+
+#[derive(Event, Debug)]
+pub struct GameMenuShuffleBtnClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for GameMenuShuffleBtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct GameResultRetryBtnClick(pub Entity, pub f32);
+impl From<ListenerInput<Pointer<Click>>> for GameResultRetryBtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct GameResultSaveBtnClick(pub Entity, pub f32);
+impl From<ListenerInput<Pointer<Click>>> for GameResultSaveBtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}

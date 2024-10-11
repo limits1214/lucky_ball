@@ -115,3 +115,48 @@ impl From<ListenerInput<Pointer<Click>>> for CustomRuleRunBtnClick {
         Self(event.target, event.hit.depth)
     }
 }
+
+#[derive(Event, Debug)]
+pub struct NumbersBtnClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for NumbersBtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct QuitBtnClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for QuitBtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct NumbersPagingPrevBtnClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for NumbersPagingPrevBtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct NumbersPagingNextBtnClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for NumbersPagingNextBtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}
+
+#[derive(Event, Debug)]
+pub struct NumbersItemDeleteBtnClick(pub Entity, pub f32);
+
+impl From<ListenerInput<Pointer<Click>>> for NumbersItemDeleteBtnClick {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target, event.hit.depth)
+    }
+}

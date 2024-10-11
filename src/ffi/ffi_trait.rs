@@ -13,3 +13,12 @@ pub trait AdmobInterstitialTrait {
     fn interstitial_is_ready() -> bool;
     fn interstitial_clear();
 }
+
+pub struct AppFfi;
+
+pub trait AppFfiTrait {
+    fn exit();
+    fn init();
+    fn get_current_epoch_time() -> u64;
+    fn get_locale() -> String;
+}

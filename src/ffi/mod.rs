@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_crossbeam_event::{CrossbeamEventApp, CrossbeamEventSender};
 use ffi_event::{set_sender, FfiEvents};
+use ffi_trait::{AppFfi, AppFfiTrait};
 pub mod ffi_event;
 pub mod ffi_fn;
 pub mod ffi_trait;
@@ -23,6 +24,8 @@ impl Plugin for FfiPlugin {
             use ffi_trait::AdmobInterstitial;
             AdmobInterstitial::ad_init();
         }
+
+        AppFfi::init();
     }
 }
 

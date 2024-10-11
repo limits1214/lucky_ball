@@ -1,10 +1,14 @@
-use crate::ffi::ffi_trait::{Kv, KvTrait};
+use crate::ffi::ffi_trait::{
+    AdmobInterstitial, AdmobInterstitialTrait, AppFfi, AppFfiTrait, Kv, KvTrait,
+};
 
+use bevy::app::App;
 use directories::ProjectDirs;
 use std::{
     fs,
     io::{Read, Write},
     path::PathBuf,
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 const QUALIFIER: &str = "qualifier";
@@ -153,4 +157,45 @@ pub fn delete_test() {
 pub fn exists_test() {
     let a = Kv::exists("test");
     println!("a: {a:?}");
+}
+
+impl AdmobInterstitialTrait for AdmobInterstitial {
+    fn interstitial_show() {
+        println!("not imple");
+    }
+
+    fn interstitial_load() {
+        println!("not imple");
+    }
+
+    fn interstitial_is_ready() -> bool {
+        println!("not imple");
+        false
+    }
+
+    fn interstitial_clear() {
+        println!("not imple");
+    }
+}
+
+impl AppFfiTrait for AppFfi {
+    fn exit() {
+        println!("app init");
+    }
+
+    fn init() {
+        println!("app init");
+    }
+
+    fn get_current_epoch_time() -> u64 {
+        let start = SystemTime::now();
+        let since_the_epoch = start
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards");
+        since_the_epoch.as_secs()
+    }
+
+    fn get_locale() -> String {
+        String::from("ko_KR")
+    }
 }

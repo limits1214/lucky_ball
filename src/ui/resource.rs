@@ -71,42 +71,8 @@ pub struct BallNumber {
     pub id: String,
     pub numbers: Vec<u8>,
     pub game_type: String,
-    pub time: u64,
+    pub time: i64,
 }
-
-// impl BallNumber {
-//     pub fn init_vec() -> Vec<Self> {
-//         let mut v: Vec<Self> = vec![];
-
-//         for i in 1..100 {
-//             v.push(Self {
-//                 game_type: "".to_string(),
-//                 id: Uuid::new_v4().to_string(),
-//                 numbers: vec![1, 2, 3, 4],
-//                 time: i,
-//             });
-//         }
-//         let get = kv_get("saved_ball_numbers");
-//         let vec_ballnum = match serde_json::from_str::<Vec<BallNumber>>(&get) {
-//             Ok(a) => a,
-//             Err(err) => {
-//                 error!("BallNumber vec init err: {err:?}");
-//                 let v: Vec<BallNumber> = vec![];
-//                 let json_str = match serde_json::to_string(&v) {
-//                     Ok(s) => s,
-//                     Err(err) => {
-//                         info!("saved custom rull init err: {err:?}");
-//                         String::new()
-//                     }
-//                 };
-//                 kv_set("saved_ball_numbers", &json_str);
-//                 v
-//             }
-//         };
-//         // vec_ballnum
-//         v
-//     }
-// }
 
 pub trait VecBallNumberExt {
     fn init_items() -> Vec<BallNumber>;
@@ -116,18 +82,8 @@ pub trait VecBallNumberExt {
 
 impl VecBallNumberExt for Vec<BallNumber> {
     fn init_items() -> Vec<BallNumber> {
-        // let mut v: Vec<BallNumber> = vec![];
-
-        // for i in 1..10 {
-        //     v.push(BallNumber {
-        //         game_type: "".to_string(),
-        //         id: Uuid::new_v4().to_string(),
-        //         numbers: vec![1, 2, 3, 4],
-        //         time: i,
-        //     });
-        // }
         let get = kv_get("saved_ball_numbers");
-        let vec_ballnum = match serde_json::from_str::<Vec<BallNumber>>(&get) {
+        let mut vec_ballnum = match serde_json::from_str::<Vec<BallNumber>>(&get) {
             Ok(a) => a,
             Err(err) => {
                 error!("BallNumber vec init err: {err:?}");
@@ -143,8 +99,9 @@ impl VecBallNumberExt for Vec<BallNumber> {
                 v
             }
         };
+        // vec_ballnum.sort_by(|a, b| b.time.cmp(&a.time));
+        // info!("{vec_ballnum:?}");
         vec_ballnum
-        // v
     }
 
     fn save_item(&mut self, ball_number: BallNumber) {

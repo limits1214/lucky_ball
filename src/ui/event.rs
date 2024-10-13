@@ -84,8 +84,8 @@ impl From<ListenerInput<Pointer<Click>>> for GameRunBtnClick {
 #[derive(Event, Debug)]
 pub struct CustomRuleBallClick(pub Entity, pub f32);
 
-impl From<ListenerInput<Pointer<Click>>> for CustomRuleBallClick {
-    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+impl From<ListenerInput<Pointer<Down>>> for CustomRuleBallClick {
+    fn from(event: ListenerInput<Pointer<Down>>) -> Self {
         Self(event.target, event.hit.depth)
     }
 }

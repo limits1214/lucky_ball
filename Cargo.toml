@@ -11,7 +11,7 @@ default = ["inspector"]
 inspector = ["bevy-inspector-egui", "iyes_perf_ui"]
 
 [dependencies]
-avian3d = "0.1.2"
+avian3d = { version = "0.1.2" }
 bevy = "0.14.2"
 bevy-inspector-egui = { version = "0.26.0", optional = true }
 bevy_asset_loader = "0.21.0"
@@ -27,6 +27,7 @@ serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.128"
 directories = "5.0.1"
 uuid = "1.10.0"
+chrono = "0.4.38"
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni_fn = "0.1.2"

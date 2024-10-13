@@ -19,6 +19,7 @@ pub struct AppFfi;
 pub trait AppFfiTrait {
     fn exit();
     fn init();
-    fn get_current_epoch_time() -> u64;
+    fn get_current_epoch_time() -> i64;
     fn get_locale() -> String;
+    fn get_time_offset() -> i32;
 }

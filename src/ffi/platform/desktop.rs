@@ -3,6 +3,7 @@ use crate::ffi::ffi_trait::{
 };
 
 use bevy::app::App;
+use chrono::Utc;
 use directories::ProjectDirs;
 use std::{
     fs,
@@ -187,15 +188,17 @@ impl AppFfiTrait for AppFfi {
         println!("app init");
     }
 
-    fn get_current_epoch_time() -> u64 {
-        let start = SystemTime::now();
-        let since_the_epoch = start
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards");
-        since_the_epoch.as_secs()
+    fn get_current_epoch_time() -> i64 {
+        Utc::now().timestamp()
     }
 
     fn get_locale() -> String {
         String::from("ko_KR")
+    }
+
+    fn get_time_offset() -> i32 {
+        // 1 * 3600
+        9 * 3600
+        // 0
     }
 }

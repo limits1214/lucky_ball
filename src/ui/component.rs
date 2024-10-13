@@ -40,7 +40,7 @@ pub struct NumbersItem {
     pub id: String,
     pub numbers: Vec<u8>,
     pub game_type: String,
-    pub time: u64,
+    pub time: String,
 }
 
 #[derive(Component)]
@@ -51,3 +51,8 @@ pub struct SaveBtn;
 
 #[derive(Component)]
 pub struct GameRunBtn;
+
+#[derive(Component)]
+pub struct BtnInteract;
+#[derive(Component)]
+pub struct BtnIndianRedInteract;

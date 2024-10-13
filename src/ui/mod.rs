@@ -10,18 +10,21 @@ use event::{
 };
 use resource::UiConfig;
 use system::{
-    back_to_game_rule_select_btn_click, back_to_main_menu_btn_click, button_interaction,
-    custom_game_rule_btn_click, custom_rule_ball_click, custom_rule_fire_down_click,
-    custom_rule_fire_up_click, custom_rule_run_btn_click, er_game_end, game_menu_shuffle_btn_click,
-    game_result_menu_retry_btn_click, game_result_menu_save_btn_click,
+    back_to_game_rule_select_btn_click, back_to_main_menu_btn_click, button_indian_red_interaction,
+    button_interaction, custom_game_rule_btn_click, custom_rule_ball_click,
+    custom_rule_fire_down_click, custom_rule_fire_up_click, custom_rule_run_btn_click, er_game_end,
+    game_menu_shuffle_btn_click, game_result_menu_retry_btn_click, game_result_menu_save_btn_click,
     game_rule_select_button_click, game_run_btn_click, loaded_26_fire_1_btn_click,
     loaded_45_fire_6_btn_click, loaded_69_fire_5_btn_click, numbers_btn_click,
     numbers_item_delete_btn_click, numbers_paging_next_click, numbers_paging_prev_click,
     quit_btn_click, resize_text_based_on_window, setup_main_ui,
 };
 
+use crate::app::states::MyStates;
 pub mod component;
+pub mod constant;
 pub mod event;
+pub mod i18n;
 pub mod resource;
 pub mod system;
 pub mod utils;
@@ -51,7 +54,7 @@ impl Plugin for MyUiPlugin {
             .add_event::<GameMenuShuffleBtnClick>()
             .add_event::<GameResultRetryBtnClick>()
             .add_event::<GameResultSaveBtnClick>()
-            .add_systems(Startup, setup_main_ui)
+            .add_systems(OnEnter(MyStates::Game), setup_main_ui)
             .add_systems(
                 Update,
                 (
@@ -79,8 +82,10 @@ impl Plugin for MyUiPlugin {
                         er_game_end,
                         game_result_menu_retry_btn_click,
                         game_result_menu_save_btn_click,
+                        button_indian_red_interaction,
                     ),
-                ),
+                )
+                    .run_if(in_state(MyStates::Game)),
             );
     }
 }

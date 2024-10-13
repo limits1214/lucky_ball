@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use bevy_crossbeam_event::{CrossbeamEventApp, CrossbeamEventSender};
 use ffi_event::{set_sender, FfiEvents};
 use ffi_trait::{AppFfi, AppFfiTrait};
+
+use crate::ui::i18n::set_locale;
 pub mod ffi_event;
 pub mod ffi_fn;
 pub mod ffi_trait;
@@ -26,6 +28,8 @@ impl Plugin for FfiPlugin {
         }
 
         AppFfi::init();
+
+        set_locale(AppFfi::get_locale());
     }
 }
 

@@ -1,6 +1,7 @@
 use crate::{assets::AssetsPlugin, ffi::FfiPlugin, game::GamePlugin, ui::MyUiPlugin};
 use avian3d::prelude::*;
 use bevy::prelude::*;
+use bevy_kira_audio::AudioPlugin;
 use bevy_mod_picking::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use bevy_tweening::TweeningPlugin;
@@ -15,6 +16,7 @@ impl Plugin for AppPlugin {
         app.insert_state(MyStates::Load(Loading::Loading));
 
         app.add_plugins(PanOrbitCameraPlugin)
+            .add_plugins(AudioPlugin)
             .add_plugins(TweeningPlugin)
             .add_plugins(DefaultPickingPlugins)
             .add_plugins(PhysicsPlugins::default());
@@ -38,50 +40,18 @@ impl Plugin for AppPlugin {
 }
 
 fn camera_light_setup(mut commands: Commands) {
-    // commands.spawn((
-    //     PointLightBundle {
-    //         point_light: PointLight {
-    //             shadows_enabled: true,
-    //             ..default()
-    //         },
-    //         transform: Transform::from_xyz(0.0, 7.0, 0.0),
-    //         ..default()
-    //     },
-    //     Name::new("point light"),
-    // ));
-
-    // directional 'sun' light
-    // commands.spawn((
-    //     DirectionalLightBundle {
-    //         directional_light: DirectionalLight {
-    //             illuminance: light_consts::lux::OVERCAST_DAY,
-    //             shadows_enabled: true,
-    //             ..default()
-    //         },
-    //         transform: Transform {
-    //             translation: Vec3::new(0.0, 2.0, 0.0),
-    //             rotation: Quat::from_rotation_x(-PI / 4.),
-    //             ..default()
-    //         },
-    //         // The default cascade config is designed to handle large scenes.
-    //         // As this example has a much smaller world, we can tighten the shadow
-    //         // bounds for better visual quality.
-    //         cascade_shadow_config: CascadeShadowConfigBuilder {
-    //             first_cascade_far_bound: 4.0,
-    //             maximum_distance: 10.0,
-    //             ..default()
-    //         }
-    //         .into(),
-    //         ..default()
-    //     },
-    //     Name::new("directional light"),
-    // ));
+    let mut panorbit = PanOrbitCamera::default();
+    // panorbit.yaw_upper_limit = Some(20.);
+    panorbit.zoom_upper_limit = Some(20.);
+    panorbit.zoom_lower_limit = Some(4.);
+    // panorbit.modifier_pan = Some(KeyCode::ShiftLeft);
+    panorbit.pan_sensitivity = 0.;
 
     commands.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(5.0, 3.0, 0.0).looking_at(Vec3::Y * 2.0, Vec3::Y),
+            transform: Transform::from_xyz(8.0, 5.0, 0.0).looking_at(Vec3::Y * 2.0, Vec3::Y),
             ..default()
         },
-        PanOrbitCamera::default(),
+        panorbit,
     ));
 }

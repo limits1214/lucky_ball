@@ -39,6 +39,9 @@ pub struct GameStepStartEvent {
     pub data: Option<GameStepData>,
 }
 
+#[derive(Event)]
+pub struct DrawStickResetEvent;
+
 impl GameStepStartEvent {
     pub fn new(event_id: u64) -> Self {
         Self {

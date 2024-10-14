@@ -1,5 +1,3 @@
-use std::slice::Windows;
-
 use bevy::{prelude::*, window::WindowResized};
 use bevy_color::palettes::css::{self, INDIAN_RED};
 use bevy_mod_picking::prelude::*;
@@ -7,12 +5,13 @@ use uuid::Uuid;
 
 use crate::{
     assets::resources::MyAsstes,
-    ffi::{
-        ffi_fn::{kv_set, quit_app},
-        ffi_trait::{AppFfi, AppFfiTrait},
-    },
+    ffi::ffi_trait::{AppFfi, AppFfiTrait},
     game::{
-        event::{BallClearEvent, BallSpawnEvent, GameEndEvent, GameRunEvent},
+        constant::{STEP_BALL_MIXER_ROTATE, STEP_INNER_DRAW_STICK_DOWN, STEP_INNER_DRAW_STICK_UP},
+        event::{
+            BallClearEvent, BallSpawnEvent, DrawStickResetEvent, GameEndEvent, GameRunEvent,
+            GameStepData, GameStepStartEvent,
+        },
         resource::{ball26, ball45, ball69, ball70, make_given_ball, GameConfig},
     },
     ui::utils::paginate_with_total,
@@ -29,13 +28,13 @@ use super::{
         BUTTON_INDIAN_RED_CLICK_COLOR, BUTTON_INDIAN_RED_HOVER_COLOR,
     },
     event::{
-        BackToGameRuleSelectBtnClick, BackToMainMenuBtnClickEvent, ButtonClickEvent,
-        CustomGameRuleBtnClick, CustomRuleBallClick, CustomRuleFireCntDownClick,
-        CustomRuleFireCntUpClick, CustomRuleRunBtnClick, GameMenuShuffleBtnClick,
-        GameResultRetryBtnClick, GameResultSaveBtnClick, GameRuleSelectButtonClickEvent,
-        GameRunBtnClick, Load26Fire1BtnClick, Load45Fire6BtnClick, Load69Fire5BtnClick,
-        NumbersBtnClick, NumbersItemDeleteBtnClick, NumbersPagingNextBtnClick,
-        NumbersPagingPrevBtnClick, QuitBtnClick,
+        BackToGameRuleSelectBtnClick, BackToMainMenuBtnClickEvent, CustomGameRuleBtnClick,
+        CustomRuleBallClick, CustomRuleFireCntDownClick, CustomRuleFireCntUpClick,
+        CustomRuleRunBtnClick, GameMenuShuffleBtnClick, GameResultRetryBtnClick,
+        GameResultSaveBtnClick, GameRuleSelectButtonClickEvent, GameRunBtnClick,
+        Load26Fire1BtnClick, Load45Fire6BtnClick, Load69Fire5BtnClick, NumbersBtnClick,
+        NumbersItemDeleteBtnClick, NumbersPagingNextBtnClick, NumbersPagingPrevBtnClick,
+        QuitBtnClick,
     },
     i18n::{
         txt_draw_balls_count, txt_insert_balls, txt_ok, txt_quit, txt_saved_numbers, txt_start,
@@ -71,7 +70,7 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
         TextBundle::from_section(
             txt_start(),
             TextStyle {
-                font: my_assets.ttf_nanum_gothic_light.clone(),
+                font: my_assets.ttf_nanum_gothic_bold.clone(),
                 font_size: 20.,
                 ..default()
             },
@@ -106,7 +105,7 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
         TextBundle::from_section(
             txt_saved_numbers(),
             TextStyle {
-                font: my_assets.ttf_nanum_gothic_light.clone(),
+                font: my_assets.ttf_nanum_gothic_bold.clone(),
                 font_size: 20.,
                 ..default()
             },
@@ -140,7 +139,7 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
         TextBundle::from_section(
             txt_quit(),
             TextStyle {
-                font: my_assets.ttf_nanum_gothic_light.clone(),
+                font: my_assets.ttf_nanum_gothic_bold.clone(),
                 font_size: 20.,
                 ..default()
             },
@@ -194,7 +193,7 @@ fn spawn_game_rule_select_menu(
         TextBundle::from_section(
             "5/69",
             TextStyle {
-                font: my_assets.ttf_nanum_gothic_light.clone(),
+                font: my_assets.ttf_nanum_gothic_bold.clone(),
                 ..default()
             },
         ),
@@ -227,7 +226,7 @@ fn spawn_game_rule_select_menu(
         TextBundle::from_section(
             "1/26",
             TextStyle {
-                font: my_assets.ttf_nanum_gothic_light.clone(),
+                font: my_assets.ttf_nanum_gothic_bold.clone(),
                 ..default()
             },
         ),
@@ -260,7 +259,7 @@ fn spawn_game_rule_select_menu(
         TextBundle::from_section(
             "6/45",
             TextStyle {
-                font: my_assets.ttf_nanum_gothic_light.clone(),
+                font: my_assets.ttf_nanum_gothic_bold.clone(),
                 ..default()
             },
         ),
@@ -287,7 +286,7 @@ fn spawn_game_rule_select_menu(
         },
         On::<Pointer<Click>>::send_event::<CustomGameRuleBtnClick>(),
     );
-    let custom_game_rule_img = (ImageBundle {
+    let custom_game_rule_img = ImageBundle {
         style: Style {
             // width: Val::Percent(100.),
             height: Val::Percent(50.),
@@ -295,13 +294,13 @@ fn spawn_game_rule_select_menu(
         },
         image: UiImage::new(my_assets.png_customize.clone()),
         ..default()
-    });
+    };
     let custom_game_rule_btn_text = (
         Name::new("custom_game_rule_btn_text"),
         TextBundle::from_section(
             format!("{custom_type}"),
             TextStyle {
-                font: my_assets.ttf_nanum_gothic_light.clone(),
+                font: my_assets.ttf_nanum_gothic_bold.clone(),
                 font_size: 18.,
                 ..default()
             },
@@ -330,7 +329,7 @@ fn spawn_game_rule_select_menu(
         On::<Pointer<Click>>::send_event::<BackToMainMenuBtnClickEvent>(),
     );
 
-    let back_btn_img = (ImageBundle {
+    let back_btn_img = ImageBundle {
         style: Style {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
@@ -338,13 +337,7 @@ fn spawn_game_rule_select_menu(
         },
         image: UiImage::new(my_assets.png_back.clone()),
         ..default()
-    });
-
-    let back_btn_text = (
-        Name::new("back_btn_text"),
-        TextBundle::from_section("back", TextStyle { ..default() }),
-        Pickable::IGNORE,
-    );
+    };
 
     commands.entity(root_entity).with_children(|parent| {
         parent.spawn(loaded_45_fire_5_btn).with_children(|parent| {
@@ -416,13 +409,13 @@ fn spawn_game_menu(
         // background_color: BackgroundColor(css::YELLOW.into()),
         ..default()
     },);
-    let game_type_txt = (TextBundle::from_section(
+    let game_type_txt = TextBundle::from_section(
         game_type,
         TextStyle {
-            font: my_assets.ttf_nanum_gothic_light.clone(),
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
             ..default()
         },
-    ));
+    );
 
     let ball_shuffle_btn = (
         Name::new("ball_shuffle_btn"),
@@ -446,7 +439,7 @@ fn spawn_game_menu(
         On::<Pointer<Click>>::send_event::<GameMenuShuffleBtnClick>(),
     );
 
-    let ball_shuffle_btn_img = (ImageBundle {
+    let ball_shuffle_btn_img = ImageBundle {
         style: Style {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
@@ -454,7 +447,7 @@ fn spawn_game_menu(
         },
         image: UiImage::new(my_assets.png_shuffle.clone()),
         ..default()
-    });
+    };
 
     let game_run_btn = (
         Name::new("game_run_btn"),
@@ -477,7 +470,7 @@ fn spawn_game_menu(
         GameRunBtn,
         On::<Pointer<Click>>::send_event::<GameRunBtnClick>(),
     );
-    let game_run_btn_img = (ImageBundle {
+    let game_run_btn_img = ImageBundle {
         style: Style {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
@@ -485,7 +478,7 @@ fn spawn_game_menu(
         },
         image: UiImage::new(my_assets.png_play.clone()),
         ..default()
-    });
+    };
 
     let back_btn = (
         Name::new("back_btn"),
@@ -507,7 +500,7 @@ fn spawn_game_menu(
         },
         On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
     );
-    let back_btn_img = (ImageBundle {
+    let back_btn_img = ImageBundle {
         style: Style {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
@@ -515,7 +508,7 @@ fn spawn_game_menu(
         },
         image: UiImage::new(my_assets.png_back.clone()),
         ..default()
-    });
+    };
 
     commands.entity(root_entity).with_children(|parent| {
         parent.spawn(wrapwrap).with_children(|parent| {
@@ -547,7 +540,7 @@ fn spawn_numbers_menu(
 ) {
     let (paginated_ball_numbers, total_size) = paginate_with_total(&ball_numbers, 0, 5);
 
-    let wrap = (NodeBundle {
+    let wrap = NodeBundle {
         style: Style {
             width: Val::Percent(90.),
             height: Val::Percent(90.),
@@ -557,9 +550,9 @@ fn spawn_numbers_menu(
             ..default()
         },
         ..default()
-    });
+    };
 
-    let title_wrap = (NodeBundle {
+    let title_wrap = NodeBundle {
         style: Style {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
@@ -569,7 +562,7 @@ fn spawn_numbers_menu(
         },
         background_color: BackgroundColor(css::BISQUE.into()),
         ..default()
-    });
+    };
 
     let back_btn = (
         Name::new("back_btn"),
@@ -590,7 +583,7 @@ fn spawn_numbers_menu(
         },
         On::<Pointer<Click>>::send_event::<BackToMainMenuBtnClickEvent>(),
     );
-    let back_btn_img = (ImageBundle {
+    let back_btn_img = ImageBundle {
         style: Style {
             // width: Val::Percent(100.),
             height: Val::Percent(50.),
@@ -598,13 +591,9 @@ fn spawn_numbers_menu(
         },
         image: UiImage::new(my_assets.png_back.clone()),
         ..default()
-    });
-    let back_btn_text = (
-        Name::new("back_btn_text"),
-        TextBundle::from_section("<", TextStyle { ..default() }),
-        Pickable::IGNORE,
-    );
-    let title_txt_wrap = (NodeBundle {
+    };
+
+    let title_txt_wrap = NodeBundle {
         style: Style {
             width: Val::Percent(80.),
             height: Val::Percent(100.),
@@ -613,16 +602,16 @@ fn spawn_numbers_menu(
             ..default()
         },
         ..default()
-    });
+    };
 
-    let title = (TextBundle::from_section(
+    let title = TextBundle::from_section(
         txt_saved_numbers(),
         TextStyle {
-            font: my_assets.ttf_nanum_gothic_light.clone(),
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
             color: css::BLACK.into(),
             ..default()
         },
-    ));
+    );
 
     let content_wrap = (
         Name::new("NumbersContentNode"),
@@ -640,7 +629,7 @@ fn spawn_numbers_menu(
         NumbersContentNode,
     );
 
-    let paging_wrap = (NodeBundle {
+    let paging_wrap = NodeBundle {
         style: Style {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
@@ -651,7 +640,7 @@ fn spawn_numbers_menu(
         background_color: BackgroundColor(css::BISQUE.into()),
         // background_color: BackgroundColor(css::YELLOW_GREEN.into()),
         ..default()
-    });
+    };
 
     let paging_prev_btn = (
         BtnInteract,
@@ -677,7 +666,7 @@ fn spawn_numbers_menu(
         TextBundle::from_section(
             "<",
             TextStyle {
-                font: my_assets.ttf_nanum_gothic_light.clone(),
+                font: my_assets.ttf_nanum_gothic_bold.clone(),
                 ..default()
             },
         ),
@@ -699,7 +688,7 @@ fn spawn_numbers_menu(
         TextBundle::from_section(
             format!("1/{}", if total_size < 1 { 1 } else { total_size }),
             TextStyle {
-                font: my_assets.ttf_nanum_gothic_light.clone(),
+                font: my_assets.ttf_nanum_gothic_bold.clone(),
                 color: css::BLACK.into(),
                 ..default()
             },
@@ -734,7 +723,7 @@ fn spawn_numbers_menu(
         TextBundle::from_section(
             ">",
             TextStyle {
-                font: my_assets.ttf_nanum_gothic_light.clone(),
+                font: my_assets.ttf_nanum_gothic_bold.clone(),
                 ..default()
             },
         ),
@@ -791,7 +780,7 @@ fn spawn_numbers_contents(
     ball_nums: &[BallNumber],
     my_assets: Res<MyAsstes>,
 ) {
-    let content_item_wrap = (NodeBundle {
+    let content_item_wrap = NodeBundle {
         style: Style {
             width: Val::Percent(100.),
             height: Val::Percent(20.),
@@ -801,9 +790,9 @@ fn spawn_numbers_contents(
         // background_color: BackgroundColor(css::LIGHT_BLUE.into()),
         border_color: BorderColor(css::BLACK.into()),
         ..default()
-    });
+    };
 
-    let content_item_number_wrap = (NodeBundle {
+    let content_item_number_wrap = NodeBundle {
         style: Style {
             width: Val::Percent(10.),
             height: Val::Percent(100.),
@@ -815,9 +804,9 @@ fn spawn_numbers_contents(
         },
         border_color: BorderColor(css::BLACK.into()),
         ..default()
-    });
+    };
 
-    let content_item_body_wrap = (NodeBundle {
+    let content_item_body_wrap = NodeBundle {
         style: Style {
             width: Val::Percent(70.),
             height: Val::Percent(100.),
@@ -828,7 +817,7 @@ fn spawn_numbers_contents(
             ..default()
         },
         ..default()
-    });
+    };
     let content_item_remove_btn = (ButtonBundle {
         style: Style {
             width: Val::Percent(20.),
@@ -866,7 +855,7 @@ fn spawn_numbers_contents(
                             parent.spawn(TextBundle::from_section(
                                 (total_item_cnt - (page * 5 + i)).to_string(),
                                 TextStyle {
-                                    font: my_assets.ttf_nanum_gothic_light.clone(),
+                                    font: my_assets.ttf_nanum_gothic_bold.clone(),
                                     color: css::BLACK.into(),
                                     ..default()
                                 },
@@ -881,7 +870,7 @@ fn spawn_numbers_contents(
                                     time_formatting(time.clone(), AppFfi::get_time_offset())
                                 ),
                                 TextStyle {
-                                    font: my_assets.ttf_nanum_gothic_light.clone(),
+                                    font: my_assets.ttf_nanum_gothic_bold.clone(),
                                     color: css::BLACK.into(),
                                     font_size: 14.,
                                 },
@@ -889,7 +878,7 @@ fn spawn_numbers_contents(
                             parent.spawn(TextBundle::from_section(
                                 format!("- {}", game_type.clone()),
                                 TextStyle {
-                                    font: my_assets.ttf_nanum_gothic_light.clone(),
+                                    font: my_assets.ttf_nanum_gothic_bold.clone(),
                                     color: css::BLACK.into(),
                                     font_size: 14.,
                                 },
@@ -902,7 +891,7 @@ fn spawn_numbers_contents(
                             parent.spawn(TextBundle::from_section(
                                 format!("{ten:?}"),
                                 TextStyle {
-                                    font: my_assets.ttf_nanum_gothic_light.clone(),
+                                    font: my_assets.ttf_nanum_gothic_bold.clone(),
                                     font_size: 14.,
                                     color: css::BLACK.into(),
                                 },
@@ -913,7 +902,7 @@ fn spawn_numbers_contents(
                                 parent.spawn(TextBundle::from_section(
                                     format!("{ten:?}"),
                                     TextStyle {
-                                        font: my_assets.ttf_nanum_gothic_light.clone(),
+                                        font: my_assets.ttf_nanum_gothic_bold.clone(),
                                         font_size: 13.,
                                         color: css::BLACK.into(),
                                     },
@@ -1008,7 +997,7 @@ fn spawn_custom_rule_menu(
         },
     );
 
-    let circle_1 = (NodeBundle {
+    let circle_1 = NodeBundle {
         style: Style {
             width: Val::Percent(90.),
             height: Val::Percent(100. * 1. / 14.),
@@ -1020,7 +1009,7 @@ fn spawn_custom_rule_menu(
         border_color: BorderColor(css::BLACK.into()),
         // background_color: BackgroundColor(css::WHEAT.into()),
         ..default()
-    });
+    };
 
     let circle_buttons_style = Style {
         width: Val::Percent(100.),
@@ -1029,16 +1018,8 @@ fn spawn_custom_rule_menu(
         align_items: AlignItems::Center,
         ..default()
     };
-    let circle_btn = (ButtonBundle {
+    let circle_btn = ButtonBundle {
         style: circle_buttons_style.clone(),
-        ..default()
-    });
-
-    let fire_btn_style = Style {
-        width: Val::Percent(30.),
-        height: Val::Percent(70.),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
         ..default()
     };
 
@@ -1058,16 +1039,16 @@ fn spawn_custom_rule_menu(
         ..default()
     },);
 
-    let left_btn_txt = (make_text("<"));
+    let left_btn_txt = make_text("<");
 
-    let fire_cnt_txt = (TextBundle::from_section(
+    let fire_cnt_txt = TextBundle::from_section(
         custom_rule.fire.to_string(),
         TextStyle {
             font_size: 30.,
             color: css::BLACK.into(),
             ..default()
         },
-    ));
+    );
 
     let right_btn = (ButtonBundle {
         style: Style {
@@ -1084,9 +1065,9 @@ fn spawn_custom_rule_menu(
         border_radius: BorderRadius::all(Val::Percent(5.)),
         ..default()
     },);
-    let right_btn_txt = (make_text(">"));
+    let right_btn_txt = make_text(">");
 
-    let back_run_wrap = (NodeBundle {
+    let back_run_wrap = NodeBundle {
         style: Style {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
@@ -1098,14 +1079,8 @@ fn spawn_custom_rule_menu(
         },
         // background_color: BackgroundColor(css::YELLOW.into()),
         ..default()
-    });
-    let bottom_btn_style = Style {
-        width: Val::Percent(90.),
-        height: Val::Percent(90.),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        ..default()
     };
+
     let back_btn = (
         Name::new("back_btn"),
         ButtonBundle {
@@ -1125,12 +1100,8 @@ fn spawn_custom_rule_menu(
         },
         On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
     );
-    let back_btn_text = (
-        Name::new("back_btn_text"),
-        TextBundle::from_section("back", TextStyle { ..default() }),
-        Pickable::IGNORE,
-    );
-    let back_btn_img = (ImageBundle {
+
+    let back_btn_img = ImageBundle {
         style: Style {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
@@ -1138,7 +1109,7 @@ fn spawn_custom_rule_menu(
         },
         image: UiImage::new(my_assets.png_back.clone()),
         ..default()
-    });
+    };
     let run_btn = (
         Name::new("back_btn"),
         ButtonBundle {
@@ -1163,7 +1134,7 @@ fn spawn_custom_rule_menu(
         TextBundle::from_section(
             txt_ok(),
             TextStyle {
-                font: my_assets.ttf_nanum_gothic_light.clone(),
+                font: my_assets.ttf_nanum_gothic_bold.clone(),
                 ..default()
             },
         ),
@@ -1174,7 +1145,7 @@ fn spawn_custom_rule_menu(
             parent.spawn(TextBundle::from_section(
                 txt_insert_balls(),
                 TextStyle {
-                    font: my_assets.ttf_nanum_gothic_light.clone(),
+                    font: my_assets.ttf_nanum_gothic_bold.clone(),
                     color: css::BLACK.into(),
                     ..default()
                 },
@@ -1208,7 +1179,7 @@ fn spawn_custom_rule_menu(
                                                         &i.to_string(),
                                                         TextStyle {
                                                             font: my_assets
-                                                                .ttf_nanum_gothic_light
+                                                                .ttf_nanum_gothic_bold
                                                                 .clone(),
                                                             font_size: 16.,
                                                             ..default()
@@ -1218,7 +1189,7 @@ fn spawn_custom_rule_menu(
                                                         ox,
                                                         TextStyle {
                                                             font: my_assets
-                                                                .ttf_nanum_gothic_light
+                                                                .ttf_nanum_gothic_bold
                                                                 .clone(),
                                                             font_size: 16.,
                                                             ..default()
@@ -1235,7 +1206,7 @@ fn spawn_custom_rule_menu(
             parent.spawn(TextBundle::from_section(
                 txt_draw_balls_count(),
                 TextStyle {
-                    font: my_assets.ttf_nanum_gothic_light.clone(),
+                    font: my_assets.ttf_nanum_gothic_bold.clone(),
                     color: css::BLACK.into(),
                     ..default()
                 },
@@ -1286,7 +1257,7 @@ fn spawn_game_result_menu(
     // result
     // save btn
 
-    let wrap = (NodeBundle {
+    let wrap = NodeBundle {
         style: Style {
             width: Val::Percent(100.),
             height: Val::Percent(100.),
@@ -1296,8 +1267,8 @@ fn spawn_game_result_menu(
             ..default()
         },
         ..default()
-    });
-    let result_wrap = (NodeBundle {
+    };
+    let result_wrap = NodeBundle {
         style: Style {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
@@ -1306,18 +1277,18 @@ fn spawn_game_result_menu(
             ..default()
         },
         ..default()
-    });
+    };
 
-    let result_txt = (TextBundle::from_section(
+    let result_txt = TextBundle::from_section(
         format!("{picked_numbers:?}"),
         TextStyle {
-            font: my_assets.ttf_nanum_gothic_light.clone(),
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
             font_size: 20.,
             ..default()
         },
-    ));
+    );
 
-    let btn_wrap = (NodeBundle {
+    let btn_wrap = NodeBundle {
         style: Style {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
@@ -1327,22 +1298,22 @@ fn spawn_game_result_menu(
             ..default()
         },
         ..default()
-    });
+    };
 
-    let retry_btn = (
-        ButtonBundle {
-            style: Style {
-                width: Val::Percent(20.),
-                height: Val::Percent(100.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            ..default()
-        },
-        On::<Pointer<Click>>::send_event::<GameResultRetryBtnClick>(),
-    );
-    let retry_btn_txt = (TextBundle::from_section("retry", TextStyle::default()));
+    // let retry_btn = (
+    //     ButtonBundle {
+    //         style: Style {
+    //             width: Val::Percent(20.),
+    //             height: Val::Percent(100.),
+    //             justify_content: JustifyContent::Center,
+    //             align_items: AlignItems::Center,
+    //             ..default()
+    //         },
+    //         ..default()
+    //     },
+    //     On::<Pointer<Click>>::send_event::<GameResultRetryBtnClick>(),
+    // );
+    // let retry_btn_txt = (TextBundle::from_section("retry", TextStyle::default()));
     let save_btn = (
         BtnInteract,
         ButtonBundle {
@@ -1363,7 +1334,7 @@ fn spawn_game_result_menu(
         SaveBtn,
         On::<Pointer<Click>>::send_event::<GameResultSaveBtnClick>(),
     );
-    let save_btn_img = (ImageBundle {
+    let save_btn_img = ImageBundle {
         style: Style {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
@@ -1371,7 +1342,7 @@ fn spawn_game_result_menu(
         },
         image: UiImage::new(my_assets.png_save.clone()),
         ..default()
-    });
+    };
 
     let back_btn = (
         BtnInteract,
@@ -1393,7 +1364,7 @@ fn spawn_game_result_menu(
         On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
     );
 
-    let back_btn_img = (ImageBundle {
+    let back_btn_img = ImageBundle {
         style: Style {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
@@ -1401,7 +1372,7 @@ fn spawn_game_result_menu(
         },
         image: UiImage::new(my_assets.png_back.clone()),
         ..default()
-    });
+    };
 
     commands.entity(root_entity).with_children(|parent| {
         parent.spawn(wrap).with_children(|parent| {
@@ -1641,6 +1612,8 @@ pub fn back_to_game_rule_select_btn_click(
     mut config: ResMut<GameConfig>,
     my_assets: Res<MyAsstes>,
     ui_config: Res<UiConfig>,
+    mut ew_step_start: EventWriter<GameStepStartEvent>,
+    mut ew_draw_stick_reset: EventWriter<DrawStickResetEvent>,
 ) {
     for _ in er.read() {
         if let Ok((entity, children)) = q_root_node.get_single() {
@@ -1660,6 +1633,18 @@ pub fn back_to_game_rule_select_btn_click(
                 .count();
             let fire = ui_config.saved_custom_rule.fire;
             let custom_type = format!("{fire}/{load}");
+
+            //
+            config.is_running = false;
+            // config.is_ball_release_sensor = false;
+            // config.is_pool_ball_cnt_sensor = false;
+            // config.is_catching = false;
+            // config.picked_ball = vec![];
+            ew_draw_stick_reset.send(DrawStickResetEvent);
+            ew_step_start.send(GameStepStartEvent::new_with_data(
+                STEP_BALL_MIXER_ROTATE,
+                GameStepData::Float(1.),
+            ));
             return spawn_game_rule_select_menu(entity, commands, my_assets, custom_type);
         }
     }
@@ -1684,10 +1669,10 @@ pub fn game_run_btn_click(
 }
 
 pub fn resize_text_based_on_window(
-    mut query: Query<&mut Text, With<TextResize>>,
+    // mut query: Query<&mut Text, With<TextResize>>,
     mut resize_reader: EventReader<WindowResized>,
 ) {
-    for e in resize_reader.read() {
+    for _ in resize_reader.read() {
         // return;
         // for mut t in &mut query {
         //     for t2 in t.sections.iter_mut() {
@@ -1808,7 +1793,7 @@ pub fn custom_rule_fire_down_click(
 pub fn custom_rule_fire_up_click(
     mut er: EventReader<CustomRuleFireCntUpClick>,
     mut q_firecnt: Query<(&mut CustomRuleFireCnt, &mut Text)>,
-    q_custom_balls: Query<&CustomRuleBall>,
+    // q_custom_balls: Query<&CustomRuleBall>,
     mut ui_config: ResMut<UiConfig>,
 ) {
     for _ in er.read() {
@@ -1906,7 +1891,7 @@ pub fn numbers_paging_prev_click(
                 let mut ball_numbers = ui_config.saved_ball_numbers.clone();
                 ball_numbers.sort_by(|a, b| b.time.cmp(&a.time));
 
-                let (ball_nums, total_size) = paginate_with_total(&ball_numbers, pagination.now, 5);
+                let (ball_nums, ..) = paginate_with_total(&ball_numbers, pagination.now, 5);
                 return spawn_numbers_contents(
                     entity,
                     commands,
@@ -1944,7 +1929,7 @@ pub fn numbers_paging_next_click(
                 let mut ball_numbers = ui_config.saved_ball_numbers.clone();
                 ball_numbers.sort_by(|a, b| b.time.cmp(&a.time));
 
-                let (ball_nums, total_size) = paginate_with_total(&ball_numbers, pagination.now, 5);
+                let (ball_nums, ..) = paginate_with_total(&ball_numbers, pagination.now, 5);
                 return spawn_numbers_contents(
                     entity,
                     commands,
@@ -1990,7 +1975,7 @@ pub fn numbers_item_delete_btn_click(
                     let mut ball_numbers = ui_config.saved_ball_numbers.clone();
                     ball_numbers.sort_by(|a, b| b.time.cmp(&a.time));
 
-                    let (ball_nums, total_size) =
+                    let (_ball_nums, total_size) =
                         paginate_with_total(&ball_numbers, pagination.now, 5);
 
                     pagination.last = total_size;
@@ -1998,8 +1983,7 @@ pub fn numbers_item_delete_btn_click(
                     if pagination.now + 1 > total_size {
                         pagination.now = total_size - 1;
                     }
-                    let (ball_nums, total_size) =
-                        paginate_with_total(&ball_numbers, pagination.now, 5);
+                    let (ball_nums, ..) = paginate_with_total(&ball_numbers, pagination.now, 5);
 
                     text.sections[0].value = format!(
                         "{}/{}",
@@ -2041,8 +2025,9 @@ pub fn er_game_end(
     mut commands: Commands,
     mut er: EventReader<GameEndEvent>,
     q_root_node: Query<(Entity, &Children), With<RootNode>>,
-    config: Res<GameConfig>,
+    mut config: ResMut<GameConfig>,
     my_assets: Res<MyAsstes>,
+    // mut ew_step_start: EventWriter<GameStepStartEvent>,
 ) {
     for _ in er.read() {
         if let Ok((entity, children)) = q_root_node.get_single() {

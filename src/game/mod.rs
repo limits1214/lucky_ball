@@ -2,17 +2,18 @@ use avian3d::prelude::AngularVelocity;
 use bevy::prelude::*;
 use bevy_tweening::{component_animator_system, AnimationSystem, Lens};
 use event::{
-    BallClearEvent, BallSpawnEvent, GameEndEvent, GameResetEvent, GameRunEvent,
-    GameStepFinishEvent, GameStepStartEvent, PoolBallCntZeroEvent,
+    BallClearEvent, BallSpawnEvent, DrawStickResetEvent, GameEndEvent, GameResetEvent,
+    GameRunEvent, GameStepFinishEvent, GameStepStartEvent, PoolBallCntZeroEvent,
 };
 use resource::{ball70, make_given_ball, GameConfig};
 use system::{
     ball_catch, ball_catch_sensor_collding, ball_holder_last_collding, ball_mixer_rotate,
     ball_picked_static, ball_release_sensor, draw_inner_stick_down_event,
-    draw_inner_stick_up_event, draw_stick_down_event, draw_stick_rigid_change, draw_stick_up_event,
-    er_ball_catch, er_ball_clear, er_ball_release, er_ball_rigid_change, er_ball_spawn,
-    er_game_reset, er_game_run, er_pool_outlet_cover_close, er_pool_outlet_cover_open,
-    game_run_step_finish, pool_ball_cnt_zero_sensor, spawn_balls, spawn_setup, tcb_to_step_convert,
+    draw_inner_stick_up_event, draw_stick_down_event, draw_stick_reset_event,
+    draw_stick_rigid_change, draw_stick_up_event, er_ball_catch, er_ball_clear, er_ball_release,
+    er_ball_rigid_change, er_ball_spawn, er_game_reset, er_game_run, er_pool_outlet_cover_close,
+    er_pool_outlet_cover_open, game_run_step_finish, play_ball_sound, pool_ball_cnt_zero_sensor,
+    spawn_setup, tcb_to_step_convert,
 };
 
 use crate::app::states::MyStates;
@@ -35,6 +36,7 @@ impl Plugin for GamePlugin {
             .add_event::<PoolBallCntZeroEvent>()
             .add_event::<BallClearEvent>()
             .add_event::<BallSpawnEvent>()
+            .add_event::<DrawStickResetEvent>()
             .insert_resource(GameConfig {
                 is_ball_release_sensor: false,
                 is_running: false,
@@ -72,6 +74,8 @@ impl Plugin for GamePlugin {
                         er_ball_spawn,
                         er_ball_clear,
                         ball_release_sensor,
+                        // play_ball_sound,
+                        draw_stick_reset_event,
                     ),
                 )
                     .run_if(in_state(MyStates::Game)),

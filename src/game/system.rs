@@ -4,6 +4,7 @@ use bevy::{
     math::vec3,
     prelude::*,
 };
+use bevy_kira_audio::AudioControl;
 use bevy_tweening::{
     lens::TransformPositionLens, Animator, Delay, EaseFunction, Tween, TweenCompleted,
 };
@@ -39,8 +40,8 @@ use super::{
         TWEEN_POOL_OUTLET_CLOSE_END, TWEEN_POOL_OUTLET_OPEN_END,
     },
     event::{
-        BallClearEvent, BallSpawnEvent, GameEndEvent, GameResetEvent, GameRunEvent, GameStepData,
-        GameStepFinishEvent, GameStepStartEvent,
+        BallClearEvent, BallSpawnEvent, DrawStickResetEvent, GameEndEvent, GameResetEvent,
+        GameRunEvent, GameStepData, GameStepFinishEvent, GameStepStartEvent,
     },
     resource::GameConfig,
     MyAngularVelocityYLens,
@@ -577,6 +578,39 @@ pub fn draw_inner_stick_down_event(
     }
 }
 
+pub fn draw_stick_reset_event(
+    mut er: EventReader<DrawStickResetEvent>,
+    mut commands: Commands,
+    q_stick: Query<Entity, With<BallDrawStick>>,
+    q_stick_in: Query<Entity, With<BallDrawStickIn>>,
+) {
+    for _ in er.read() {
+        let tween = Tween::new(
+            EaseFunction::QuarticInOut,
+            Duration::from_millis(1),
+            TransformPositionLens {
+                start: vec3(0., 0.001, 0.),
+                end: vec3(0., 0.001, 0.),
+            },
+        )
+        .with_completed_event(TWEEN_DRAW_STICK_DOWN_END);
+        if let Ok(entity) = q_stick.get_single() {
+            commands.entity(entity).insert(Animator::new(tween));
+        }
+        let tween = Tween::new(
+            EaseFunction::QuarticInOut,
+            Duration::from_millis(1),
+            TransformPositionLens {
+                start: vec3(0., 0.65, 0.),
+                end: vec3(0., 0.65, 0.),
+            },
+        );
+        if let Ok(entity) = q_stick_in.get_single() {
+            commands.entity(entity).insert(Animator::new(tween));
+        }
+    }
+}
+
 pub fn ball_catch_sensor_collding(
     q_sensor: Query<(Entity, &CollidingEntities), With<BallCatchSensor>>,
     q_ball: Query<&Ball>,
@@ -850,7 +884,7 @@ pub fn ball_mixer_rotate(
                 if let Ok((entity, av)) = q_mixer.get_single() {
                     let tween = Tween::new(
                         EaseFunction::QuarticInOut,
-                        Duration::from_millis(500),
+                        Duration::from_millis(2000),
                         MyAngularVelocityYLens {
                             start: av.y,
                             end: *speed,
@@ -903,6 +937,10 @@ pub fn game_run_step_finish(
         for GameStepFinishEvent { event_id, .. } in er.read() {
             match *event_id {
                 STEP_GAME_RUN_COMMAND => {
+                    config.is_ball_release_sensor = false;
+                    config.is_pool_ball_cnt_sensor = false;
+                    config.is_catching = false;
+                    config.picked_ball = vec![];
                     ew_step_start.send(GameStepStartEvent::new(STEP_POOL_OUTLET_OPEN_START));
                 }
                 STEP_POOL_OUTLET_OPEN_END => {
@@ -937,10 +975,6 @@ pub fn game_run_step_finish(
                 }
                 STEP_DRAW_STICK_UP_END => {
                     ew_step_start.send(GameStepStartEvent::new(STEP_INNER_DRAW_STICK_UP));
-                    ew_step_start.send(GameStepStartEvent::new_with_data(
-                        STEP_BALL_MIXER_ROTATE,
-                        GameStepData::Float(15.),
-                    ));
                 }
                 STEP_INNER_DRAW_STICK_UP_END => {
                     config.is_ball_release_sensor = true;
@@ -955,6 +989,10 @@ pub fn game_run_step_finish(
                     if config.picked_ball.len() < config.rule_taken_ball as usize {
                         // KEEP GOING
                         ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
+                        ew_step_start.send(GameStepStartEvent::new_with_data(
+                            STEP_BALL_MIXER_ROTATE,
+                            GameStepData::Float(15.),
+                        ));
                     } else {
                         // END
                         // todo rotate speed down is must worked before step
@@ -963,6 +1001,8 @@ pub fn game_run_step_finish(
                             STEP_BALL_MIXER_ROTATE,
                             GameStepData::Float(1.),
                         ));
+
+                        config.is_running = false;
 
                         ew_game_end.send(GameEndEvent);
                     }
@@ -1007,4 +1047,37 @@ pub fn tcb_to_step_convert(
             _ => {}
         }
     }
+}
+
+pub fn play_ball_sound(
+    mut collision_event_reader: EventReader<CollisionStarted>,
+    q_ball_collidings: Query<(Entity, &CollidingEntities), With<Ball>>,
+    q_ball: Query<&Ball>,
+    my_assets: Res<MyAsstes>,
+    audio: Res<bevy_kira_audio::Audio>,
+) {
+    for CollisionStarted(entity1, entity2) in collision_event_reader.read() {
+        // println!(
+        //     "Entities {:?} and {:?} are colliding",
+        //     contacts.entity1, contacts.entity2,
+        // );
+        let mut is_ball1 = false;
+        let mut is_ball2 = false;
+        if let Ok(_) = q_ball.get(*entity1) {
+            is_ball1 = true;
+        }
+        if let Ok(_) = q_ball.get(*entity2) {
+            is_ball2 = true;
+        }
+
+        if is_ball1 && is_ball2 {
+            // info!("ball colliding");
+            // audio.play(my_assets.mp3_ballsound.clone());
+        }
+    }
+    // for (e, c) in &q_ball_collidings {
+    //     for e in c.iter() {}
+    //     //
+    // }
+    // audio.play(my_assets.mp3_ballsound.clone());
 }

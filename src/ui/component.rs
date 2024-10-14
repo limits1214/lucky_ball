@@ -2,9 +2,6 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Component)]
-pub struct TestBtn;
-
-#[derive(Component)]
 pub struct RootNode;
 
 #[derive(Component)]

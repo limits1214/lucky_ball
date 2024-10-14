@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use chrono::{DateTime, FixedOffset, NaiveDateTime, TimeZone, Utc};
+use chrono::{DateTime, FixedOffset, Utc};
 
 use super::component::TextResize;
 

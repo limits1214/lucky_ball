@@ -1,10 +1,7 @@
+use super::component::CustomRuleBall;
+use crate::ffi::ffi_fn::{kv_get, kv_set};
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
-use uuid::{uuid, Uuid};
-
-use crate::ffi::ffi_fn::{kv_get, kv_set};
-
-use super::component::CustomRuleBall;
 
 // custom rule setting save
 // numbers save
@@ -83,7 +80,7 @@ pub trait VecBallNumberExt {
 impl VecBallNumberExt for Vec<BallNumber> {
     fn init_items() -> Vec<BallNumber> {
         let get = kv_get("saved_ball_numbers");
-        let mut vec_ballnum = match serde_json::from_str::<Vec<BallNumber>>(&get) {
+        let vec_ballnum = match serde_json::from_str::<Vec<BallNumber>>(&get) {
             Ok(a) => a,
             Err(err) => {
                 error!("BallNumber vec init err: {err:?}");

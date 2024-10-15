@@ -5,7 +5,10 @@ use uuid::Uuid;
 
 use crate::{
     assets::resources::MyAsstes,
-    ffi::ffi_trait::{AppFfi, AppFfiTrait},
+    ffi::{
+        event::AdmobBannerLaunch,
+        ffi_trait::{AppFfi, AppFfiTrait},
+    },
     game::{
         constant::{STEP_BALL_MIXER_ROTATE, STEP_INNER_DRAW_STICK_DOWN, STEP_INNER_DRAW_STICK_UP},
         event::{
@@ -156,9 +159,9 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
             parent.spawn(numbers_btn_text);
         });
 
-        parent.spawn(quit_btn).with_children(|parent| {
-            parent.spawn(quit_btn_text);
-        });
+        // parent.spawn(quit_btn).with_children(|parent| {
+        //     parent.spawn(quit_btn_text);
+        // });
     });
 }
 
@@ -391,6 +394,8 @@ fn spawn_game_menu(
             justify_content: JustifyContent::End,
             align_items: AlignItems::Center,
             flex_direction: FlexDirection::Column,
+            // margin: UiRect::bottom(Val::Percent(40.)),
+            margin: UiRect::bottom(Val::Px(100.)),
             ..default()
         },
         // background_color: BackgroundColor(css::YELLOW.into()),
@@ -540,11 +545,24 @@ fn spawn_numbers_menu(
 ) {
     let (paginated_ball_numbers, total_size) = paginate_with_total(&ball_numbers, 0, 5);
 
+    let root_wrap = NodeBundle {
+        style: Style {
+            width: Val::Percent(100.),
+            height: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            flex_direction: FlexDirection::Column,
+            margin: UiRect::bottom(Val::Px(100.)),
+            ..default()
+        },
+        ..default()
+    };
+
     let wrap = NodeBundle {
         style: Style {
-            width: Val::Percent(90.),
-            height: Val::Percent(90.),
-            justify_content: JustifyContent::Center,
+            width: Val::Percent(80.),
+            height: Val::Percent(70.),
+            justify_content: JustifyContent::Start,
             align_items: AlignItems::Center,
             flex_direction: FlexDirection::Column,
             ..default()
@@ -733,30 +751,32 @@ fn spawn_numbers_menu(
     let mut content_entity = commands.spawn_empty().id();
 
     commands.entity(root_entity).with_children(|parent| {
-        parent.spawn(wrap).with_children(|parent| {
-            parent.spawn(title_wrap).with_children(|parent| {
-                parent.spawn(back_btn).with_children(|parent| {
-                    parent.spawn(back_btn_img);
+        parent.spawn(root_wrap).with_children(|parent| {
+            parent.spawn(wrap).with_children(|parent| {
+                parent.spawn(title_wrap).with_children(|parent| {
+                    parent.spawn(back_btn).with_children(|parent| {
+                        parent.spawn(back_btn_img);
+                    });
+
+                    parent.spawn(title_txt_wrap).with_children(|parent| {
+                        parent.spawn(title);
+                    });
                 });
 
-                parent.spawn(title_txt_wrap).with_children(|parent| {
-                    parent.spawn(title);
-                });
-            });
+                content_entity = parent.spawn(content_wrap).id();
 
-            content_entity = parent.spawn(content_wrap).id();
+                parent.spawn(paging_wrap).with_children(|parent| {
+                    parent.spawn(paging_prev_btn).with_children(|parent| {
+                        parent.spawn(paging_prev_btn_txt);
+                    });
 
-            parent.spawn(paging_wrap).with_children(|parent| {
-                parent.spawn(paging_prev_btn).with_children(|parent| {
-                    parent.spawn(paging_prev_btn_txt);
-                });
+                    parent.spawn(paging_txt_wrap).with_children(|parent| {
+                        parent.spawn(paging_txt);
+                    });
 
-                parent.spawn(paging_txt_wrap).with_children(|parent| {
-                    parent.spawn(paging_txt);
-                });
-
-                parent.spawn(paging_next_btn).with_children(|parent| {
-                    parent.spawn(paging_next_btn_txt);
+                    parent.spawn(paging_next_btn).with_children(|parent| {
+                        parent.spawn(paging_next_btn_txt);
+                    });
                 });
             });
         });
@@ -937,16 +957,29 @@ fn spawn_custom_rule_menu(
     custom_rule: &SavedCustomRule,
     my_assets: Res<MyAsstes>,
 ) {
+    let root_wrap = NodeBundle {
+        style: Style {
+            width: Val::Percent(100.),
+            height: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            flex_direction: FlexDirection::Column,
+            // margin: UiRect::top(Val::Percent(30.)),
+            margin: UiRect::bottom(Val::Px(100.)),
+            ..default()
+        },
+        ..default()
+    };
+
     let wrap = (
         Name::new("wrap"),
         NodeBundle {
             style: Style {
                 width: Val::Percent(80.),
                 height: Val::Percent(80.),
-                justify_content: JustifyContent::Center,
+                justify_content: JustifyContent::Start,
                 align_items: AlignItems::Center,
                 flex_direction: FlexDirection::Column,
-
                 ..default()
             },
             border_radius: BorderRadius::all(Val::Percent(1.)),
@@ -970,7 +1003,7 @@ fn spawn_custom_rule_menu(
     let wrap3 = (NodeBundle {
         style: Style {
             width: Val::Percent(100.),
-            height: Val::Percent(20.),
+            height: Val::Percent(10.),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             flex_direction: FlexDirection::Row,
@@ -1141,105 +1174,107 @@ fn spawn_custom_rule_menu(
         Pickable::IGNORE,
     );
     commands.entity(root_entity).with_children(|parent| {
-        parent.spawn(wrap).with_children(|parent| {
-            parent.spawn(TextBundle::from_section(
-                txt_insert_balls(),
-                TextStyle {
-                    font: my_assets.ttf_nanum_gothic_bold.clone(),
-                    color: css::BLACK.into(),
-                    ..default()
-                },
-            ));
-            parent.spawn(wrap2).with_children(|parent| {
-                let ranges = [(1..=14), (15..=28), (29..=42), (43..=56), (57..=70)];
-                for r in ranges {
-                    parent
-                        .spawn(custom_line_1_wrap.clone())
-                        .with_children(|parent| {
-                            for i in r {
-                                let custom_ball = custom_rule.load[i - 1].clone();
-                                let ox = if custom_ball.1 { "[v]" } else { "[ ]" };
-                                let bg_col = if custom_ball.1 {
-                                    BackgroundColor(css::BLUE.into())
-                                } else {
-                                    BackgroundColor(css::LIGHT_BLUE.into())
-                                };
-                                parent.spawn(circle_1.clone()).with_children(|parent| {
-                                    parent
-                                        .spawn(circle_btn.clone())
-                                        .insert(bg_col)
-                                        .insert(custom_ball)
-                                        .insert(On::<Pointer<Down>>::send_event::<
-                                            CustomRuleBallClick,
-                                        >())
-                                        .with_children(|parent| {
-                                            parent
-                                                .spawn(TextBundle::from_sections([
-                                                    TextSection::new(
-                                                        &i.to_string(),
-                                                        TextStyle {
-                                                            font: my_assets
-                                                                .ttf_nanum_gothic_bold
-                                                                .clone(),
-                                                            font_size: 16.,
-                                                            ..default()
-                                                        },
-                                                    ),
-                                                    TextSection::new(
-                                                        ox,
-                                                        TextStyle {
-                                                            font: my_assets
-                                                                .ttf_nanum_gothic_bold
-                                                                .clone(),
-                                                            font_size: 16.,
-                                                            ..default()
-                                                        },
-                                                    ),
-                                                ]))
-                                                .insert(Pickable::IGNORE);
-                                        });
-                                });
-                            }
-                        });
-                }
-            });
-            parent.spawn(TextBundle::from_section(
-                txt_draw_balls_count(),
-                TextStyle {
-                    font: my_assets.ttf_nanum_gothic_bold.clone(),
-                    color: css::BLACK.into(),
-                    ..default()
-                },
-            ));
-            parent.spawn(wrap3).with_children(|parent| {
-                // <
-                parent
-                    .spawn(left_btn)
-                    .insert(On::<Pointer<Click>>::send_event::<CustomRuleFireCntDownClick>())
-                    .with_children(|parent| {
-                        parent.spawn(left_btn_txt);
-                    });
-                // fire_cnt
-                parent
-                    .spawn(fire_cnt_txt)
-                    .insert(CustomRuleFireCnt(custom_rule.fire));
-                // >
-                parent
-                    .spawn(right_btn)
-                    .insert(On::<Pointer<Click>>::send_event::<CustomRuleFireCntUpClick>())
-                    .with_children(|parent| {
-                        parent.spawn(right_btn_txt);
-                    });
-            });
-
-            parent.spawn(back_run_wrap).with_children(|parent| {
-                // back
-                parent.spawn(back_btn).with_children(|parent| {
-                    parent.spawn(back_btn_img);
+        parent.spawn(root_wrap).with_children(|parent| {
+            parent.spawn(wrap).with_children(|parent| {
+                parent.spawn(TextBundle::from_section(
+                    txt_insert_balls(),
+                    TextStyle {
+                        font: my_assets.ttf_nanum_gothic_bold.clone(),
+                        color: css::BLACK.into(),
+                        ..default()
+                    },
+                ));
+                parent.spawn(wrap2).with_children(|parent| {
+                    let ranges = [(1..=14), (15..=28), (29..=42), (43..=56), (57..=70)];
+                    for r in ranges {
+                        parent
+                            .spawn(custom_line_1_wrap.clone())
+                            .with_children(|parent| {
+                                for i in r {
+                                    let custom_ball = custom_rule.load[i - 1].clone();
+                                    let ox = if custom_ball.1 { "[v]" } else { "[ ]" };
+                                    let bg_col = if custom_ball.1 {
+                                        BackgroundColor(css::BLUE.into())
+                                    } else {
+                                        BackgroundColor(css::LIGHT_BLUE.into())
+                                    };
+                                    parent.spawn(circle_1.clone()).with_children(|parent| {
+                                        parent
+                                            .spawn(circle_btn.clone())
+                                            .insert(bg_col)
+                                            .insert(custom_ball)
+                                            .insert(On::<Pointer<Down>>::send_event::<
+                                                CustomRuleBallClick,
+                                            >())
+                                            .with_children(|parent| {
+                                                parent
+                                                    .spawn(TextBundle::from_sections([
+                                                        TextSection::new(
+                                                            &i.to_string(),
+                                                            TextStyle {
+                                                                font: my_assets
+                                                                    .ttf_nanum_gothic_bold
+                                                                    .clone(),
+                                                                font_size: 16.,
+                                                                ..default()
+                                                            },
+                                                        ),
+                                                        TextSection::new(
+                                                            ox,
+                                                            TextStyle {
+                                                                font: my_assets
+                                                                    .ttf_nanum_gothic_bold
+                                                                    .clone(),
+                                                                font_size: 16.,
+                                                                ..default()
+                                                            },
+                                                        ),
+                                                    ]))
+                                                    .insert(Pickable::IGNORE);
+                                            });
+                                    });
+                                }
+                            });
+                    }
                 });
-                // run
-                parent.spawn(run_btn).with_children(|parent| {
-                    parent.spawn(run_btn_text);
+                parent.spawn(TextBundle::from_section(
+                    txt_draw_balls_count(),
+                    TextStyle {
+                        font: my_assets.ttf_nanum_gothic_bold.clone(),
+                        color: css::BLACK.into(),
+                        ..default()
+                    },
+                ));
+                parent.spawn(wrap3).with_children(|parent| {
+                    // <
+                    parent
+                        .spawn(left_btn)
+                        .insert(On::<Pointer<Click>>::send_event::<CustomRuleFireCntDownClick>())
+                        .with_children(|parent| {
+                            parent.spawn(left_btn_txt);
+                        });
+                    // fire_cnt
+                    parent
+                        .spawn(fire_cnt_txt)
+                        .insert(CustomRuleFireCnt(custom_rule.fire));
+                    // >
+                    parent
+                        .spawn(right_btn)
+                        .insert(On::<Pointer<Click>>::send_event::<CustomRuleFireCntUpClick>())
+                        .with_children(|parent| {
+                            parent.spawn(right_btn_txt);
+                        });
+                });
+
+                parent.spawn(back_run_wrap).with_children(|parent| {
+                    // back
+                    parent.spawn(back_btn).with_children(|parent| {
+                        parent.spawn(back_btn_img);
+                    });
+                    // run
+                    parent.spawn(run_btn).with_children(|parent| {
+                        parent.spawn(run_btn_text);
+                    });
                 });
             });
         });
@@ -1264,6 +1299,8 @@ fn spawn_game_result_menu(
             flex_direction: FlexDirection::Column,
             justify_content: JustifyContent::End,
             align_items: AlignItems::Center,
+            // margin: UiRect::bottom(Val::Percent(40.)),
+            margin: UiRect::bottom(Val::Px(100.)),
             ..default()
         },
         ..default()
@@ -1839,7 +1876,7 @@ pub fn quit_btn_click(
     for _ in er.read() {
         #[cfg(any(target_os = "android", target_os = "ios"))]
         {
-            quit_app();
+            // quit_app();
         }
         #[cfg(not(any(target_os = "android", target_os = "ios")))]
         {
@@ -2089,4 +2126,8 @@ pub fn game_result_menu_save_btn_click(
             commands.entity(entity).insert(Visibility::Hidden);
         }
     }
+}
+
+pub fn admob_banner_show(mut ew: EventWriter<AdmobBannerLaunch>) {
+    ew.send(AdmobBannerLaunch);
 }

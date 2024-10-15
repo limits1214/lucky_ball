@@ -1,15 +1,14 @@
 use crate::ffi::ffi_trait::{
-    AdmobInterstitial, AdmobInterstitialTrait, AppFfi, AppFfiTrait, Kv, KvTrait,
+    AdmobBanner, AdmobBannerTrait, AdmobInterstitial, AdmobInterstitialTrait, AppFfi, AppFfiTrait,
+    Kv, KvTrait,
 };
 
-use bevy::app::App;
 use chrono::Utc;
 use directories::ProjectDirs;
 use std::{
     fs,
     io::{Read, Write},
     path::PathBuf,
-    time::{SystemTime, UNIX_EPOCH},
 };
 
 const QUALIFIER: &str = "qualifier";
@@ -200,5 +199,11 @@ impl AppFfiTrait for AppFfi {
         // 1 * 3600
         9 * 3600
         // 0
+    }
+}
+
+impl AdmobBannerTrait for AdmobBanner {
+    fn banner_launch(#[cfg(target_os = "ios")] rwh: RawWindowHandle) {
+        println!("not imple");
     }
 }

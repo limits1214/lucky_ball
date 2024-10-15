@@ -14,6 +14,8 @@ pub struct GameConfig {
     pub picked_ball: Vec<u8>,
     pub rule_given_ball: Vec<GivenBall>,
     pub rule_taken_ball: u8,
+    pub running_cnt: u32,
+    pub show_ad_weight: u8,
 }
 
 pub fn make_given_ball(ball_num: Vec<u8>) -> Vec<GivenBall> {

@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "xyz.lsy969999.myapplication"
+    namespace = "xyz.lsy969999.luckyball"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "xyz.lsy969999.myapplication"
+        applicationId = "xyz.lsy969999.luckyball"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

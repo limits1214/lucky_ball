@@ -13,6 +13,10 @@ use std::time::Duration;
 
 use crate::{
     assets::resources::MyAsstes,
+    ffi::{
+        ffi_event::{AdFfi, FfiEvents, InterstitailAdEvents},
+        ffi_fn::{admob_interstitial_is_ready, admob_interstitial_load, admob_interstitial_show},
+    },
     game::{
         component::{
             Ball, BallDrawStick, BallDrawStickIn, BallMixer, BallOutletGuideHolderLast,
@@ -75,6 +79,20 @@ pub fn spawn_setup(
         },
         Name::new("PointLight"),
     ));
+
+    // commands.spawn((
+    //     DirectionalLightBundle {
+    //         directional_light: DirectionalLight {
+    //             // shadows_enabled: true, // 필요한 경우 이 줄을 활성화할 수 있습니다.
+    //             illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 2., // intensity와 유사한 개념 (단위: 루멘)
+    //             ..default()
+    //         },
+    //         // DirectionalLight는 위치보다는 방향이 중요하므로, 아래 transform을 통해 방향 설정
+    //         transform: Transform::from_xyz(16.0, 16.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y), // 빛의 방향 설정 (0, 0, 0)을 향하도록
+    //         ..default()
+    //     },
+    //     Name::new("DirectionalLight"),
+    // ));
 
     //////
     if let Some(gltf) = assets_gltf.get(my_assets.luckyball.id()) {
@@ -905,8 +923,65 @@ pub fn er_game_run(
     mut ew: EventWriter<GameStepFinishEvent>,
 ) {
     for _ in er.read() {
-        config.is_running = true;
-        ew.send(GameStepFinishEvent::new(STEP_GAME_RUN_COMMAND));
+        #[cfg(not(any(target_os = "ios", target_os = "android")))]
+        {
+            config.is_running = true;
+            ew.send(GameStepFinishEvent::new(STEP_GAME_RUN_COMMAND));
+            config.running_cnt += 1;
+        }
+        #[cfg(any(target_os = "ios", target_os = "android"))]
+        {
+            admob_interstitial_is_ready();
+        }
+    }
+}
+
+pub fn er_ffi_ad(
+    mut er: EventReader<FfiEvents>,
+    mut config: ResMut<GameConfig>,
+    mut ew: EventWriter<GameStepFinishEvent>,
+) {
+    for evt in er.read() {
+        match evt.clone() {
+            FfiEvents::Ad(AdFfi::AdmobInterstitial(InterstitailAdEvents::ShowFail(msg))) => {
+                config.is_running = true;
+                ew.send(GameStepFinishEvent::new(STEP_GAME_RUN_COMMAND));
+                config.running_cnt += 1;
+            }
+            FfiEvents::Ad(AdFfi::AdmobInterstitial(InterstitailAdEvents::Dismissed)) => {
+                config.is_running = true;
+                ew.send(GameStepFinishEvent::new(STEP_GAME_RUN_COMMAND));
+                config.running_cnt += 1;
+                admob_interstitial_load()
+            }
+            FfiEvents::Ad(AdFfi::AdmobInterstitial(InterstitailAdEvents::IsReady(is_ready))) => {
+                if is_ready {
+                    info!("interstitail is ready");
+                    let mut rng = rand::thread_rng();
+                    let random_value: u8 = rng.gen_range(0..=100);
+                    if random_value <= config.show_ad_weight {
+                        info!("interstitail show");
+                        admob_interstitial_show();
+                        config.show_ad_weight = 0;
+                    } else {
+                        config.is_running = true;
+                        ew.send(GameStepFinishEvent::new(STEP_GAME_RUN_COMMAND));
+                        config.running_cnt += 1;
+                        config.show_ad_weight += 20;
+                        info!(
+                            "interstitail not show add weight {:>}",
+                            config.show_ad_weight
+                        );
+                    }
+                } else {
+                    info!("interstitail is not ready");
+                    config.is_running = true;
+                    ew.send(GameStepFinishEvent::new(STEP_GAME_RUN_COMMAND));
+                    config.running_cnt += 1;
+                }
+            }
+            _ => {}
+        }
     }
 }
 

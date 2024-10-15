@@ -1,3 +1,6 @@
+#[cfg(target_os = "ios")]
+use raw_window_handle::RawWindowHandle;
+
 pub struct Kv;
 pub trait KvTrait {
     fn set(key: &str, value: &str);
@@ -10,8 +13,13 @@ pub struct AdmobInterstitial;
 pub trait AdmobInterstitialTrait {
     fn interstitial_show();
     fn interstitial_load();
-    fn interstitial_is_ready() -> bool;
+    fn interstitial_is_ready();
     fn interstitial_clear();
+}
+
+pub struct AdmobBanner;
+pub trait AdmobBannerTrait {
+    fn banner_launch(#[cfg(target_os = "ios")] rwh: RawWindowHandle);
 }
 
 pub struct AppFfi;

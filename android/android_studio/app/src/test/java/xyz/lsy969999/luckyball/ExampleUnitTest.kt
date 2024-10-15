@@ -1,4 +1,4 @@
-package xyz.lsy969999.myapplication
+package xyz.lsy969999.luckyball
 
 import org.junit.Test
 

@@ -11,9 +11,9 @@ use system::{
     ball_picked_static, ball_release_sensor, draw_inner_stick_down_event,
     draw_inner_stick_up_event, draw_stick_down_event, draw_stick_reset_event,
     draw_stick_rigid_change, draw_stick_up_event, er_ball_catch, er_ball_clear, er_ball_release,
-    er_ball_rigid_change, er_ball_spawn, er_game_reset, er_game_run, er_pool_outlet_cover_close,
-    er_pool_outlet_cover_open, game_run_step_finish, play_ball_sound, pool_ball_cnt_zero_sensor,
-    spawn_setup, tcb_to_step_convert,
+    er_ball_rigid_change, er_ball_spawn, er_ffi_ad, er_game_reset, er_game_run,
+    er_pool_outlet_cover_close, er_pool_outlet_cover_open, game_run_step_finish, play_ball_sound,
+    pool_ball_cnt_zero_sensor, spawn_setup, tcb_to_step_convert,
 };
 
 use crate::app::states::MyStates;
@@ -45,6 +45,8 @@ impl Plugin for GamePlugin {
                 picked_ball: vec![],
                 rule_given_ball: make_given_ball(ball70()),
                 rule_taken_ball: 5,
+                running_cnt: 0,
+                show_ad_weight: 0,
             })
             .add_systems(OnEnter(MyStates::Game), (spawn_setup /*spawn_balls*/,))
             .add_systems(
@@ -76,6 +78,7 @@ impl Plugin for GamePlugin {
                         ball_release_sensor,
                         // play_ball_sound,
                         draw_stick_reset_event,
+                        er_ffi_ad,
                     ),
                 )
                     .run_if(in_state(MyStates::Game)),

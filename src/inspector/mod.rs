@@ -6,7 +6,7 @@ use bevy_inspector_egui::{
 use iyes_perf_ui::{entries::PerfUiBundle, PerfUiPlugin};
 
 use crate::{
-    ffi::ffi_fn::{kv_delete, kv_exists, kv_get, kv_set},
+    ffi::ffi_fn::{admob_interstitial_is_ready, kv_delete, kv_exists, kv_get, kv_set},
     game::{
         constant::{
             STEP_BALL_CATCH, STEP_BALL_MIXER_ROTATE, STEP_BALL_RELEASE, STEP_BALL_RIGID_TO_DYNAMIC,
@@ -158,13 +158,39 @@ fn inspector_ui(world: &mut World) {
 
             #[cfg(any(target_os = "android", target_os = "ios"))]
             {
-                use super::ffi::ffi_fn::{admob_interstitial_load, admob_interstitial_show};
+                use super::ffi::ffi_fn::{
+                    admob_banner_launch, admob_interstitial_is_ready, admob_interstitial_load,
+                    admob_interstitial_show,
+                };
                 if ui.button("admob interstital load").clicked() {
                     admob_interstitial_load();
                 }
 
                 if ui.button("admob interstital show").clicked() {
                     admob_interstitial_show();
+                }
+
+                if ui.button("admob interstital is ready").clicked() {
+                    admob_interstitial_is_ready();
+                }
+
+                if ui.button("admob banner launch").clicked() {
+                    #[cfg(target_os = "ios")]
+                    {
+                        use bevy::winit::WinitWindows;
+                        use raw_window_handle::HasWindowHandle;
+                        let mut q_primary = world.query_filtered::<Entity, With<PrimaryWindow>>();
+                        let windows = world.non_send_resource::<WinitWindows>();
+                        let e = q_primary.single(&world);
+                        let winwrapper = windows.get_window(e).unwrap();
+                        let wh = winwrapper.window_handle().unwrap();
+                        let rwh = wh.as_raw();
+                        admob_banner_launch(rwh);
+                    }
+                    #[cfg(target_os = "android")]
+                    {
+                        admob_banner_launch();
+                    }
                 }
             }
 

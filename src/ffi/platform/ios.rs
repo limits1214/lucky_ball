@@ -1,10 +1,14 @@
 use crate::ffi::{
     ffi_event::{AdFfi, FfiEvents, InterstitailAdEvents, SENDER},
-    ffi_trait::{AdmobInterstitial, AdmobInterstitialTrait, Kv, KvTrait},
+    ffi_trait::{
+        AdmobBanner, AdmobBannerTrait, AdmobInterstitial, AdmobInterstitialTrait, AppFfi,
+        AppFfiTrait, Kv, KvTrait,
+    },
 };
+use raw_window_handle::RawWindowHandle;
 use std::{
-    ffi::{CStr, CString},
-    os::raw::{c_char, c_void},
+    ffi::{c_void, CStr, CString},
+    os::raw::c_char,
 };
 
 extern "C" {
@@ -49,10 +53,9 @@ impl KvTrait for Kv {
 }
 
 extern "C" {
-    fn ffi_ad_init();
     fn ffi_admob_interstitial_load();
     fn ffi_admob_interstitial_show();
-    fn ffi_admob_interstitial_is_ready() -> bool;
+    fn ffi_admob_interstitial_is_ready();
     fn ffi_admob_interstitial_clear();
 }
 
@@ -120,6 +123,16 @@ pub extern "C" fn ffi_callback_admob_interstitial_dismissed() {
         )));
 }
 
+#[no_mangle]
+pub extern "C" fn ffi_callback_admob_interstitial_is_ready(is_ready: bool) {
+    SENDER
+        .get()
+        .unwrap()
+        .send(FfiEvents::Ad(AdFfi::AdmobInterstitial(
+            InterstitailAdEvents::IsReady(is_ready),
+        )));
+}
+
 impl AdmobInterstitialTrait for AdmobInterstitial {
     fn interstitial_show() {
         unsafe {
@@ -133,8 +146,10 @@ impl AdmobInterstitialTrait for AdmobInterstitial {
         };
     }
 
-    fn interstitial_is_ready() -> bool {
-        unsafe { ffi_admob_interstitial_is_ready() }
+    fn interstitial_is_ready() {
+        unsafe {
+            ffi_admob_interstitial_is_ready();
+        };
     }
 
     fn interstitial_clear() {
@@ -144,10 +159,66 @@ impl AdmobInterstitialTrait for AdmobInterstitial {
     }
 }
 
-impl AdmobInterstitial {
-    pub fn ad_init() {
+extern "C" {
+    fn ffi_admob_banner_launch(vc: *mut c_void);
+}
+
+impl AdmobBannerTrait for AdmobBanner {
+    fn banner_launch(rwh: RawWindowHandle) {
+        if let RawWindowHandle::UiKit(uikit) = rwh {
+            let vc = uikit.ui_view_controller.unwrap();
+            unsafe {
+                ffi_admob_banner_launch(vc.as_ptr());
+            }
+        }
+    }
+}
+
+extern "C" {
+    fn ffi_app_init();
+    fn ffi_app_exit();
+    fn ffi_get_current_epoch_time() -> i64;
+    fn ffi_get_locale() -> *const c_char;
+    fn ffi_get_time_offset() -> i32;
+}
+
+#[no_mangle]
+pub extern "C" fn ffi_callback_app_init_end() {
+    SENDER
+        .get()
+        .unwrap()
+        .send(FfiEvents::App(crate::ffi::ffi_event::AppFfi::InitEnd));
+}
+
+impl AppFfiTrait for AppFfi {
+    fn exit() {
         unsafe {
-            ffi_ad_init();
+            ffi_app_exit();
         };
+    }
+
+    fn init() {
+        unsafe {
+            ffi_app_init();
+        };
+    }
+
+    fn get_current_epoch_time() -> i64 {
+        unsafe { ffi_get_current_epoch_time() }
+    }
+
+    fn get_locale() -> String {
+        unsafe {
+            let ptr = ffi_get_locale();
+            let c_str = CStr::from_ptr(ptr);
+            match c_str.to_str() {
+                Ok(val) => String::from(val),
+                Err(_) => String::new(),
+            }
+        }
+    }
+
+    fn get_time_offset() -> i32 {
+        unsafe { ffi_get_time_offset() }
     }
 }

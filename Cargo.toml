@@ -41,9 +41,9 @@ raw-window-handle = "0.6.0"
 winit = { git = "https://github.com/lsy969999/winit.git", branch = "patch-ios-0.30.0" }
 
 [profile.release]
-# lto = "fat"
-# opt-level = 3
+lto = "fat"
+opt-level = 3
 codegen-units = 1
-# incremental = false
-# debug = false
-# panic = "abort"
+incremental = false
+debug = false
+panic = "abort"

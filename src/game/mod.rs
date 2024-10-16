@@ -2,17 +2,16 @@ use avian3d::prelude::AngularVelocity;
 use bevy::prelude::*;
 use bevy_tweening::{component_animator_system, AnimationSystem, Lens};
 use event::{
-    BallClearEvent, BallSpawnEvent, DrawStickResetEvent, GameEndEvent, GameResetEvent,
-    GameRunEvent, GameStepFinishEvent, GameStepStartEvent, PoolBallCntZeroEvent,
+    BallClearEvent, BallSpawnEvent, DrawStickResetEvent, GameEndEvent, GameRunEvent,
+    GameStepFinishEvent, GameStepStartEvent, PoolBallCntZeroEvent,
 };
 use resource::{ball70, make_given_ball, GameConfig};
 use system::{
-    ball_catch, ball_catch_sensor_collding, ball_holder_last_collding, ball_mixer_rotate,
-    ball_picked_static, ball_release_sensor, draw_inner_stick_down_event,
-    draw_inner_stick_up_event, draw_stick_down_event, draw_stick_reset_event,
-    draw_stick_rigid_change, draw_stick_up_event, er_ball_catch, er_ball_clear, er_ball_release,
-    er_ball_rigid_change, er_ball_spawn, er_ffi_ad, er_game_reset, er_game_run,
-    er_pool_outlet_cover_close, er_pool_outlet_cover_open, game_run_step_finish, play_ball_sound,
+    ball_catch, ball_holder_last_collding, ball_mixer_rotate, ball_picked_static,
+    ball_release_sensor, draw_inner_stick_down_event, draw_inner_stick_up_event,
+    draw_stick_down_event, draw_stick_reset_event, draw_stick_rigid_change, draw_stick_up_event,
+    er_ball_catch, er_ball_clear, er_ball_release, er_ball_rigid_change, er_ball_spawn, er_ffi_ad,
+    er_game_run, er_pool_outlet_cover_close, er_pool_outlet_cover_open, game_run_step_finish,
     pool_ball_cnt_zero_sensor, spawn_setup, tcb_to_step_convert,
 };
 
@@ -30,7 +29,6 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<GameRunEvent>()
             .add_event::<GameEndEvent>()
-            .add_event::<GameResetEvent>()
             .add_event::<GameStepStartEvent>()
             .add_event::<GameStepFinishEvent>()
             .add_event::<PoolBallCntZeroEvent>()
@@ -53,7 +51,7 @@ impl Plugin for GamePlugin {
                 Update,
                 (
                     ball_mixer_rotate,
-                    ball_catch_sensor_collding,
+                    // ball_catch_sensor_collding,
                     er_ball_rigid_change,
                     draw_stick_down_event,
                     draw_stick_up_event,
@@ -69,7 +67,7 @@ impl Plugin for GamePlugin {
                     er_pool_outlet_cover_close,
                     (
                         er_game_run,
-                        er_game_reset,
+                        // er_game_reset,
                         game_run_step_finish,
                         pool_ball_cnt_zero_sensor,
                         tcb_to_step_convert,

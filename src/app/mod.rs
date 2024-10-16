@@ -1,4 +1,4 @@
-use crate::{assets::AssetsPlugin, ffi::FfiPlugin, game::GamePlugin, ui::MyUiPlugin};
+use crate::{asset::AssetsPlugin, ffi::FfiPlugin, game::GamePlugin, ui::MyUiPlugin};
 use avian3d::prelude::*;
 use bevy::prelude::*;
 use bevy_kira_audio::AudioPlugin;
@@ -19,7 +19,10 @@ impl Plugin for AppPlugin {
             .add_plugins(AudioPlugin)
             .add_plugins(TweeningPlugin)
             .add_plugins(DefaultPickingPlugins)
-            .add_plugins(PhysicsPlugins::default());
+            .add_plugins(PhysicsPlugins::default())
+            .insert_resource(Time::new_with(Physics::fixed_hz(30.0)))
+            // .insert_resource(SubstepCount(1))
+            ;
 
         app.add_plugins(AssetsPlugin)
             .add_plugins(GamePlugin)

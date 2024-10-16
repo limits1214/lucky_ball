@@ -11,6 +11,7 @@
 		2604C99FAB5A8322EDCABB9F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE71FBCAA714DB4F42459106 /* UIKit.framework */; };
 		3D402A9C2CB6C55400C40B08 /* lucky_ball.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D402A9B2CB6C55400C40B08 /* lucky_ball.swift */; };
 		3D402A9F2CB70E5200C40B08 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 3D402A9E2CB70E5200C40B08 /* GoogleMobileAds */; };
+		3D402AA12CBF29FE00C40B08 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D402AA02CBF29FE00C40B08 /* Assets.xcassets */; };
 		442540D056ADB9AE61A0A590 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F1B41978FA53999AA836D0F /* Security.framework */; };
 		55892F1396056740E1AF9685 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AF7DE91055EBD05ED77E57F9 /* main.m */; };
 		55B7188F81C3C4183F81D3AE /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A39528EB2CCB182F5328223A /* libc++.tbd */; };
@@ -32,6 +33,7 @@
 		160DB77300A3F1806F024D47 /* bindings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bindings.h; sourceTree = "<group>"; };
 		3D402A9A2CB6C55400C40B08 /* lucky ball-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "lucky ball-Bridging-Header.h"; sourceTree = "<group>"; };
 		3D402A9B2CB6C55400C40B08 /* lucky_ball.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lucky_ball.swift; sourceTree = "<group>"; };
+		3D402AA02CBF29FE00C40B08 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		55EAC02897847195D2F44C15 /* lucky ball.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "lucky ball.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		57CD6305253C7A940098CD4A /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		57CD630A253C7F5F0098CD4A /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../../../assets; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 				4F1D6F28B8A5D1927AB0ADED /* ios-src */,
 				EB028409C2D0655412DA6E44 /* Frameworks */,
 				321F7D6A765B38E746C35105 /* Products */,
+				3D402AA02CBF29FE00C40B08 /* Assets.xcassets */,
 			);
 			sourceTree = "<group>";
 		};
@@ -179,6 +182,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D402AA12CBF29FE00C40B08 /* Assets.xcassets in Resources */,
 				57CD630E253C80EC0098CD4A /* assets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -290,6 +294,7 @@
 					"ios-src/",
 				);
 				INFOPLIST_FILE = "ios-src/Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -312,7 +317,7 @@
 					"-lios",
 					"-lc++abi",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.bevyengine.example;
+				PRODUCT_BUNDLE_IDENTIFIER = xyz.lsy969999.luckyball;
 				PRODUCT_NAME = "lucky ball";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
@@ -407,6 +412,7 @@
 					"ios-src/",
 				);
 				INFOPLIST_FILE = "ios-src/Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -429,7 +435,7 @@
 					"-lios",
 					"-lc++abi",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.bevyengine.example;
+				PRODUCT_BUNDLE_IDENTIFIER = xyz.lsy969999.luckyball;
 				PRODUCT_NAME = "lucky ball";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;

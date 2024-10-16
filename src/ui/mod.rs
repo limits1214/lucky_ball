@@ -10,7 +10,7 @@ use event::{
 };
 use resource::UiConfig;
 use system::{
-    admob_banner_show, back_to_game_rule_select_btn_click, back_to_main_menu_btn_click,
+    admob_banner_show, app_init, back_to_game_rule_select_btn_click, back_to_main_menu_btn_click,
     button_indian_red_interaction, button_interaction, custom_game_rule_btn_click,
     custom_rule_ball_click, custom_rule_fire_down_click, custom_rule_fire_up_click,
     custom_rule_run_btn_click, er_game_end, game_menu_shuffle_btn_click,
@@ -18,7 +18,7 @@ use system::{
     game_rule_select_button_click, game_run_btn_click, loaded_26_fire_1_btn_click,
     loaded_45_fire_6_btn_click, loaded_69_fire_5_btn_click, numbers_btn_click,
     numbers_item_delete_btn_click, numbers_paging_next_click, numbers_paging_prev_click,
-    quit_btn_click, resize_text_based_on_window, setup_main_ui,
+    quit_btn_click, setup_main_ui,
 };
 
 use crate::app::states::MyStates;
@@ -55,7 +55,7 @@ impl Plugin for MyUiPlugin {
             .add_event::<GameMenuShuffleBtnClick>()
             .add_event::<GameResultRetryBtnClick>()
             .add_event::<GameResultSaveBtnClick>()
-            .add_systems(OnEnter(MyStates::Game), (setup_main_ui, admob_banner_show))
+            .add_systems(OnEnter(MyStates::Game), (setup_main_ui, app_init))
             .add_systems(
                 Update,
                 (
@@ -68,7 +68,7 @@ impl Plugin for MyUiPlugin {
                     loaded_45_fire_6_btn_click,
                     custom_game_rule_btn_click,
                     game_run_btn_click,
-                    resize_text_based_on_window,
+                    // resize_text_based_on_window,
                     custom_rule_run_btn_click,
                     custom_rule_ball_click,
                     custom_rule_fire_down_click,
@@ -81,7 +81,7 @@ impl Plugin for MyUiPlugin {
                     (
                         game_menu_shuffle_btn_click,
                         er_game_end,
-                        game_result_menu_retry_btn_click,
+                        // game_result_menu_retry_btn_click,
                         game_result_menu_save_btn_click,
                         button_indian_red_interaction,
                     ),

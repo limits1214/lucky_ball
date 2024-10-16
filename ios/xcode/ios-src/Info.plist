@@ -20,6 +20,8 @@
 	<string>1</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-9994223855742968~7502632870</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Your consent is needed to provide better personalized ads.</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>

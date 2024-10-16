@@ -42,7 +42,7 @@ pub fn txt_ok() -> String {
 pub fn txt_insert_balls() -> String {
     match LOCALE.get().unwrap().as_str() {
         KO_KR | EN_KR => "공 넣기",
-        _ => "insert_balls",
+        _ => "insert balls",
     }
     .to_string()
 }

@@ -4,18 +4,15 @@ use bevy::{
     math::vec3,
     prelude::*,
 };
-use bevy_kira_audio::AudioControl;
-use bevy_tweening::{
-    lens::TransformPositionLens, Animator, Delay, EaseFunction, Tween, TweenCompleted,
-};
+use bevy_tweening::{lens::TransformPositionLens, Animator, EaseFunction, Tween, TweenCompleted};
 use rand::Rng;
 use std::time::Duration;
 
 use crate::{
-    assets::resources::MyAsstes,
+    asset::resources::MyAsstes,
     ffi::{
         ffi_event::{AdFfi, FfiEvents, InterstitailAdEvents},
-        ffi_fn::{admob_interstitial_is_ready, admob_interstitial_load, admob_interstitial_show},
+        ffi_fn::{admob_interstitial_load, admob_interstitial_show},
     },
     game::{
         component::{
@@ -32,10 +29,10 @@ use super::{
         BallCatchSensor, BallReleaseSensor, Catched, Picked, PickedStatic, PoolBallCntSensor,
     },
     constant::{
-        BALL_REFS, STEP_BALL_CATCH, STEP_BALL_MIXER_ROTATE, STEP_BALL_MIXER_ROTATE_END,
-        STEP_BALL_RELEASE, STEP_BALL_RELEASE_DONE, STEP_BALL_RIGID_TO_DYNAMIC,
-        STEP_BALL_RIGID_TO_STATIC, STEP_BALL_STICK_RIGID_TO_EMPTY, STEP_BALL_STICK_RIGID_TO_STATIC,
-        STEP_DRAW_STICK_DOWN, STEP_DRAW_STICK_DOWN_END, STEP_DRAW_STICK_UP, STEP_DRAW_STICK_UP_END,
+        STEP_BALL_CATCH, STEP_BALL_MIXER_ROTATE, STEP_BALL_MIXER_ROTATE_END, STEP_BALL_RELEASE,
+        STEP_BALL_RELEASE_DONE, STEP_BALL_RIGID_TO_DYNAMIC, STEP_BALL_RIGID_TO_STATIC,
+        STEP_BALL_STICK_RIGID_TO_EMPTY, STEP_BALL_STICK_RIGID_TO_STATIC, STEP_DRAW_STICK_DOWN,
+        STEP_DRAW_STICK_DOWN_END, STEP_DRAW_STICK_UP, STEP_DRAW_STICK_UP_END,
         STEP_GAME_RUN_COMMAND, STEP_INNER_DRAW_STICK_DOWN, STEP_INNER_DRAW_STICK_UP,
         STEP_INNER_DRAW_STICK_UP_END, STEP_POOL_BALL_ZERO, STEP_POOL_OUTLET_CLOSE_END,
         STEP_POOL_OUTLET_CLOSE_START, STEP_POOL_OUTLET_OPEN_END, STEP_POOL_OUTLET_OPEN_START,
@@ -44,20 +41,20 @@ use super::{
         TWEEN_POOL_OUTLET_CLOSE_END, TWEEN_POOL_OUTLET_OPEN_END,
     },
     event::{
-        BallClearEvent, BallSpawnEvent, DrawStickResetEvent, GameEndEvent, GameResetEvent,
-        GameRunEvent, GameStepData, GameStepFinishEvent, GameStepStartEvent,
+        BallClearEvent, BallSpawnEvent, DrawStickResetEvent, GameEndEvent, GameRunEvent,
+        GameStepData, GameStepFinishEvent, GameStepStartEvent,
     },
     resource::GameConfig,
     MyAngularVelocityYLens,
 };
 
-pub fn spawn_balls(mut ew: EventWriter<BallSpawnEvent>) {
-    ew.send(BallSpawnEvent(false));
-}
+// pub fn spawn_balls(mut ew: EventWriter<BallSpawnEvent>) {
+//     ew.send(BallSpawnEvent(false));
+// }
 
 pub fn spawn_setup(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
+    meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     //
     my_assets: Res<MyAsstes>,
@@ -65,34 +62,34 @@ pub fn spawn_setup(
     assets_node: Res<Assets<GltfNode>>,
     assets_gltfmesh: Res<Assets<GltfMesh>>,
 ) {
-    commands.spawn((
-        PointLightBundle {
-            point_light: PointLight {
-                // shadows_enabled: true,
-                intensity: 10_000_000.,
-                range: 100.0,
-                // shadow_depth_bias: 0.2,
-                ..default()
-            },
-            transform: Transform::from_xyz(0.0, 16.0, 0.0),
-            ..default()
-        },
-        Name::new("PointLight"),
-    ));
-
     // commands.spawn((
-    //     DirectionalLightBundle {
-    //         directional_light: DirectionalLight {
-    //             // shadows_enabled: true, // 필요한 경우 이 줄을 활성화할 수 있습니다.
-    //             illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 2., // intensity와 유사한 개념 (단위: 루멘)
+    //     PointLightBundle {
+    //         point_light: PointLight {
+    //             // shadows_enabled: true,
+    //             intensity: 10_000_000.,
+    //             range: 100.0,
+    //             // shadow_depth_bias: 0.2,
     //             ..default()
     //         },
-    //         // DirectionalLight는 위치보다는 방향이 중요하므로, 아래 transform을 통해 방향 설정
-    //         transform: Transform::from_xyz(16.0, 16.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y), // 빛의 방향 설정 (0, 0, 0)을 향하도록
+    //         transform: Transform::from_xyz(0.0, 16.0, 0.0),
     //         ..default()
     //     },
-    //     Name::new("DirectionalLight"),
+    //     Name::new("PointLight"),
     // ));
+
+    commands.spawn((
+        DirectionalLightBundle {
+            directional_light: DirectionalLight {
+                // shadows_enabled: true, // 필요한 경우 이 줄을 활성화할 수 있습니다.
+                illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 2., // intensity와 유사한 개념 (단위: 루멘)
+                ..default()
+            },
+            // DirectionalLight는 위치보다는 방향이 중요하므로, 아래 transform을 통해 방향 설정
+            transform: Transform::from_xyz(16.0, 16.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y), // 빛의 방향 설정 (0, 0, 0)을 향하도록
+            ..default()
+        },
+        Name::new("DirectionalLight"),
+    ));
 
     //////
     if let Some(gltf) = assets_gltf.get(my_assets.luckyball.id()) {
@@ -341,14 +338,14 @@ pub fn spawn_setup(
 pub fn er_ball_spawn(
     mut er: EventReader<BallSpawnEvent>,
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
+    // mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     //
     my_assets: Res<MyAsstes>,
     assets_gltf: Res<Assets<Gltf>>,
     assets_node: Res<Assets<GltfNode>>,
     assets_gltfmesh: Res<Assets<GltfMesh>>,
-    mut config: ResMut<GameConfig>,
+    config: Res<GameConfig>,
     q_ball: Query<Entity, With<Ball>>,
 ) {
     for BallSpawnEvent(is_shuffle) in er.read() {
@@ -386,7 +383,7 @@ pub fn er_ball_spawn(
                     let mesh_handle = b.primitives[0].mesh.clone();
                     let transform = *transform;
                     let node_name = node_name.as_ref();
-                    if node_name.contains("BallTmp") {
+                    if node_name.contains("Ball__") {
                         transforms.push(transform);
                     }
                     for GivenBall(num, name) in &config.rule_given_ball {
@@ -437,6 +434,7 @@ pub fn er_ball_spawn(
                     .insert(Restitution::new(0.9))
                     .insert(Collider::sphere(1.))
                     .insert(Ball(number))
+                    .insert(SpeculativeMargin(4.0))
                     .insert(Name::new(node_name));
             }
         }
@@ -629,19 +627,19 @@ pub fn draw_stick_reset_event(
     }
 }
 
-pub fn ball_catch_sensor_collding(
-    q_sensor: Query<(Entity, &CollidingEntities), With<BallCatchSensor>>,
-    q_ball: Query<&Ball>,
-) {
-    for (_entity, colliding_entities) in &q_sensor {
-        for entity in colliding_entities.iter() {
-            // info!("colliding_entities {entity:?}");
-            if let Ok(ball) = q_ball.get(*entity) {
-                // info!("colliding ball {:?}", ball.0);
-            }
-        }
-    }
-}
+// pub fn ball_catch_sensor_collding(
+//     q_sensor: Query<(Entity, &CollidingEntities), With<BallCatchSensor>>,
+//     q_ball: Query<&Ball>,
+// ) {
+//     for (_entity, colliding_entities) in &q_sensor {
+//         for entity in colliding_entities.iter() {
+//             // info!("colliding_entities {entity:?}");
+//             if let Ok(ball) = q_ball.get(*entity) {
+//                 // info!("colliding ball {:?}", ball.0);
+//             }
+//         }
+//     }
+// }
 
 pub fn ball_holder_last_collding(
     mut commands: Commands,
@@ -687,18 +685,20 @@ pub fn pool_ball_cnt_zero_sensor(
     q_ball: Query<&Ball>,
     mut ew: EventWriter<GameStepFinishEvent>,
 ) {
-    if config.is_pool_ball_cnt_sensor {
-        for (_entity, colliding_entitiles) in &q_sensor {
-            let mut ball_cnt = 0;
-            for entity in colliding_entitiles.iter() {
-                if let Ok(_) = q_ball.get(*entity) {
-                    ball_cnt += 1;
+    if config.is_running {
+        if config.is_pool_ball_cnt_sensor {
+            for (_entity, colliding_entitiles) in &q_sensor {
+                let mut ball_cnt = 0;
+                for entity in colliding_entitiles.iter() {
+                    if let Ok(_) = q_ball.get(*entity) {
+                        ball_cnt += 1;
+                    }
                 }
-            }
 
-            if ball_cnt == 0 {
-                config.is_pool_ball_cnt_sensor = false;
-                ew.send(GameStepFinishEvent::new(STEP_POOL_BALL_ZERO));
+                if ball_cnt == 0 {
+                    config.is_pool_ball_cnt_sensor = false;
+                    ew.send(GameStepFinishEvent::new(STEP_POOL_BALL_ZERO));
+                }
             }
         }
     }
@@ -710,19 +710,21 @@ pub fn ball_release_sensor(
     q_ball: Query<&Ball>,
     mut ew: EventWriter<GameStepFinishEvent>,
 ) {
-    if config.is_ball_release_sensor {
-        for (_entity, colliding_entitiles) in &q_sensor {
-            let mut is_ball_released = true;
+    if config.is_running {
+        if config.is_ball_release_sensor {
+            for (_entity, colliding_entitiles) in &q_sensor {
+                let mut is_ball_released = true;
 
-            for entity in colliding_entitiles.iter() {
-                if let Ok(_) = q_ball.get(*entity) {
-                    is_ball_released = false;
+                for entity in colliding_entitiles.iter() {
+                    if let Ok(_) = q_ball.get(*entity) {
+                        is_ball_released = false;
+                    }
                 }
-            }
 
-            if is_ball_released {
-                config.is_ball_release_sensor = false;
-                ew.send(GameStepFinishEvent::new(STEP_BALL_RELEASE_DONE));
+                if is_ball_released {
+                    config.is_ball_release_sensor = false;
+                    ew.send(GameStepFinishEvent::new(STEP_BALL_RELEASE_DONE));
+                }
             }
         }
     }
@@ -742,28 +744,31 @@ pub fn ball_catch(
     q_sensor: Query<(Entity, &CollidingEntities), With<BallCatchSensor>>,
     q_ball: Query<(Entity, &Transform, &Ball), With<Ball>>,
 ) {
-    if config.is_catching {
-        for (_entity, colliding_entities) in &q_sensor {
-            for entity in colliding_entities.iter() {
-                if let Ok((entity, transform, ball)) = q_ball.get(*entity) {
-                    config.is_catching = false;
-                    let tween = Tween::new(
-                        EaseFunction::QuadraticInOut,
-                        Duration::from_millis(100),
-                        TransformPositionLens {
-                            start: transform.translation,
-                            end: vec3(0., -0.9, 0.),
-                        },
-                    )
-                    .with_completed_event(TWEEN_BALL_CATCH_END);
-                    commands
-                        .entity(entity)
-                        .insert(RigidBody::Static)
-                        .insert(Catched)
-                        .insert(Picked)
-                        .insert(Animator::new(tween));
-                    info!("catched!! {:?}", ball.0);
-                    config.picked_ball.push(ball.0);
+    if config.is_running {
+        if config.is_catching {
+            for (_entity, colliding_entities) in &q_sensor {
+                for entity in colliding_entities.iter() {
+                    if let Ok((entity, transform, ball)) = q_ball.get(*entity) {
+                        config.is_catching = false;
+                        let tween = Tween::new(
+                            EaseFunction::QuadraticInOut,
+                            Duration::from_millis(100),
+                            TransformPositionLens {
+                                start: transform.translation,
+                                end: vec3(0., -0.9, 0.),
+                            },
+                        )
+                        .with_completed_event(TWEEN_BALL_CATCH_END);
+                        commands
+                            .entity(entity)
+                            .insert(RigidBody::Static)
+                            .insert(Catched)
+                            .insert(Picked)
+                            .insert(Animator::new(tween));
+                        info!("catched!! {:?}", ball.0);
+                        config.picked_ball.push(ball.0);
+                        return;
+                    }
                 }
             }
         }
@@ -931,6 +936,7 @@ pub fn er_game_run(
         }
         #[cfg(any(target_os = "ios", target_os = "android"))]
         {
+            use crate::ffi::ffi_fn::admob_interstitial_is_ready;
             admob_interstitial_is_ready();
         }
     }
@@ -975,6 +981,7 @@ pub fn er_ffi_ad(
                     }
                 } else {
                     info!("interstitail is not ready");
+                    admob_interstitial_load();
                     config.is_running = true;
                     ew.send(GameStepFinishEvent::new(STEP_GAME_RUN_COMMAND));
                     config.running_cnt += 1;
@@ -991,11 +998,11 @@ pub fn er_ffi_ad(
 //     }
 // }
 
-pub fn er_game_reset(mut er: EventReader<GameResetEvent>) {
-    for _ in er.read() {
-        //
-    }
-}
+// pub fn er_game_reset(mut er: EventReader<GameResetEvent>) {
+//     for _ in er.read() {
+//         //
+//     }
+// }
 
 /// 1. open pooloutlet
 /// 2. ball rigid to dynamic
@@ -1028,7 +1035,7 @@ pub fn game_run_step_finish(
                 STEP_POOL_OUTLET_CLOSE_END => {
                     ew_step_start.send(GameStepStartEvent::new_with_data(
                         STEP_BALL_MIXER_ROTATE,
-                        GameStepData::Float(15.),
+                        GameStepData::Float(11.),
                     ));
                     ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
                 }
@@ -1066,7 +1073,7 @@ pub fn game_run_step_finish(
                         ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
                         ew_step_start.send(GameStepStartEvent::new_with_data(
                             STEP_BALL_MIXER_ROTATE,
-                            GameStepData::Float(15.),
+                            GameStepData::Float(11.),
                         ));
                     } else {
                         // END
@@ -1092,7 +1099,7 @@ pub fn tcb_to_step_convert(
     mut er: EventReader<TweenCompleted>,
     mut ew: EventWriter<GameStepFinishEvent>,
 ) {
-    for TweenCompleted { user_data, entity } in er.read() {
+    for TweenCompleted { user_data, .. } in er.read() {
         // info!("entity {entity:?}");
         match *user_data {
             TWEEN_DRAW_STICK_UP_END => {
@@ -1124,35 +1131,35 @@ pub fn tcb_to_step_convert(
     }
 }
 
-pub fn play_ball_sound(
-    mut collision_event_reader: EventReader<CollisionStarted>,
-    q_ball_collidings: Query<(Entity, &CollidingEntities), With<Ball>>,
-    q_ball: Query<&Ball>,
-    my_assets: Res<MyAsstes>,
-    audio: Res<bevy_kira_audio::Audio>,
-) {
-    for CollisionStarted(entity1, entity2) in collision_event_reader.read() {
-        // println!(
-        //     "Entities {:?} and {:?} are colliding",
-        //     contacts.entity1, contacts.entity2,
-        // );
-        let mut is_ball1 = false;
-        let mut is_ball2 = false;
-        if let Ok(_) = q_ball.get(*entity1) {
-            is_ball1 = true;
-        }
-        if let Ok(_) = q_ball.get(*entity2) {
-            is_ball2 = true;
-        }
+// pub fn play_ball_sound(
+//     mut collision_event_reader: EventReader<CollisionStarted>,
+//     q_ball_collidings: Query<(Entity, &CollidingEntities), With<Ball>>,
+//     q_ball: Query<&Ball>,
+//     my_assets: Res<MyAsstes>,
+//     audio: Res<bevy_kira_audio::Audio>,
+// ) {
+//     for CollisionStarted(entity1, entity2) in collision_event_reader.read() {
+//         // println!(
+//         //     "Entities {:?} and {:?} are colliding",
+//         //     contacts.entity1, contacts.entity2,
+//         // );
+//         let mut is_ball1 = false;
+//         let mut is_ball2 = false;
+//         if let Ok(_) = q_ball.get(*entity1) {
+//             is_ball1 = true;
+//         }
+//         if let Ok(_) = q_ball.get(*entity2) {
+//             is_ball2 = true;
+//         }
 
-        if is_ball1 && is_ball2 {
-            // info!("ball colliding");
-            // audio.play(my_assets.mp3_ballsound.clone());
-        }
-    }
-    // for (e, c) in &q_ball_collidings {
-    //     for e in c.iter() {}
-    //     //
-    // }
-    // audio.play(my_assets.mp3_ballsound.clone());
-}
+//         if is_ball1 && is_ball2 {
+//             // info!("ball colliding");
+//             // audio.play(my_assets.mp3_ballsound.clone());
+//         }
+//     }
+//     // for (e, c) in &q_ball_collidings {
+//     //     for e in c.iter() {}
+//     //     //
+//     // }
+//     // audio.play(my_assets.mp3_ballsound.clone());
+// }

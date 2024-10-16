@@ -4,9 +4,9 @@ use bevy_mod_picking::prelude::*;
 use uuid::Uuid;
 
 use crate::{
-    assets::resources::MyAsstes,
+    asset::resources::MyAsstes,
     ffi::{
-        event::AdmobBannerLaunch,
+        event::{AdmobBannerLaunch, AppInitStartEvent},
         ffi_trait::{AppFfi, AppFfiTrait},
     },
     game::{
@@ -418,6 +418,7 @@ fn spawn_game_menu(
         game_type,
         TextStyle {
             font: my_assets.ttf_nanum_gothic_bold.clone(),
+            color: css::BLACK.into(),
             ..default()
         },
     );
@@ -1321,6 +1322,7 @@ fn spawn_game_result_menu(
         TextStyle {
             font: my_assets.ttf_nanum_gothic_bold.clone(),
             font_size: 20.,
+            color: css::BLACK.into(),
             ..default()
         },
     );
@@ -1657,9 +1659,14 @@ pub fn back_to_game_rule_select_btn_click(
             for &entity in children.iter() {
                 commands.entity(entity).despawn_recursive();
             }
+
+            config.is_running = false;
             config.rule_given_ball = make_given_ball(ball70());
             config.rule_taken_ball = 5;
             config.picked_ball = vec![];
+            config.is_ball_release_sensor = false;
+            config.is_pool_ball_cnt_sensor = false;
+            config.is_catching = false;
             ew.send(BallClearEvent);
 
             let load = ui_config
@@ -1671,12 +1678,6 @@ pub fn back_to_game_rule_select_btn_click(
             let fire = ui_config.saved_custom_rule.fire;
             let custom_type = format!("{fire}/{load}");
 
-            //
-            config.is_running = false;
-            // config.is_ball_release_sensor = false;
-            // config.is_pool_ball_cnt_sensor = false;
-            // config.is_catching = false;
-            // config.picked_ball = vec![];
             ew_draw_stick_reset.send(DrawStickResetEvent);
             ew_step_start.send(GameStepStartEvent::new_with_data(
                 STEP_BALL_MIXER_ROTATE,
@@ -1705,19 +1706,19 @@ pub fn game_run_btn_click(
     }
 }
 
-pub fn resize_text_based_on_window(
-    // mut query: Query<&mut Text, With<TextResize>>,
-    mut resize_reader: EventReader<WindowResized>,
-) {
-    for _ in resize_reader.read() {
-        // return;
-        // for mut t in &mut query {
-        //     for t2 in t.sections.iter_mut() {
-        //         t2.style.font_size = e.width * 0.03;
-        //     }
-        // }
-    }
-}
+// pub fn resize_text_based_on_window(
+//     // mut query: Query<&mut Text, With<TextResize>>,
+//     mut resize_reader: EventReader<WindowResized>,
+// ) {
+//     for _ in resize_reader.read() {
+//         // return;
+//         // for mut t in &mut query {
+//         //     for t2 in t.sections.iter_mut() {
+//         //         t2.style.font_size = e.width * 0.03;
+//         //     }
+//         // }
+//     }
+// }
 
 pub fn custom_rule_run_btn_click(
     mut commands: Commands,
@@ -2062,7 +2063,7 @@ pub fn er_game_end(
     mut commands: Commands,
     mut er: EventReader<GameEndEvent>,
     q_root_node: Query<(Entity, &Children), With<RootNode>>,
-    mut config: ResMut<GameConfig>,
+    config: Res<GameConfig>,
     my_assets: Res<MyAsstes>,
     // mut ew_step_start: EventWriter<GameStepStartEvent>,
 ) {
@@ -2128,6 +2129,11 @@ pub fn game_result_menu_save_btn_click(
     }
 }
 
+/// Main State 진입시 배너 광고 오픈
 pub fn admob_banner_show(mut ew: EventWriter<AdmobBannerLaunch>) {
     ew.send(AdmobBannerLaunch);
+}
+
+pub fn app_init(mut ew: EventWriter<AppInitStartEvent>) {
+    ew.send(AppInitStartEvent);
 }

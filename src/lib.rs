@@ -1,5 +1,5 @@
 mod app;
-mod assets;
+mod asset;
 mod ffi;
 mod game;
 #[cfg(feature = "inspector")]

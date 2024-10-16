@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AppTrackingTransparency
 @preconcurrency import GoogleMobileAds
 
 @MainActor
@@ -216,8 +217,17 @@ func ffi_kv_exists(key: UnsafePointer<CChar>) -> Bool {
 
 @_cdecl("ffi_app_init")
 public func ffi_app_init() {
-    GADMobileAds.sharedInstance().start() { _ in
-        ffi_callback_app_init_end();
+    if #available(iOS 14, *) {
+        ATTrackingManager.requestTrackingAuthorization(completionHandler: {status in
+            GADMobileAds.sharedInstance().start() { _ in
+                ffi_callback_app_init_end();
+            }
+        })
+    } else {
+        // Fallback on earlier versions
+        GADMobileAds.sharedInstance().start() { _ in
+            ffi_callback_app_init_end();
+        }
     }
 }
 
@@ -247,3 +257,8 @@ public func ffi_get_time_offset() ->  Int {
 //    let hoursFromGMT = secondsFromGMT / 3600
     return secondsFromGMT
 }
+
+//@_cdecl("ffi_request_idfa")
+//public func ffi_request_att()  {
+//    
+//}

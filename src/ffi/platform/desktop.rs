@@ -168,9 +168,8 @@ impl AdmobInterstitialTrait for AdmobInterstitial {
         println!("not imple");
     }
 
-    fn interstitial_is_ready() -> bool {
+    fn interstitial_is_ready() {
         println!("not imple");
-        false
     }
 
     fn interstitial_clear() {

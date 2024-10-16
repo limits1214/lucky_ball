@@ -278,7 +278,7 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        // .insert(RigidBody::Static)
+                        .insert(RigidBody::Static)
                         // .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         // .insert(BallOutletGuideHolderLast)
                         .insert(PoolOutletCover)
@@ -434,7 +434,7 @@ pub fn er_ball_spawn(
                     .insert(Restitution::new(0.9))
                     .insert(Collider::sphere(1.))
                     .insert(Ball(number))
-                    .insert(SpeculativeMargin(5.0))
+                    // .insert(SpeculativeMargin(5.0))
                     .insert(Name::new(node_name));
             }
         }
@@ -462,27 +462,28 @@ pub fn draw_stick_up_event(
 ) {
     for GameStepStartEvent { event_id, .. } in er.read() {
         if *event_id == STEP_DRAW_STICK_UP {
-            let tween = Tween::new(
-                EaseFunction::QuarticInOut,
-                Duration::from_secs(2),
-                TransformPositionLens {
-                    start: vec3(0., -1.85, 0.),
-                    end: vec3(0., 0.001, 0.),
-                },
-            )
-            .with_completed_event(TWEEN_DRAW_STICK_UP_END);
             if let Ok(entity) = q_stick.get_single() {
+                let tween = Tween::new(
+                    EaseFunction::QuarticInOut,
+                    Duration::from_secs(2),
+                    TransformPositionLens {
+                        start: vec3(0., -2., 0.),
+                        end: vec3(0., 0.001, 0.),
+                    },
+                )
+                .with_completed_event(TWEEN_DRAW_STICK_UP_END);
                 commands.entity(entity).insert(Animator::new(tween));
             }
-            let tween = Tween::new(
-                EaseFunction::QuarticInOut,
-                Duration::from_secs(2),
-                TransformPositionLens {
-                    start: vec3(0., -1.85 + 0.65, 0.),
-                    end: vec3(0., 0.65, 0.),
-                },
-            );
+
             if let Ok(entity) = q_stick_in.get_single() {
+                let tween = Tween::new(
+                    EaseFunction::QuarticInOut,
+                    Duration::from_secs(2),
+                    TransformPositionLens {
+                        start: vec3(0., /*-1.85 + 0.65 */ -1.24, 0.),
+                        end: vec3(0., 0.65, 0.),
+                    },
+                );
                 commands.entity(entity).insert(Animator::new(tween));
             }
             if let Ok((entity, transform)) = q_catched_ball.get_single() {
@@ -508,27 +509,28 @@ pub fn draw_stick_down_event(
 ) {
     for GameStepStartEvent { event_id, .. } in er.read() {
         if *event_id == STEP_DRAW_STICK_DOWN {
-            let tween = Tween::new(
-                EaseFunction::QuarticInOut,
-                Duration::from_secs(2),
-                TransformPositionLens {
-                    start: vec3(0., 0.001, 0.),
-                    end: vec3(0., -1.85, 0.),
-                },
-            )
-            .with_completed_event(TWEEN_DRAW_STICK_DOWN_END);
             if let Ok(entity) = q_stick.get_single() {
+                let tween = Tween::new(
+                    EaseFunction::QuarticInOut,
+                    Duration::from_secs(2),
+                    TransformPositionLens {
+                        start: vec3(0., 0.001, 0.),
+                        end: vec3(0., -2., 0.),
+                    },
+                )
+                .with_completed_event(TWEEN_DRAW_STICK_DOWN_END);
                 commands.entity(entity).insert(Animator::new(tween));
             }
-            let tween = Tween::new(
-                EaseFunction::QuarticInOut,
-                Duration::from_secs(2),
-                TransformPositionLens {
-                    start: vec3(0., 0.65, 0.),
-                    end: vec3(0., -1.85 + 0.65, 0.),
-                },
-            );
+
             if let Ok(entity) = q_stick_in.get_single() {
+                let tween = Tween::new(
+                    EaseFunction::QuarticInOut,
+                    Duration::from_secs(2),
+                    TransformPositionLens {
+                        start: vec3(0., 0.65, 0.),
+                        end: vec3(0., /*-1.85 + 0.65*/ -1.24, 0.),
+                    },
+                );
                 commands.entity(entity).insert(Animator::new(tween));
             }
         }
@@ -791,7 +793,7 @@ pub fn er_ball_release(
                     .insert(RigidBody::Dynamic);
 
                 let mut impulse = ExternalImpulse::default();
-                impulse.apply_impulse(Vec3::NEG_Z * 0.002);
+                impulse.apply_impulse(Vec3::NEG_Z * 0.003);
                 commands.entity(entity).insert(impulse);
             }
         }
@@ -811,7 +813,7 @@ pub fn er_pool_outlet_cover_open(
                     Duration::from_millis(500),
                     TransformPositionLens {
                         start: vec3(-0.86, 0.1, 0.0),
-                        end: vec3(-0.86, -0.1, 0.0),
+                        end: vec3(-0.86, -0.13, 0.0),
                     },
                 )
                 .with_completed_event(TWEEN_POOL_OUTLET_OPEN_END);
@@ -833,7 +835,7 @@ pub fn er_pool_outlet_cover_close(
                     EaseFunction::QuadraticInOut,
                     Duration::from_millis(500),
                     TransformPositionLens {
-                        start: vec3(-0.86, -0.1, 0.0),
+                        start: vec3(-0.86, -0.13, 0.0),
                         end: vec3(-0.86, 0.1, 0.0),
                     },
                 )
@@ -907,7 +909,7 @@ pub fn ball_mixer_rotate(
                 if let Ok((entity, av)) = q_mixer.get_single() {
                     let tween = Tween::new(
                         EaseFunction::QuarticInOut,
-                        Duration::from_millis(1500),
+                        Duration::from_millis(1600),
                         MyAngularVelocityYLens {
                             start: av.y,
                             end: *speed,
@@ -1042,13 +1044,12 @@ pub fn game_run_step_finish(
                 STEP_POOL_OUTLET_CLOSE_END => {
                     ew_step_start.send(GameStepStartEvent::new_with_data(
                         STEP_BALL_MIXER_ROTATE,
-                        GameStepData::Float(11.),
+                        GameStepData::Float(13.),
                     ));
                     ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
                 }
                 STEP_BALL_MIXER_ROTATE_END => {
                     // MIXER ROTATE를 자주하게되는데 이러면 이벤트가 계속발생하므로 사용은 x
-                    // ew_stick_down.send(DrawStickDownEvent);
                 }
                 STEP_DRAW_STICK_DOWN_END => {
                     ew_step_start.send(GameStepStartEvent::new_with_data(
@@ -1056,10 +1057,10 @@ pub fn game_run_step_finish(
                         GameStepData::Float(1.),
                     ));
                     ew_step_start.send(GameStepStartEvent::new(STEP_BALL_CATCH));
-                    ew_step_start.send(GameStepStartEvent::new(STEP_BALL_STICK_RIGID_TO_EMPTY));
+                    // ew_step_start.send(GameStepStartEvent::new(STEP_BALL_STICK_RIGID_TO_EMPTY));
                 }
                 STEP_BALL_CATCH_DONE => {
-                    ew_step_start.send(GameStepStartEvent::new(STEP_BALL_STICK_RIGID_TO_STATIC));
+                    // ew_step_start.send(GameStepStartEvent::new(STEP_BALL_STICK_RIGID_TO_STATIC));
                     ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_UP));
                 }
                 STEP_DRAW_STICK_UP_END => {
@@ -1080,7 +1081,7 @@ pub fn game_run_step_finish(
                         ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
                         ew_step_start.send(GameStepStartEvent::new_with_data(
                             STEP_BALL_MIXER_ROTATE,
-                            GameStepData::Float(11.),
+                            GameStepData::Float(13.),
                         ));
                     } else {
                         // END

@@ -11,7 +11,7 @@ android {
         applicationId = "xyz.lsy969999.luckyball"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
+        versionCode = 4
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -19,7 +19,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -45,7 +45,7 @@ android {
 }
 
 dependencies {
-    implementation("com.google.android.gms:play-services-ads:23.3.0")
+//    implementation("com.google.android.gms:play-services-ads:23.3.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

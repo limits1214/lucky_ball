@@ -3,14 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		134866208A035F8615C99114 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96A1E5B62F48B379829E8A0D /* Metal.framework */; };
 		2604C99FAB5A8322EDCABB9F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE71FBCAA714DB4F42459106 /* UIKit.framework */; };
 		3D402A9C2CB6C55400C40B08 /* lucky_ball.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D402A9B2CB6C55400C40B08 /* lucky_ball.swift */; };
-		3D402A9F2CB70E5200C40B08 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 3D402A9E2CB70E5200C40B08 /* GoogleMobileAds */; };
 		3D402AA12CBF29FE00C40B08 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3D402AA02CBF29FE00C40B08 /* Assets.xcassets */; };
 		442540D056ADB9AE61A0A590 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F1B41978FA53999AA836D0F /* Security.framework */; };
 		55892F1396056740E1AF9685 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AF7DE91055EBD05ED77E57F9 /* main.m */; };
@@ -34,7 +33,7 @@
 		3D402A9A2CB6C55400C40B08 /* lucky ball-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "lucky ball-Bridging-Header.h"; sourceTree = "<group>"; };
 		3D402A9B2CB6C55400C40B08 /* lucky_ball.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lucky_ball.swift; sourceTree = "<group>"; };
 		3D402AA02CBF29FE00C40B08 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		55EAC02897847195D2F44C15 /* lucky ball.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "lucky ball.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		55EAC02897847195D2F44C15 /* my lucky ball.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "my lucky ball.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		57CD6305253C7A940098CD4A /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		57CD630A253C7F5F0098CD4A /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../../../assets; sourceTree = "<group>"; };
 		8EE7F1E3B0303533925D7E33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -50,7 +49,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D402A9F2CB70E5200C40B08 /* GoogleMobileAds in Frameworks */,
 				442540D056ADB9AE61A0A590 /* Security.framework in Frameworks */,
 				134866208A035F8615C99114 /* Metal.framework in Frameworks */,
 				2604C99FAB5A8322EDCABB9F /* UIKit.framework in Frameworks */,
@@ -65,7 +63,7 @@
 		321F7D6A765B38E746C35105 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				55EAC02897847195D2F44C15 /* lucky ball.app */,
+				55EAC02897847195D2F44C15 /* my lucky ball.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -126,9 +124,9 @@
 /* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
-		3BDB8152E4962373181B4FE5 /* lucky ball */ = {
+		3BDB8152E4962373181B4FE5 /* my lucky ball */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E714A1AEAAE517C348B5BD27 /* Build configuration list for PBXNativeTarget "lucky ball" */;
+			buildConfigurationList = E714A1AEAAE517C348B5BD27 /* Build configuration list for PBXNativeTarget "my lucky ball" */;
 			buildPhases = (
 				9F13800790AD9DBC2BC0F116 /* Sources */,
 				D5A822CB2D6847BA8800BE4C /* Frameworks */,
@@ -139,9 +137,9 @@
 			dependencies = (
 				19D4B9C22ADC6705B5132B4C /* PBXTargetDependency */,
 			);
-			name = "lucky ball";
+			name = "my lucky ball";
 			productName = bevy_mobile_example;
-			productReference = 55EAC02897847195D2F44C15 /* lucky ball.app */;
+			productReference = 55EAC02897847195D2F44C15 /* my lucky ball.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -157,7 +155,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 9D43D41707A5C30B227B83F9 /* Build configuration list for PBXProject "lucky ball" */;
+			buildConfigurationList = 9D43D41707A5C30B227B83F9 /* Build configuration list for PBXProject "my lucky ball" */;
 			compatibilityVersion = "Xcode 10.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -166,12 +164,11 @@
 			);
 			mainGroup = 8F2E3E6040EAD2EC9F3FA530;
 			packageReferences = (
-				3D402A9D2CB6C59000C40B08 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				3BDB8152E4962373181B4FE5 /* lucky ball */,
+				3BDB8152E4962373181B4FE5 /* my lucky ball */,
 				D08AEBE0B1A9C9A7B8C7B33F /* cargo_ios */,
 			);
 		};
@@ -294,6 +291,7 @@
 					"ios-src/",
 				);
 				INFOPLIST_FILE = "ios-src/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "행운공";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -318,7 +316,7 @@
 					"-lc++abi",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = xyz.lsy969999.luckyball;
-				PRODUCT_NAME = "lucky ball";
+				PRODUCT_NAME = "my lucky ball";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -412,6 +410,7 @@
 					"ios-src/",
 				);
 				INFOPLIST_FILE = "ios-src/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "행운공";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -436,7 +435,7 @@
 					"-lc++abi",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = xyz.lsy969999.luckyball;
-				PRODUCT_NAME = "lucky ball";
+				PRODUCT_NAME = "my lucky ball";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -465,7 +464,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9D43D41707A5C30B227B83F9 /* Build configuration list for PBXProject "lucky ball" */ = {
+		9D43D41707A5C30B227B83F9 /* Build configuration list for PBXProject "my lucky ball" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4AD7BC6FDD56FF18FA6DA7D7 /* Debug */,
@@ -483,7 +482,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		E714A1AEAAE517C348B5BD27 /* Build configuration list for PBXNativeTarget "lucky ball" */ = {
+		E714A1AEAAE517C348B5BD27 /* Build configuration list for PBXNativeTarget "my lucky ball" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A2D5B73DD30D562B6F366526 /* Debug */,
@@ -493,25 +492,6 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		3D402A9D2CB6C59000C40B08 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 11.10.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		3D402A9E2CB70E5200C40B08 /* GoogleMobileAds */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3D402A9D2CB6C59000C40B08 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
-			productName = GoogleMobileAds;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8DBF1E2B5C613DA41701F6D9 /* Project object */;
 }

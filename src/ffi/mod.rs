@@ -24,7 +24,7 @@ impl Plugin for FfiPlugin {
                     ffi_event_test_logging,
                     ffi_event_app_init_end,
                     er_admob_banner_launch_with_intersti,
-                    er_app_init_start,
+                    // er_app_init_start,
                 ),
             );
 

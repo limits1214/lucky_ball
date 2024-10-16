@@ -434,7 +434,7 @@ pub fn er_ball_spawn(
                     .insert(Restitution::new(0.9))
                     .insert(Collider::sphere(1.))
                     .insert(Ball(number))
-                    .insert(SpeculativeMargin(4.0))
+                    .insert(SpeculativeMargin(5.0))
                     .insert(Name::new(node_name));
             }
         }
@@ -907,7 +907,7 @@ pub fn ball_mixer_rotate(
                 if let Ok((entity, av)) = q_mixer.get_single() {
                     let tween = Tween::new(
                         EaseFunction::QuarticInOut,
-                        Duration::from_millis(2000),
+                        Duration::from_millis(1500),
                         MyAngularVelocityYLens {
                             start: av.y,
                             end: *speed,
@@ -934,10 +934,17 @@ pub fn er_game_run(
             ew.send(GameStepFinishEvent::new(STEP_GAME_RUN_COMMAND));
             config.running_cnt += 1;
         }
+        // 광고는 일단 보류
+        // #[cfg(any(target_os = "ios", target_os = "android"))]
+        // {
+        //     use crate::ffi::ffi_fn::admob_interstitial_is_ready;
+        //     admob_interstitial_is_ready();
+        // }
         #[cfg(any(target_os = "ios", target_os = "android"))]
         {
-            use crate::ffi::ffi_fn::admob_interstitial_is_ready;
-            admob_interstitial_is_ready();
+            config.is_running = true;
+            ew.send(GameStepFinishEvent::new(STEP_GAME_RUN_COMMAND));
+            config.running_cnt += 1;
         }
     }
 }

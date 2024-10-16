@@ -52,7 +52,7 @@ fn ffi_event_app_init_end(
 ) {
     for evt in er.read() {
         if *evt == FfiEvents::App(ffi_event::AppFfi::InitEnd) {
-            #[cfg(target_os = "ios")]
+            #[cfg(any(target_os = "ios", target_os = "android"))]
             {
                 ew_banner_launch.send(AdmobBannerLaunch);
             }

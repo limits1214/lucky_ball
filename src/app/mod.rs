@@ -20,7 +20,7 @@ impl Plugin for AppPlugin {
             .add_plugins(TweeningPlugin)
             .add_plugins(DefaultPickingPlugins)
             .add_plugins(PhysicsPlugins::default())
-            .insert_resource(Time::new_with(Physics::fixed_hz(30.0)))
+            .insert_resource(Time::new_with(Physics::fixed_hz(40.0)))
             // .insert_resource(SubstepCount(1))
             ;
 

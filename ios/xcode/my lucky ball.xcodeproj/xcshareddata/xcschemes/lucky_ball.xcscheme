@@ -16,8 +16,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3BDB8152E4962373181B4FE5"
                BuildableName = "lucky ball.app"
-               BlueprintName = "lucky ball"
-               ReferencedContainer = "container:lucky ball.xcodeproj">
+               BlueprintName = "my lucky ball"
+               ReferencedContainer = "container:my lucky ball.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -46,8 +46,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3BDB8152E4962373181B4FE5"
             BuildableName = "lucky ball.app"
-            BlueprintName = "lucky ball"
-            ReferencedContainer = "container:lucky ball.xcodeproj">
+            BlueprintName = "my lucky ball"
+            ReferencedContainer = "container:my lucky ball.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -63,8 +63,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3BDB8152E4962373181B4FE5"
             BuildableName = "lucky ball.app"
-            BlueprintName = "lucky ball"
-            ReferencedContainer = "container:lucky ball.xcodeproj">
+            BlueprintName = "my lucky ball"
+            ReferencedContainer = "container:my lucky ball.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

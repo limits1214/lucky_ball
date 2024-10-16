@@ -184,7 +184,11 @@ impl AppFfiTrait for AppFfi {
     }
 
     fn init() {
-        // todo!()
+        let ctx = ndk_context::android_context();
+        let vm = unsafe { JavaVM::from_raw(ctx.vm().cast()) }.unwrap();
+        let ctx = unsafe { JObject::from_raw(ctx.context().cast()) };
+        let mut env = vm.attach_current_thread().unwrap();
+        env.call_method(ctx, "ffiAppInit", "()V", &[]).unwrap();
     }
 
     fn get_current_epoch_time() -> i64 {

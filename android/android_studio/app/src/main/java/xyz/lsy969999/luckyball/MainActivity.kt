@@ -41,11 +41,7 @@ class MainActivity : NativeActivity() {
 
         spf = getSharedPreferences("kv", Context.MODE_PRIVATE)
         //
-        val backgroundScope = CoroutineScope(Dispatchers.IO)
-        backgroundScope.launch {
-            // Initialize the Google Mobile Ads SDK on a background thread.
-            MobileAds.initialize(this@MainActivity) {}
-        }
+
         admobInterstitialAd = AdmobInterstitial()
         admobBannerAd = AdmobBanner()
     }
@@ -85,7 +81,13 @@ class MainActivity : NativeActivity() {
     }
 
     fun ffiAppInit() {
-
+        val backgroundScope = CoroutineScope(Dispatchers.IO)
+        backgroundScope.launch {
+            // Initialize the Google Mobile Ads SDK on a background thread.
+            MobileAds.initialize(this@MainActivity) {
+                RustBinding.ffi_callback_app_init_end()
+            }
+        }
     }
 
     fun ffiGetCurrentEpochTime(): Long {

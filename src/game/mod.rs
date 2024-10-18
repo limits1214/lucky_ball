@@ -12,7 +12,8 @@ use system::{
     draw_stick_down_event, draw_stick_reset_event, draw_stick_rigid_change, draw_stick_up_event,
     er_ball_catch, er_ball_clear, er_ball_release, er_ball_rigid_change, er_ball_spawn, er_ffi_ad,
     er_game_run, er_pool_outlet_cover_close, er_pool_outlet_cover_open, game_run_step_finish,
-    pool_ball_cnt_zero_sensor, spawn_setup, tcb_to_step_convert,
+    pool_ball_cnt_zero_sensor, pool_pump_sensor, remixer_end_timer, remixer_judge_timer,
+    remixer_timer, spawn_setup, tcb_to_step_convert,
 };
 
 use crate::app::states::MyStates;
@@ -52,7 +53,7 @@ impl Plugin for GamePlugin {
                 (
                     ball_mixer_rotate,
                     // ball_catch_sensor_collding,
-                    er_ball_rigid_change,
+                    er_ball_rigid_change.after(er_ball_clear),
                     draw_stick_down_event,
                     draw_stick_up_event,
                     draw_inner_stick_down_event,
@@ -71,12 +72,16 @@ impl Plugin for GamePlugin {
                         game_run_step_finish,
                         pool_ball_cnt_zero_sensor,
                         tcb_to_step_convert,
-                        er_ball_spawn,
+                        er_ball_spawn.after(er_ball_clear),
                         er_ball_clear,
                         ball_release_sensor,
                         // play_ball_sound,
                         draw_stick_reset_event,
                         er_ffi_ad,
+                        pool_pump_sensor,
+                        remixer_judge_timer,
+                        remixer_end_timer,
+                        remixer_timer,
                     ),
                 )
                     .run_if(in_state(MyStates::Game)),

@@ -10,6 +10,7 @@ use crate::{
         ffi_trait::{AppFfi, AppFfiTrait},
     },
     game::{
+        component::{RemixerEndTimer, RemixerJudgeTimer, RemixerTimer},
         constant::{STEP_BALL_MIXER_ROTATE, STEP_INNER_DRAW_STICK_DOWN, STEP_INNER_DRAW_STICK_UP},
         event::{
             BallClearEvent, BallSpawnEvent, DrawStickResetEvent, GameEndEvent, GameRunEvent,
@@ -1653,6 +1654,9 @@ pub fn back_to_game_rule_select_btn_click(
     ui_config: Res<UiConfig>,
     mut ew_step_start: EventWriter<GameStepStartEvent>,
     mut ew_draw_stick_reset: EventWriter<DrawStickResetEvent>,
+    q_rt: Query<Entity, With<RemixerTimer>>,
+    q_ret: Query<Entity, With<RemixerEndTimer>>,
+    q_rjt: Query<Entity, With<RemixerJudgeTimer>>,
 ) {
     for _ in er.read() {
         if let Ok((entity, children)) = q_root_node.get_single() {
@@ -1667,6 +1671,17 @@ pub fn back_to_game_rule_select_btn_click(
             config.is_ball_release_sensor = false;
             config.is_pool_ball_cnt_sensor = false;
             config.is_catching = false;
+            for entity in &q_rt {
+                commands.entity(entity).despawn_recursive();
+            }
+
+            for entity in &q_ret {
+                commands.entity(entity).despawn_recursive();
+            }
+
+            for entity in &q_rjt {
+                commands.entity(entity).despawn_recursive();
+            }
             ew.send(BallClearEvent);
 
             let load = ui_config

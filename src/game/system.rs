@@ -1,10 +1,12 @@
 use avian3d::prelude::*;
 use bevy::{
     gltf::{GltfMesh, GltfNode},
-    math::vec3,
+    math::{vec3, VectorSpace},
     prelude::*,
 };
-use bevy_tweening::{lens::TransformPositionLens, Animator, EaseFunction, Tween, TweenCompleted};
+use bevy_tweening::{
+    lens::TransformPositionLens, Animator, Delay, EaseFunction, Tween, TweenCompleted,
+};
 use rand::Rng;
 use std::time::Duration;
 
@@ -17,7 +19,7 @@ use crate::{
     game::{
         component::{
             Ball, BallDrawStick, BallDrawStickIn, BallMixer, BallOutletGuideHolderLast,
-            PoolOutletCover,
+            PoolOutletCover, PoolPumpSensor,
         },
         constant::{STEP_BALL_CATCH_DONE, STEP_INNER_DRAW_STICK_DOWN_END, TWEEN_BALL_CATCH_END},
         resource::GivenBall,
@@ -27,6 +29,7 @@ use crate::{
 use super::{
     component::{
         BallCatchSensor, BallReleaseSensor, Catched, Picked, PickedStatic, PoolBallCntSensor,
+        RemixerEndTimer, RemixerJudgeTimer, RemixerTimer,
     },
     constant::{
         STEP_BALL_CATCH, STEP_BALL_MIXER_ROTATE, STEP_BALL_MIXER_ROTATE_END, STEP_BALL_RELEASE,
@@ -90,7 +93,32 @@ pub fn spawn_setup(
         },
         Name::new("DirectionalLight"),
     ));
-
+    commands.spawn((
+        DirectionalLightBundle {
+            directional_light: DirectionalLight {
+                // shadows_enabled: true, // 필요한 경우 이 줄을 활성화할 수 있습니다.
+                illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 10., // intensity와 유사한 개념 (단위: 루멘)
+                ..default()
+            },
+            // DirectionalLight는 위치보다는 방향이 중요하므로, 아래 transform을 통해 방향 설정
+            transform: Transform::from_xyz(-16.0, -16.0, -16.0).looking_at(Vec3::ZERO, Vec3::Y), // 빛의 방향 설정 (0, 0, 0)을 향하도록
+            ..default()
+        },
+        Name::new("DirectionalLight bck"),
+    ));
+    commands.spawn((
+        DirectionalLightBundle {
+            directional_light: DirectionalLight {
+                // shadows_enabled: true, // 필요한 경우 이 줄을 활성화할 수 있습니다.
+                illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 10., // intensity와 유사한 개념 (단위: 루멘)
+                ..default()
+            },
+            // DirectionalLight는 위치보다는 방향이 중요하므로, 아래 transform을 통해 방향 설정
+            transform: Transform::from_xyz(-16.0, -16.0, 16.0).looking_at(Vec3::ZERO, Vec3::Y), // 빛의 방향 설정 (0, 0, 0)을 향하도록
+            ..default()
+        },
+        Name::new("DirectionalLight bck2"),
+    ));
     //////
     if let Some(gltf) = assets_gltf.get(my_assets.luckyball.id()) {
         for (node_name, _node_handle) in gltf.named_nodes.iter() {
@@ -119,6 +147,7 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
+                        .insert(SpeculativeMargin::MAX)
                         .insert(RigidBody::Static)
                         .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         .insert(Name::new("BallCase"));
@@ -183,8 +212,8 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        .insert(RigidBody::Static)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        // .insert(RigidBody::Static)
+                        // .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         .insert(BallDrawStickIn)
                         .insert(Name::new("BallDrawStickIn"));
                 } else if node_name == "pool" {
@@ -279,7 +308,7 @@ pub fn spawn_setup(
                             ..default()
                         })
                         .insert(RigidBody::Static)
-                        // .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         // .insert(BallOutletGuideHolderLast)
                         .insert(PoolOutletCover)
                         .insert(Name::new("poolOutletCover"));
@@ -287,6 +316,21 @@ pub fn spawn_setup(
                     commands
                         .spawn(Name::new("BallOutletGuideResultCollider"))
                         .insert(RigidBody::Static)
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(TransformBundle::from_transform(transform));
+                    // .insert(BallOutletGuideHolderLast);
+                } else if node_name == "BallOutletGuideConnector" {
+                    commands
+                        .spawn(Name::new("BallOutletGuideConnector"))
+                        .insert(RigidBody::Static)
+                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(TransformBundle::from_transform(transform));
+                    // .insert(BallOutletGuideHolderLast);
+                } else if node_name == "poolPumpCollider" {
+                    commands
+                        .spawn(Name::new("poolPumpCollider"))
+                        .insert(PoolPumpSensor)
+                        .insert(Sensor)
                         .insert(Collider::trimesh_from_mesh(mesh).unwrap())
                         .insert(TransformBundle::from_transform(transform));
                     // .insert(BallOutletGuideHolderLast);
@@ -434,7 +478,12 @@ pub fn er_ball_spawn(
                     .insert(Restitution::new(0.9))
                     .insert(Collider::sphere(1.))
                     .insert(Ball(number))
-                    // .insert(SpeculativeMargin(5.0))
+                    .insert(LinearDamping(0.8))
+                    .insert(AngularDamping(0.8))
+                    .insert(GravityScale(0.5))
+                    // .insert(SpeculativeMargin(10.0))
+                    .insert(SpeculativeMargin::MAX)
+                    // .insert(SweptCcd::default())
                     .insert(Name::new(node_name));
             }
         }
@@ -547,7 +596,7 @@ pub fn draw_inner_stick_up_event(
         if *event_id == STEP_INNER_DRAW_STICK_UP {
             let tween = Tween::new(
                 EaseFunction::QuarticInOut,
-                Duration::from_millis(500),
+                Duration::from_millis(300),
                 TransformPositionLens {
                     start: vec3(0., 0.65, 0.),
                     end: vec3(0., 0.73, 0.),
@@ -561,7 +610,7 @@ pub fn draw_inner_stick_up_event(
             if let Ok((entity, transform)) = q_catched_ball.get_single() {
                 let tween = Tween::new(
                     EaseFunction::QuarticInOut,
-                    Duration::from_millis(500),
+                    Duration::from_millis(300),
                     TransformPositionLens {
                         start: transform.translation,
                         end: vec3(0., 1.09, 0.),
@@ -582,7 +631,7 @@ pub fn draw_inner_stick_down_event(
         if *event_id == STEP_INNER_DRAW_STICK_DOWN {
             let tween = Tween::new(
                 EaseFunction::QuarticInOut,
-                Duration::from_millis(500),
+                Duration::from_millis(300),
                 TransformPositionLens {
                     start: vec3(0., 0.73, 0.),
                     end: vec3(0., 0.65, 0.),
@@ -681,6 +730,31 @@ pub fn ball_picked_static(
     }
 }
 
+pub fn pool_pump_sensor(
+    config: Res<GameConfig>,
+    mut commands: Commands,
+    q_sensor: Query<(Entity, &CollidingEntities), With<PoolPumpSensor>>,
+    q_ball: Query<Entity, (With<Ball>,)>,
+) {
+    if config.is_running {
+        for (_entity, colliding_entitiles) in &q_sensor {
+            for entity in colliding_entitiles.iter() {
+                if let Ok(entity) = q_ball.get(*entity) {
+                    let mut impulse = ExternalImpulse::default();
+                    impulse.apply_impulse(Vec3::X * 0.002);
+                    commands
+                        .entity(entity)
+                        .remove::<GravityScale>()
+                        // .insert(GravityScale::default())
+                        .insert(impulse)
+                        .insert(AngularVelocity(Vec3::ZERO))
+                        .insert(LinearVelocity(Vec3::ZERO));
+                }
+            }
+        }
+    }
+}
+
 pub fn pool_ball_cnt_zero_sensor(
     mut config: ResMut<GameConfig>,
     q_sensor: Query<(Entity, &CollidingEntities), With<PoolBallCntSensor>>,
@@ -764,6 +838,8 @@ pub fn ball_catch(
                         commands
                             .entity(entity)
                             .insert(RigidBody::Static)
+                            .insert(AngularVelocity(Vec3::ZERO))
+                            .insert(LinearVelocity(Vec3::ZERO))
                             .insert(Catched)
                             .insert(Picked)
                             .insert(Animator::new(tween));
@@ -793,7 +869,7 @@ pub fn er_ball_release(
                     .insert(RigidBody::Dynamic);
 
                 let mut impulse = ExternalImpulse::default();
-                impulse.apply_impulse(Vec3::NEG_Z * 0.003);
+                impulse.apply_impulse(Vec3::NEG_Z * 0.001);
                 commands.entity(entity).insert(impulse);
             }
         }
@@ -916,6 +992,7 @@ pub fn ball_mixer_rotate(
                         },
                     )
                     .with_completed_event(TWEEN_BALL_MIXER_ROTATE_END);
+
                     commands.entity(entity).insert(Animator::new(tween));
                 }
             }
@@ -1013,16 +1090,104 @@ pub fn er_ffi_ad(
 //     }
 // }
 
+pub fn remixer_timer(
+    config: Res<GameConfig>,
+    mut commands: Commands,
+    mut q: Query<(Entity, &mut RemixerTimer)>,
+    time: Res<Time>,
+    mut ew_step_start: EventWriter<GameStepStartEvent>,
+) {
+    if config.is_running {
+        for (entity, mut remixer_timer) in q.iter_mut() {
+            // timers gotta be ticked, to work
+            remixer_timer.0.tick(time.delta());
+
+            // if it finished, despawn the bomb
+            if remixer_timer.0.finished() {
+                commands.entity(entity).despawn();
+                ew_step_start.send(GameStepStartEvent::new_with_data(
+                    STEP_BALL_MIXER_ROTATE,
+                    GameStepData::Float(9.),
+                ));
+                commands.spawn(RemixerEndTimer(Timer::new(
+                    Duration::from_secs(2),
+                    TimerMode::Once,
+                )));
+            }
+        }
+    }
+}
+
+pub fn remixer_end_timer(
+    config: Res<GameConfig>,
+    mut commands: Commands,
+    mut q: Query<(Entity, &mut RemixerEndTimer)>,
+    time: Res<Time>,
+    mut ew_step_start: EventWriter<GameStepStartEvent>,
+) {
+    if config.is_running {
+        for (entity, mut remixer_timer) in q.iter_mut() {
+            // timers gotta be ticked, to work
+            remixer_timer.0.tick(time.delta());
+
+            // if it finished, despawn the bomb
+            if remixer_timer.0.finished() {
+                commands.entity(entity).despawn();
+                ew_step_start.send(GameStepStartEvent::new_with_data(
+                    STEP_BALL_MIXER_ROTATE,
+                    GameStepData::Float(1.),
+                ));
+                commands.spawn(RemixerJudgeTimer(Timer::new(
+                    Duration::from_secs(2),
+                    TimerMode::Once,
+                )));
+            }
+        }
+    }
+}
+
+pub fn remixer_judge_timer(
+    config: Res<GameConfig>,
+    mut commands: Commands,
+    mut q: Query<(Entity, &mut RemixerJudgeTimer)>,
+    time: Res<Time>,
+    mut ew_step_start: EventWriter<GameStepStartEvent>,
+) {
+    if config.is_running {
+        for (entity, mut remixer_timer) in q.iter_mut() {
+            // timers gotta be ticked, to work
+            remixer_timer.0.tick(time.delta());
+
+            // if it finished, despawn the bomb
+            if remixer_timer.0.finished() {
+                commands.entity(entity).despawn();
+                ew_step_start.send(GameStepStartEvent::new_with_data(
+                    STEP_BALL_MIXER_ROTATE,
+                    GameStepData::Float(1.),
+                ));
+                commands.spawn(RemixerTimer(Timer::new(
+                    Duration::from_secs(3),
+                    TimerMode::Once,
+                )));
+            }
+        }
+    }
+}
+
 /// 1. open pooloutlet
 /// 2. ball rigid to dynamic
 /// check pool ball zero
 /// close pooloutlet
 
 pub fn game_run_step_finish(
+    mut commands: Commands,
     mut er: EventReader<GameStepFinishEvent>,
     mut config: ResMut<GameConfig>,
     mut ew_step_start: EventWriter<GameStepStartEvent>,
     mut ew_game_end: EventWriter<GameEndEvent>,
+    q_rt: Query<Entity, With<RemixerTimer>>,
+    q_ret: Query<Entity, With<RemixerEndTimer>>,
+    q_rjt: Query<Entity, With<RemixerJudgeTimer>>,
 ) {
     if config.is_running {
         for GameStepFinishEvent { event_id, .. } in er.read() {
@@ -1033,6 +1198,18 @@ pub fn game_run_step_finish(
                     config.is_catching = false;
                     config.picked_ball = vec![];
                     ew_step_start.send(GameStepStartEvent::new(STEP_POOL_OUTLET_OPEN_START));
+
+                    for entity in &q_rt {
+                        commands.entity(entity).despawn_recursive();
+                    }
+
+                    for entity in &q_ret {
+                        commands.entity(entity).despawn_recursive();
+                    }
+
+                    for entity in &q_rjt {
+                        commands.entity(entity).despawn_recursive();
+                    }
                 }
                 STEP_POOL_OUTLET_OPEN_END => {
                     config.is_pool_ball_cnt_sensor = true;
@@ -1044,7 +1221,7 @@ pub fn game_run_step_finish(
                 STEP_POOL_OUTLET_CLOSE_END => {
                     ew_step_start.send(GameStepStartEvent::new_with_data(
                         STEP_BALL_MIXER_ROTATE,
-                        GameStepData::Float(13.),
+                        GameStepData::Float(9.),
                     ));
                     ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
                 }
@@ -1058,10 +1235,30 @@ pub fn game_run_step_finish(
                     ));
                     ew_step_start.send(GameStepStartEvent::new(STEP_BALL_CATCH));
                     // ew_step_start.send(GameStepStartEvent::new(STEP_BALL_STICK_RIGID_TO_EMPTY));
+                    commands.spawn(RemixerTimer(Timer::new(
+                        Duration::from_secs(3),
+                        TimerMode::Once,
+                    )));
                 }
                 STEP_BALL_CATCH_DONE => {
                     // ew_step_start.send(GameStepStartEvent::new(STEP_BALL_STICK_RIGID_TO_STATIC));
                     ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_UP));
+
+                    for entity in &q_rt {
+                        commands.entity(entity).despawn_recursive();
+                    }
+
+                    for entity in &q_ret {
+                        commands.entity(entity).despawn_recursive();
+                    }
+
+                    for entity in &q_rjt {
+                        commands.entity(entity).despawn_recursive();
+                    }
+                    ew_step_start.send(GameStepStartEvent::new_with_data(
+                        STEP_BALL_MIXER_ROTATE,
+                        GameStepData::Float(1.),
+                    ));
                 }
                 STEP_DRAW_STICK_UP_END => {
                     ew_step_start.send(GameStepStartEvent::new(STEP_INNER_DRAW_STICK_UP));
@@ -1081,7 +1278,7 @@ pub fn game_run_step_finish(
                         ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
                         ew_step_start.send(GameStepStartEvent::new_with_data(
                             STEP_BALL_MIXER_ROTATE,
-                            GameStepData::Float(13.),
+                            GameStepData::Float(9.),
                         ));
                     } else {
                         // END

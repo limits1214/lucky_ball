@@ -16,6 +16,9 @@ pub struct PoolBallCntSensor;
 pub struct BallReleaseSensor;
 
 #[derive(Component)]
+pub struct PoolPumpSensor;
+
+#[derive(Component)]
 pub struct BallDrawStickIn;
 
 #[derive(Component, Debug)]
@@ -35,3 +38,12 @@ pub struct BallOutletGuideHolderLast;
 
 #[derive(Component)]
 pub struct PickedStatic;
+
+#[derive(Component, Debug)]
+pub struct RemixerTimer(pub Timer);
+#[derive(Component, Debug)]
+pub struct RemixerEndTimer(pub Timer);
+#[derive(Component, Debug)]
+pub struct RemixerJudgeTimer(pub Timer);
+#[derive(Component)]
+pub struct BallInit;

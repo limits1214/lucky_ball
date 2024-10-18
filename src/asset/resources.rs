@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
-use bevy_kira_audio::AudioSource;
+// use bevy_kira_audio::AudioSource;
 
 #[derive(AssetCollection, Resource)]
 pub struct MyAsstes {
@@ -20,6 +20,6 @@ pub struct MyAsstes {
     pub png_save: Handle<Image>,
     #[asset(path = "images/customize.png")]
     pub png_customize: Handle<Image>,
-    #[asset(path = "sounds/ball_sound.mp3")]
-    pub mp3_ballsound: Handle<AudioSource>,
+    // #[asset(path = "sounds/ball_sound.mp3")]
+    // pub mp3_ballsound: Handle<AudioSource>,
 }

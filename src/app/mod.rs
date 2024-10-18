@@ -1,7 +1,8 @@
 use crate::{asset::AssetsPlugin, ffi::FfiPlugin, game::GamePlugin, ui::MyUiPlugin};
 use avian3d::prelude::*;
 use bevy::prelude::*;
-use bevy_kira_audio::AudioPlugin;
+use bevy_framepace::{FramepaceSettings, Limiter};
+// use bevy_kira_audio::AudioPlugin;
 use bevy_mod_picking::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use bevy_tweening::TweeningPlugin;
@@ -16,13 +17,19 @@ impl Plugin for AppPlugin {
         app.insert_state(MyStates::Load(Loading::Loading));
 
         app.add_plugins(PanOrbitCameraPlugin)
-            .add_plugins(AudioPlugin)
+            // .add_plugins(AudioPlugin)
             .add_plugins(TweeningPlugin)
             .add_plugins(DefaultPickingPlugins)
-            .add_plugins(PhysicsPlugins::default())
-            .insert_resource(Time::new_with(Physics::fixed_hz(40.0)))
-            // .insert_resource(SubstepCount(1))
+            .add_plugins(PhysicsPlugins::new(PostUpdate))
+            .add_plugins(bevy_framepace::FramepacePlugin)
+            // .insert_resource(Time::new_with(Physics::fixed_hz(144.0)))
+            .insert_resource(Time::<Physics>::default().with_relative_speed(2.0))
+            // .insert_resource(SubstepCount(12))
             ;
+
+        app.add_systems(Startup, |mut settings: ResMut<FramepaceSettings>| {
+            settings.limiter = Limiter::from_framerate(30.);
+        });
 
         app.add_plugins(AssetsPlugin)
             .add_plugins(GamePlugin)

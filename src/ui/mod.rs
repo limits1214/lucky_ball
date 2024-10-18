@@ -18,7 +18,7 @@ use system::{
     game_rule_select_button_click, game_run_btn_click, loaded_26_fire_1_btn_click,
     loaded_45_fire_6_btn_click, loaded_69_fire_5_btn_click, numbers_btn_click,
     numbers_item_delete_btn_click, numbers_paging_next_click, numbers_paging_prev_click,
-    quit_btn_click, setup_main_ui,
+    quit_btn_click, setup_main_ui, splash_hide,
 };
 
 use crate::app::states::MyStates;
@@ -55,7 +55,10 @@ impl Plugin for MyUiPlugin {
             .add_event::<GameMenuShuffleBtnClick>()
             .add_event::<GameResultRetryBtnClick>()
             .add_event::<GameResultSaveBtnClick>()
-            .add_systems(OnEnter(MyStates::Game), (setup_main_ui, app_init))
+            .add_systems(
+                OnEnter(MyStates::Game),
+                (setup_main_ui, app_init, splash_hide),
+            )
             .add_systems(
                 Update,
                 (

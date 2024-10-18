@@ -2152,3 +2152,7 @@ pub fn admob_banner_show(mut ew: EventWriter<AdmobBannerLaunch>) {
 pub fn app_init(mut ew: EventWriter<AppInitStartEvent>) {
     ew.send(AppInitStartEvent);
 }
+
+pub fn splash_hide() {
+    AppFfi::splash_hide();
+}

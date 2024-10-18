@@ -30,4 +30,5 @@ pub trait AppFfiTrait {
     fn get_current_epoch_time() -> i64;
     fn get_locale() -> String;
     fn get_time_offset() -> i32;
+    fn splash_hide();
 }

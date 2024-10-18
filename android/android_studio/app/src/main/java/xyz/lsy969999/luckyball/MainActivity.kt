@@ -12,6 +12,7 @@ import android.view.Gravity
 import android.view.WindowManager
 import android.view.WindowMetrics
 import android.widget.FrameLayout
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 //import com.google.android.gms.ads.AdError
 //import com.google.android.gms.ads.AdListener
 //import com.google.android.gms.ads.AdRequest
@@ -24,6 +25,7 @@ import android.widget.FrameLayout
 //import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import xyz.lsy969999.luckyball.databinding.ActivityMainBinding
 import java.util.Locale
@@ -33,11 +35,16 @@ class MainActivity : NativeActivity() {
     private lateinit var spf: SharedPreferences
 //    private lateinit var admobInterstitialAd: AdmobInterstitial;
 //    private lateinit var admobBannerAd: AdmobBanner;
-    private lateinit var binding: ActivityMainBinding
+//    private lateinit var binding: ActivityMainBinding
+    private var isSplashKeep: Boolean = true;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+//        binding = ActivityMainBinding.inflate(layoutInflater)
+//        setContentView(binding.root)
+        val splashScreen = installSplashScreen()
+        splashScreen.setKeepOnScreenCondition {
+            isSplashKeep
+        }
 
         spf = getSharedPreferences("kv", Context.MODE_PRIVATE)
 
@@ -88,6 +95,13 @@ class MainActivity : NativeActivity() {
 //                RustBinding.ffi_callback_app_init_end()
 //            }
 //        }
+    }
+
+    fun ffiSplashHide() {
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(500L)  // 0.5초 대기
+            isSplashKeep = false
+        }
     }
 
     fun ffiGetCurrentEpochTime(): Long {

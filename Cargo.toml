@@ -59,7 +59,7 @@ serde_json = "1.0.128"
 
 uuid = "1.10.0"
 chrono = "0.4.38"
-bevy_framepace = "0.17.1"
+# bevy_framepace = "0.17.1"
 
 [target.'cfg(not(any(target_os = "ios", target_os = "android", target_family = "wasm")))'.dependencies]
 directories = "5.0.1"
@@ -75,10 +75,10 @@ raw-window-handle = "0.6.0"
 [patch.crates-io]
 winit = { git = "https://github.com/lsy969999/winit.git", branch = "patch-ios-0.30.0" }
 
-[profile.release]
-lto = "fat"
-opt-level = 3
-codegen-units = 1
-incremental = false
-debug = false
-panic = "abort"
+# [profile.release]
+# lto = "fat"
+# opt-level = 3
+# codegen-units = 1
+# incremental = false
+# debug = false
+# panic = "abort"

@@ -199,6 +199,8 @@ impl AppFfiTrait for AppFfi {
         9 * 3600
         // 0
     }
+
+    fn splash_hide() {}
 }
 
 impl AdmobBannerTrait for AdmobBanner {

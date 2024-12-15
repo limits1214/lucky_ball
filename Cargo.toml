@@ -12,54 +12,63 @@ inspector = ["bevy-inspector-egui", "iyes_perf_ui"]
 
 [dependencies]
 # avian3d = { version = "0.1.2" }
-bevy = { version = "0.14.2", features = [
+bevy = { version = "0.15.0", features = [
+    # "android-game-activity",
     # "android_shared_stdcxx",
-    # "animation",
-    # "bevy_animation",
-    # "bevy_asset",
+    "animation",
+    "bevy_asset",
     # "bevy_audio",
-    # "bevy_color",
-    # "bevy_core_pipeline",
+    "bevy_color",
+    "bevy_core_pipeline",
     # "bevy_gilrs",
-    # "bevy_gizmos",
+    "bevy_gizmos",
     "bevy_gltf",
+    "bevy_mesh_picking_backend",
     "bevy_pbr",
-    # "bevy_picking",
+    "bevy_picking",
     # "bevy_render",
     # "bevy_scene",
     # "bevy_sprite",
+    # "bevy_sprite_picking_backend",
     "bevy_state",
     "bevy_text",
     "bevy_ui",
+    "bevy_ui_picking_backend",
+    "bevy_window",
     "bevy_winit",
+    # "custom_cursor",
+    "default_font",
     # "hdr",
-    # "ktx2",
     "multi_threaded",
     "png",
     # "smaa_luts",
     # "sysinfo_plugin",
     "tonemapping_luts",
-    # "webgl2",
+    # "vorbis",
+    "webgl2",
     # "x11",
-    # "zstd",
+    # /////// optional features ///////
+    "android-native-activity",
+    # "trace_tracy", # cargo run --release --features bevy/trace_tracy
+    # "trace_tracy_memory", # cargo run --release --features bevy/trace_tracy_memory
 ], default-features = false }
 
-bevy-inspector-egui = { version = "0.26.0", optional = true }
-bevy_asset_loader = "0.21.0"
-bevy_color = "0.14.3"
-bevy_crossbeam_event = "0.6.0"
+bevy-inspector-egui = { version = "0.28.0", optional = true }
+bevy_asset_loader = "0.22.0"
+# bevy_color = "0.14.3"
+bevy_crossbeam_event = "0.7.0"
 # bevy_kira_audio = { version = "0.20.0", features = ["mp3"] }
-bevy_mod_picking = "0.20.1"
-bevy_panorbit_camera = "0.19.3"
-bevy_tweening = "0.11.0"
-iyes_perf_ui = { version = "0.3.0", optional = true }
+# bevy_mod_picking = "0.20.1"
+bevy_panorbit_camera = "0.21.0"
+bevy_tweening = "0.12.0"
+iyes_perf_ui = { git = "https://github.com/IyesGames/iyes_perf_ui.git", branch = "main", optional = true }
 rand = "0.8.5"
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.128"
 
 uuid = "1.10.0"
 chrono = "0.4.38"
-bevy_rapier3d = "0.27.0"
+bevy_rapier3d = "0.28.0"
 # bevy_framepace = "0.17.1"
 
 [target.'cfg(not(any(target_os = "ios", target_os = "android", target_family = "wasm")))'.dependencies]

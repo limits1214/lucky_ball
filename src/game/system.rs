@@ -5,9 +5,7 @@ use bevy::{
     utils::hashbrown::HashSet,
 };
 use bevy_rapier3d::prelude::*;
-use bevy_tweening::{
-    lens::TransformPositionLens, Animator, Delay, EaseFunction, Tween, TweenCompleted,
-};
+use bevy_tweening::{lens::TransformPositionLens, Animator, Delay, Tween, TweenCompleted};
 use rand::Rng;
 use std::time::Duration;
 
@@ -143,22 +141,25 @@ pub fn spawn_setup(
                 if node_name == "BallCase" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
                         .insert(RigidBody::Fixed)
                         .insert(
-                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
+                            Collider::from_bevy_mesh(
+                                mesh,
+                                &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                            )
+                            .unwrap(),
                         )
                         .insert(Name::new("BallCase"));
                 } else if node_name == "BallInletCover" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
@@ -168,15 +169,18 @@ pub fn spawn_setup(
                 } else if node_name == "BallMixer2" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
                         .insert(RigidBody::KinematicVelocityBased)
                         .insert(
-                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
+                            Collider::from_bevy_mesh(
+                                mesh,
+                                &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                            )
+                            .unwrap(),
                         )
                         .insert(BallMixer)
                         .insert(Velocity::angular(vec3(0., 1., 0.)))
@@ -184,19 +188,22 @@ pub fn spawn_setup(
                 } else if node_name == "BallMixerColliderd" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: materials.add(StandardMaterial {
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(materials.add(StandardMaterial {
                                 base_color: Color::srgba(1.0, 1.0, 1.0, 0.0), // 투명한 색상
                                 alpha_mode: AlphaMode::Blend, // 알파 블렌딩 모드 설정
                                 ..default()
-                            }),
+                            })),
                             transform,
                             ..default()
                         })
                         .insert(RigidBody::KinematicPositionBased)
                         .insert(
-                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
+                            Collider::from_bevy_mesh(
+                                mesh,
+                                &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                            )
+                            .unwrap(),
                         )
                         .insert(BallMixer)
                         .insert(Velocity::angular(vec3(0., 0., 0.)))
@@ -204,23 +211,26 @@ pub fn spawn_setup(
                 } else if node_name == "BallDrawStick" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
                         .insert(RigidBody::Fixed)
                         .insert(
-                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
+                            Collider::from_bevy_mesh(
+                                mesh,
+                                &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                            )
+                            .unwrap(),
                         )
                         .insert(BallDrawStick)
                         .insert(Name::new("BallDrawStick"));
                 } else if node_name == "BallDrawStickIn" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
@@ -231,22 +241,25 @@ pub fn spawn_setup(
                 } else if node_name == "pool" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
                         .insert(RigidBody::Fixed)
                         .insert(
-                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
+                            Collider::from_bevy_mesh(
+                                mesh,
+                                &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                            )
+                            .unwrap(),
                         )
                         .insert(Name::new("pool"));
                 } else if node_name == "BottomSupport" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
@@ -256,15 +269,18 @@ pub fn spawn_setup(
                 } else if node_name == "BallOutletGuide" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
                         .insert(RigidBody::Fixed)
                         .insert(
-                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
+                            Collider::from_bevy_mesh(
+                                mesh,
+                                &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                            )
+                            .unwrap(),
                         )
                         .insert(Name::new("test3"));
                 } else if node_name == "BallOutletGuideHolder1"
@@ -274,8 +290,8 @@ pub fn spawn_setup(
                 {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
@@ -285,29 +301,35 @@ pub fn spawn_setup(
                 } else if node_name == "BallOutletGuard" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
                         .insert(RigidBody::Fixed)
                         .insert(
-                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
+                            Collider::from_bevy_mesh(
+                                mesh,
+                                &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                            )
+                            .unwrap(),
                         )
                         .insert(Name::new("BallOutletGuard"));
                 } else if node_name == "BallOutletGuideHolderLast" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
                         .insert(RigidBody::Fixed)
                         .insert(
-                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
+                            Collider::from_bevy_mesh(
+                                mesh,
+                                &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                            )
+                            .unwrap(),
                         )
                         .insert(BallOutletGuideHolderLast)
                         // .insert(Sensor)
@@ -317,8 +339,8 @@ pub fn spawn_setup(
                 } else if node_name == "Base" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
@@ -329,15 +351,18 @@ pub fn spawn_setup(
                 } else if node_name == "poolOutletCover" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
                         .insert(RigidBody::Fixed)
                         .insert(
-                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
+                            Collider::from_bevy_mesh(
+                                mesh,
+                                &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                            )
+                            .unwrap(),
                         )
                         // .insert(BallOutletGuideHolderLast)
                         .insert(PoolOutletCover)
@@ -347,8 +372,11 @@ pub fn spawn_setup(
                         .spawn(Name::new("BallOutletGuideResultCollider"))
                         .insert(RigidBody::Fixed)
                         .insert(
-                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
+                            Collider::from_bevy_mesh(
+                                mesh,
+                                &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                            )
+                            .unwrap(),
                         )
                         .insert(TransformBundle::from_transform(transform));
                     // .insert(BallOutletGuideHolderLast);
@@ -357,8 +385,11 @@ pub fn spawn_setup(
                         .spawn(Name::new("BallOutletGuideConnector"))
                         .insert(RigidBody::Fixed)
                         .insert(
-                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
+                            Collider::from_bevy_mesh(
+                                mesh,
+                                &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                            )
+                            .unwrap(),
                         )
                         .insert(TransformBundle::from_transform(transform));
                     // .insert(BallOutletGuideHolderLast);
@@ -370,16 +401,19 @@ pub fn spawn_setup(
                         // .insert(ActiveEvents::COLLISION_EVENTS)
                         // .insert(CollidingEntities::default())
                         .insert(
-                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
-                                .unwrap(),
+                            Collider::from_bevy_mesh(
+                                mesh,
+                                &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                            )
+                            .unwrap(),
                         )
                         .insert(TransformBundle::from_transform(transform));
                     // .insert(BallOutletGuideHolderLast);
                 } else if node_name == "poolSupport" {
                     commands
                         .spawn(PbrBundle {
-                            mesh: mesh_handle,
-                            material: mat_handle,
+                            mesh: Mesh3d(mesh_handle),
+                            material: MeshMaterial3d(mat_handle),
                             transform,
                             ..default()
                         })
@@ -518,8 +552,8 @@ pub fn er_ball_spawn(
             {
                 commands
                     .spawn(PbrBundle {
-                        mesh: mesh_handle,
-                        material: mat_handle,
+                        mesh: Mesh3d(mesh_handle),
+                        material: MeshMaterial3d(mat_handle),
                         transform,
                         ..default()
                     })

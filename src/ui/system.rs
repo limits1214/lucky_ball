@@ -1,6 +1,5 @@
-use bevy::{prelude::*, window::WindowResized};
-use bevy_color::palettes::css::{self, INDIAN_RED};
-use bevy_mod_picking::prelude::*;
+use bevy::{color::palettes::css, prelude::*, window::WindowResized};
+
 use uuid::Uuid;
 
 use crate::{
@@ -53,7 +52,7 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
         GameBtn,
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(25.),
                 height: Val::Percent(10.),
                 justify_content: JustifyContent::Center,
@@ -67,20 +66,18 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<GameRuleSelectButtonClickEvent>(),
+        // On::<Pointer<Click>>::send_event::<GameRuleSelectButtonClickEvent>(),
     );
     let game_btn_text = (
         Name::new("game_btn_text"),
-        TextBundle::from_section(
-            txt_start(),
-            TextStyle {
-                font: my_assets.ttf_nanum_gothic_bold.clone(),
-                font_size: 20.,
-                ..default()
-            },
-        ),
+        Text::new(txt_start()),
+        TextFont {
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
+            font_size: 20.,
+            ..default()
+        },
         TextResize,
-        Pickable::IGNORE,
+        PickingBehavior::IGNORE,
     );
 
     let numbers_btn = (
@@ -88,7 +85,7 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
         NumbersBtn,
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(25.),
                 height: Val::Percent(10.),
                 justify_content: JustifyContent::Center,
@@ -102,19 +99,17 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<NumbersBtnClick>(),
+        // On::<Pointer<Click>>::send_event::<NumbersBtnClick>(),
     );
     let numbers_btn_text = (
         Name::new("numbers_btn_text"),
-        TextBundle::from_section(
-            txt_saved_numbers(),
-            TextStyle {
-                font: my_assets.ttf_nanum_gothic_bold.clone(),
-                font_size: 20.,
-                ..default()
-            },
-        ),
-        Pickable::IGNORE,
+        Text::new(txt_saved_numbers()),
+        TextFont {
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
+            font_size: 20.,
+            ..default()
+        },
+        PickingBehavior::IGNORE,
     );
 
     let quit_btn = (
@@ -122,7 +117,7 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
         QuitBtn,
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(25.),
                 height: Val::Percent(10.),
                 justify_content: JustifyContent::Center,
@@ -136,29 +131,44 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<QuitBtnClick>(),
+        // On::<Pointer<Click>>::send_event::<QuitBtnClick>(),
     );
     let quit_btn_text = (
         Name::new("quit_btn_text"),
-        TextBundle::from_section(
-            txt_quit(),
-            TextStyle {
-                font: my_assets.ttf_nanum_gothic_bold.clone(),
-                font_size: 20.,
-                ..default()
-            },
-        ),
-        Pickable::IGNORE,
+        Text::new(txt_quit()),
+        TextFont {
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
+            font_size: 20.,
+            ..default()
+        },
+        PickingBehavior::IGNORE,
     );
 
     commands.entity(root_entity).with_children(|parent| {
-        parent.spawn(game_btn).with_children(|parent| {
-            parent.spawn(game_btn_text);
-        });
+        parent
+            .spawn(game_btn)
+            .observe(
+                |t: Trigger<Pointer<Click>>,
+                 mut ew: EventWriter<GameRuleSelectButtonClickEvent>| {
+                    //GameRuleSelectButtonClickEvent
+                    ew.send(GameRuleSelectButtonClickEvent(t.entity(), t.hit.depth));
+                },
+            )
+            .with_children(|parent| {
+                parent.spawn(game_btn_text);
+            });
 
-        parent.spawn(numbers_btn).with_children(|parent| {
-            parent.spawn(numbers_btn_text);
-        });
+        parent
+            .spawn(numbers_btn)
+            .observe(
+                |t: Trigger<Pointer<Click>>, mut ew: EventWriter<NumbersBtnClick>| {
+                    //
+                    ew.send(NumbersBtnClick(t.entity(), t.hit.depth));
+                },
+            )
+            .with_children(|parent| {
+                parent.spawn(numbers_btn_text);
+            });
 
         // parent.spawn(quit_btn).with_children(|parent| {
         //     parent.spawn(quit_btn_text);
@@ -176,7 +186,7 @@ fn spawn_game_rule_select_menu(
         Name::new("loaded_69_fire_5_btn"),
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(25.),
                 height: Val::Percent(10.),
                 justify_content: JustifyContent::Center,
@@ -190,25 +200,23 @@ fn spawn_game_rule_select_menu(
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<Load69Fire5BtnClick>(),
+        // On::<Pointer<Click>>::send_event::<Load69Fire5BtnClick>(),
     );
     let loaded_69_fire_5_btn_text = (
         Name::new("loaded_69_fire_5_btn_text"),
-        TextBundle::from_section(
-            "5/69",
-            TextStyle {
-                font: my_assets.ttf_nanum_gothic_bold.clone(),
-                ..default()
-            },
-        ),
-        Pickable::IGNORE,
+        Text::new("5/69"),
+        TextFont {
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
+            ..default()
+        },
+        PickingBehavior::IGNORE,
     );
 
     let loaded_26_fire_1_btn = (
         Name::new("loaded_26_fire_1_btn"),
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(25.),
                 height: Val::Percent(10.),
                 justify_content: JustifyContent::Center,
@@ -222,26 +230,24 @@ fn spawn_game_rule_select_menu(
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<Load26Fire1BtnClick>(),
+        // On::<Pointer<Click>>::send_event::<Load26Fire1BtnClick>(),
     );
 
     let loaded_26_fire_1_btn_text = (
         Name::new("loaded_26_fire_1_btn_text"),
-        TextBundle::from_section(
-            "1/26",
-            TextStyle {
-                font: my_assets.ttf_nanum_gothic_bold.clone(),
-                ..default()
-            },
-        ),
-        Pickable::IGNORE,
+        Text::new("1/26"),
+        TextFont {
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
+            ..default()
+        },
+        PickingBehavior::IGNORE,
     );
 
     let loaded_45_fire_5_btn = (
         Name::new("loaded_45_fire_5_btn"),
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(25.),
                 height: Val::Percent(10.),
                 justify_content: JustifyContent::Center,
@@ -255,26 +261,24 @@ fn spawn_game_rule_select_menu(
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<Load45Fire6BtnClick>(),
+        // On::<Pointer<Click>>::send_event::<Load45Fire6BtnClick>(),
     );
 
     let loaded_45_fire_5_btn_text = (
         Name::new("loaded_45_fire_5_btn_text"),
-        TextBundle::from_section(
-            "6/45",
-            TextStyle {
-                font: my_assets.ttf_nanum_gothic_bold.clone(),
-                ..default()
-            },
-        ),
-        Pickable::IGNORE,
+        Text::new("6/45"),
+        TextFont {
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
+            ..default()
+        },
+        PickingBehavior::IGNORE,
     );
 
     let custom_game_rule_btn = (
         Name::new("custom_game_rule_btn"),
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(25.),
                 height: Val::Percent(10.),
                 justify_content: JustifyContent::Center,
@@ -288,35 +292,33 @@ fn spawn_game_rule_select_menu(
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<CustomGameRuleBtnClick>(),
+        // On::<Pointer<Click>>::send_event::<CustomGameRuleBtnClick>(),
     );
     let custom_game_rule_img = ImageBundle {
-        style: Style {
+        node: Node {
             // width: Val::Percent(100.),
             height: Val::Percent(50.),
             ..default()
         },
-        image: UiImage::new(my_assets.png_customize.clone()),
+        image: ImageNode::new(my_assets.png_customize.clone()),
         ..default()
     };
     let custom_game_rule_btn_text = (
         Name::new("custom_game_rule_btn_text"),
-        TextBundle::from_section(
-            format!("{custom_type}"),
-            TextStyle {
-                font: my_assets.ttf_nanum_gothic_bold.clone(),
-                font_size: 18.,
-                ..default()
-            },
-        ),
-        Pickable::IGNORE,
+        Text::new(format!("{custom_type}")),
+        TextFont {
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
+            font_size: 18.,
+            ..default()
+        },
+        PickingBehavior::IGNORE,
     );
 
     let back_btn = (
         Name::new("back_btn"),
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(25.),
                 height: Val::Percent(10.),
                 justify_content: JustifyContent::Center,
@@ -330,40 +332,75 @@ fn spawn_game_rule_select_menu(
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<BackToMainMenuBtnClickEvent>(),
+        // On::<Pointer<Click>>::send_event::<BackToMainMenuBtnClickEvent>(),
     );
 
     let back_btn_img = ImageBundle {
-        style: Style {
+        node: Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: UiImage::new(my_assets.png_back.clone()),
+        image: ImageNode::new(my_assets.png_back.clone()),
         ..default()
     };
 
     commands.entity(root_entity).with_children(|parent| {
-        parent.spawn(loaded_45_fire_5_btn).with_children(|parent| {
-            parent.spawn(loaded_45_fire_5_btn_text);
-        });
+        parent
+            .spawn(loaded_45_fire_5_btn)
+            .observe(
+                |t: Trigger<Pointer<Click>>, mut ew: EventWriter<Load45Fire6BtnClick>| {
+                    ew.send(Load45Fire6BtnClick(t.entity(), t.hit.depth));
+                },
+            )
+            .with_children(|parent| {
+                parent.spawn(loaded_45_fire_5_btn_text);
+            });
 
-        parent.spawn(loaded69_fire_5_btn).with_children(|parent| {
-            parent.spawn(loaded_69_fire_5_btn_text);
-        });
+        parent
+            .spawn(loaded69_fire_5_btn)
+            .observe(
+                |t: Trigger<Pointer<Click>>, mut ew: EventWriter<Load69Fire5BtnClick>| {
+                    ew.send(Load69Fire5BtnClick(t.entity(), t.hit.depth));
+                },
+            )
+            .with_children(|parent| {
+                parent.spawn(loaded_69_fire_5_btn_text);
+            });
 
-        parent.spawn(loaded_26_fire_1_btn).with_children(|parent| {
-            parent.spawn(loaded_26_fire_1_btn_text);
-        });
+        parent
+            .spawn(loaded_26_fire_1_btn)
+            .observe(
+                |t: Trigger<Pointer<Click>>, mut ew: EventWriter<Load26Fire1BtnClick>| {
+                    ew.send(Load26Fire1BtnClick(t.entity(), t.hit.depth));
+                },
+            )
+            .with_children(|parent| {
+                parent.spawn(loaded_26_fire_1_btn_text);
+            });
 
-        parent.spawn(custom_game_rule_btn).with_children(|parent| {
-            parent.spawn(custom_game_rule_img);
-            parent.spawn(custom_game_rule_btn_text);
-        });
+        parent
+            .spawn(custom_game_rule_btn)
+            .observe(
+                |t: Trigger<Pointer<Click>>, mut ew: EventWriter<CustomGameRuleBtnClick>| {
+                    ew.send(CustomGameRuleBtnClick(t.entity(), t.hit.depth));
+                },
+            )
+            .with_children(|parent| {
+                parent.spawn(custom_game_rule_img);
+                parent.spawn(custom_game_rule_btn_text);
+            });
 
-        parent.spawn(back_btn).with_children(|parent| {
-            parent.spawn(back_btn_img);
-        });
+        parent
+            .spawn(back_btn)
+            .observe(
+                |t: Trigger<Pointer<Click>>, mut ew: EventWriter<BackToMainMenuBtnClickEvent>| {
+                    ew.send(BackToMainMenuBtnClickEvent(t.entity(), t.hit.depth));
+                },
+            )
+            .with_children(|parent| {
+                parent.spawn(back_btn_img);
+            });
     });
 }
 
@@ -376,7 +413,7 @@ fn spawn_game_menu(
     let wrap = (
         Name::new("wrap"),
         NodeBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(100.),
                 height: Val::Percent(10.),
                 justify_content: JustifyContent::Center,
@@ -389,7 +426,7 @@ fn spawn_game_menu(
     );
 
     let wrapwrap = (NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(100.),
             justify_content: JustifyContent::End,
@@ -404,7 +441,7 @@ fn spawn_game_menu(
     },);
 
     let game_type_wrap = (NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
             justify_content: JustifyContent::Center,
@@ -415,20 +452,20 @@ fn spawn_game_menu(
         // background_color: BackgroundColor(css::YELLOW.into()),
         ..default()
     },);
-    let game_type_txt = TextBundle::from_section(
-        game_type,
-        TextStyle {
+    let game_type_txt = (
+        Text::new(game_type),
+        TextFont {
             font: my_assets.ttf_nanum_gothic_bold.clone(),
-            color: css::BLACK.into(),
             ..default()
         },
+        TextColor(css::BLACK.into()),
     );
 
     let ball_shuffle_btn = (
         Name::new("ball_shuffle_btn"),
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(25.),
                 height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
@@ -443,16 +480,16 @@ fn spawn_game_menu(
             ..default()
         },
         ShuffleBtn,
-        On::<Pointer<Click>>::send_event::<GameMenuShuffleBtnClick>(),
+        // On::<Pointer<Click>>::send_event::<GameMenuShuffleBtnClick>(),
     );
 
     let ball_shuffle_btn_img = ImageBundle {
-        style: Style {
+        node: Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: UiImage::new(my_assets.png_shuffle.clone()),
+        image: ImageNode::new(my_assets.png_shuffle.clone()),
         ..default()
     };
 
@@ -460,7 +497,7 @@ fn spawn_game_menu(
         Name::new("game_run_btn"),
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(25.),
                 height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
@@ -475,15 +512,15 @@ fn spawn_game_menu(
             ..default()
         },
         GameRunBtn,
-        On::<Pointer<Click>>::send_event::<GameRunBtnClick>(),
+        // On::<Pointer<Click>>::send_event::<GameRunBtnClick>(),
     );
     let game_run_btn_img = ImageBundle {
-        style: Style {
+        node: Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: UiImage::new(my_assets.png_play.clone()),
+        image: ImageNode::new(my_assets.png_play.clone()),
         ..default()
     };
 
@@ -491,7 +528,7 @@ fn spawn_game_menu(
         Name::new("back_btn"),
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(25.),
                 height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
@@ -505,15 +542,15 @@ fn spawn_game_menu(
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
+        // On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
     );
     let back_btn_img = ImageBundle {
-        style: Style {
+        node: Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: UiImage::new(my_assets.png_back.clone()),
+        image: ImageNode::new(my_assets.png_back.clone()),
         ..default()
     };
 
@@ -523,17 +560,34 @@ fn spawn_game_menu(
                 parent.spawn(game_type_txt);
             });
             parent.spawn(wrap).with_children(|parent| {
-                parent.spawn(back_btn).with_children(|parent| {
+                parent.spawn(back_btn).observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<BackToGameRuleSelectBtnClick>| {
+                    ew.send(BackToGameRuleSelectBtnClick(t.entity(), t.hit.depth));
+                }).with_children(|parent| {
                     parent.spawn(back_btn_img);
                 });
 
-                parent.spawn(ball_shuffle_btn).with_children(|parent| {
-                    parent.spawn(ball_shuffle_btn_img);
-                });
+                parent
+                    .spawn(ball_shuffle_btn)
+                    .observe(
+                        |t: Trigger<Pointer<Click>>,
+                         mut ew: EventWriter<GameMenuShuffleBtnClick>| {
+                            ew.send(GameMenuShuffleBtnClick(t.entity(), t.hit.depth));
+                        },
+                    )
+                    .with_children(|parent| {
+                        parent.spawn(ball_shuffle_btn_img);
+                    });
 
-                parent.spawn(game_run_btn).with_children(|parent| {
-                    parent.spawn(game_run_btn_img);
-                });
+                parent
+                    .spawn(game_run_btn)
+                    .observe(
+                        |t: Trigger<Pointer<Click>>, mut ew: EventWriter<GameRunBtnClick>| {
+                            ew.send(GameRunBtnClick(t.entity(), t.hit.depth));
+                        },
+                    )
+                    .with_children(|parent| {
+                        parent.spawn(game_run_btn_img);
+                    });
             });
         });
     });
@@ -548,7 +602,7 @@ fn spawn_numbers_menu(
     let (paginated_ball_numbers, total_size) = paginate_with_total(&ball_numbers, 0, 5);
 
     let root_wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(100.),
             justify_content: JustifyContent::Center,
@@ -561,7 +615,7 @@ fn spawn_numbers_menu(
     };
 
     let wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(80.),
             height: Val::Percent(70.),
             justify_content: JustifyContent::Start,
@@ -573,7 +627,7 @@ fn spawn_numbers_menu(
     };
 
     let title_wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
             justify_content: JustifyContent::Start,
@@ -588,7 +642,7 @@ fn spawn_numbers_menu(
         Name::new("back_btn"),
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(10.),
                 height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
@@ -601,20 +655,20 @@ fn spawn_numbers_menu(
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<BackToMainMenuBtnClickEvent>(),
+        // On::<Pointer<Click>>::send_event::<BackToMainMenuBtnClickEvent>(),
     );
     let back_btn_img = ImageBundle {
-        style: Style {
+        node: Node {
             // width: Val::Percent(100.),
             height: Val::Percent(50.),
             ..default()
         },
-        image: UiImage::new(my_assets.png_back.clone()),
+        image: ImageNode::new(my_assets.png_back.clone()),
         ..default()
     };
 
     let title_txt_wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(80.),
             height: Val::Percent(100.),
             justify_content: JustifyContent::Center,
@@ -624,19 +678,19 @@ fn spawn_numbers_menu(
         ..default()
     };
 
-    let title = TextBundle::from_section(
-        txt_saved_numbers(),
-        TextStyle {
+    let title = (
+        Text::new(txt_saved_numbers()),
+        TextFont {
             font: my_assets.ttf_nanum_gothic_bold.clone(),
-            color: css::BLACK.into(),
             ..default()
         },
+        TextColor(css::BLACK.into()),
     );
 
     let content_wrap = (
         Name::new("NumbersContentNode"),
         NodeBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(100.),
                 height: Val::Percent(80.),
                 flex_direction: FlexDirection::Column,
@@ -650,7 +704,7 @@ fn spawn_numbers_menu(
     );
 
     let paging_wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
             justify_content: JustifyContent::Center,
@@ -665,7 +719,7 @@ fn spawn_numbers_menu(
     let paging_prev_btn = (
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(20.),
                 height: Val::Percent(80.),
                 justify_content: JustifyContent::Center,
@@ -679,22 +733,20 @@ fn spawn_numbers_menu(
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<NumbersPagingPrevBtnClick>(),
+        // On::<Pointer<Click>>::send_event::<NumbersPagingPrevBtnClick>(),
     );
 
     let paging_prev_btn_txt = (
-        TextBundle::from_section(
-            "<",
-            TextStyle {
-                font: my_assets.ttf_nanum_gothic_bold.clone(),
-                ..default()
-            },
-        ),
-        Pickable::IGNORE,
+        Text::new("<"),
+        TextFont {
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
+            ..default()
+        },
+        PickingBehavior::IGNORE,
     );
 
     let paging_txt_wrap = (NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(20.),
             height: Val::Percent(100.),
             justify_content: JustifyContent::Center,
@@ -705,14 +757,12 @@ fn spawn_numbers_menu(
     },);
 
     let paging_txt = (
-        TextBundle::from_section(
-            format!("1/{}", if total_size < 1 { 1 } else { total_size }),
-            TextStyle {
-                font: my_assets.ttf_nanum_gothic_bold.clone(),
-                color: css::BLACK.into(),
-                ..default()
-            },
-        ),
+        Text::new(format!("1/{}", if total_size < 1 { 1 } else { total_size })),
+        TextFont {
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
+            ..default()
+        },
+        TextColor(css::BLACK.into()),
         NumbersPagination {
             now: 0,
             last: total_size,
@@ -722,7 +772,7 @@ fn spawn_numbers_menu(
     let paging_next_btn = (
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(20.),
                 height: Val::Percent(80.),
                 justify_content: JustifyContent::Center,
@@ -736,18 +786,16 @@ fn spawn_numbers_menu(
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<NumbersPagingNextBtnClick>(),
+        // On::<Pointer<Click>>::send_event::<NumbersPagingNextBtnClick>(),
     );
 
     let paging_next_btn_txt = (
-        TextBundle::from_section(
-            ">",
-            TextStyle {
-                font: my_assets.ttf_nanum_gothic_bold.clone(),
-                ..default()
-            },
-        ),
-        Pickable::IGNORE,
+        Text::new(">"),
+        TextFont {
+            font: my_assets.ttf_nanum_gothic_bold.clone(),
+            ..default()
+        },
+        PickingBehavior::IGNORE,
     );
 
     let mut content_entity = commands.spawn_empty().id();
@@ -756,7 +804,9 @@ fn spawn_numbers_menu(
         parent.spawn(root_wrap).with_children(|parent| {
             parent.spawn(wrap).with_children(|parent| {
                 parent.spawn(title_wrap).with_children(|parent| {
-                    parent.spawn(back_btn).with_children(|parent| {
+                    parent.spawn(back_btn).observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<BackToMainMenuBtnClickEvent>| {
+                        ew.send(BackToMainMenuBtnClickEvent(t.entity(), t.hit.depth));
+                    }).with_children(|parent| {
                         parent.spawn(back_btn_img);
                     });
 
@@ -768,7 +818,9 @@ fn spawn_numbers_menu(
                 content_entity = parent.spawn(content_wrap).id();
 
                 parent.spawn(paging_wrap).with_children(|parent| {
-                    parent.spawn(paging_prev_btn).with_children(|parent| {
+                    parent.spawn(paging_prev_btn).observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<NumbersPagingPrevBtnClick>| {
+                        ew.send(NumbersPagingPrevBtnClick(t.entity(), t.hit.depth));
+                    }).with_children(|parent| {
                         parent.spawn(paging_prev_btn_txt);
                     });
 
@@ -776,7 +828,9 @@ fn spawn_numbers_menu(
                         parent.spawn(paging_txt);
                     });
 
-                    parent.spawn(paging_next_btn).with_children(|parent| {
+                    parent.spawn(paging_next_btn).observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<NumbersPagingNextBtnClick>| {
+                        ew.send(NumbersPagingNextBtnClick(t.entity(), t.hit.depth));
+                    }).with_children(|parent| {
                         parent.spawn(paging_next_btn_txt);
                     });
                 });
@@ -803,7 +857,7 @@ fn spawn_numbers_contents(
     my_assets: Res<MyAsstes>,
 ) {
     let content_item_wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(20.),
             border: UiRect::all(Val::Px(1.)),
@@ -815,7 +869,7 @@ fn spawn_numbers_contents(
     };
 
     let content_item_number_wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(10.),
             height: Val::Percent(100.),
             justify_content: JustifyContent::Center,
@@ -829,7 +883,7 @@ fn spawn_numbers_contents(
     };
 
     let content_item_body_wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(70.),
             height: Val::Percent(100.),
             flex_direction: FlexDirection::Column,
@@ -841,7 +895,7 @@ fn spawn_numbers_contents(
         ..default()
     };
     let content_item_remove_btn = (ButtonBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(20.),
             height: Val::Percent(100.),
             justify_content: JustifyContent::Center,
@@ -874,79 +928,73 @@ fn spawn_numbers_contents(
                     parent
                         .spawn(content_item_number_wrap.clone())
                         .with_children(|parent| {
-                            parent.spawn(TextBundle::from_section(
-                                (total_item_cnt - (page * 5 + i)).to_string(),
-                                TextStyle {
-                                    font: my_assets.ttf_nanum_gothic_bold.clone(),
-                                    color: css::BLACK.into(),
-                                    ..default()
-                                },
+                            parent.spawn((
+                                Text::new((total_item_cnt - (page * 5 + i)).to_string()),
+                                TextFont::from_font(my_assets.ttf_nanum_gothic_bold.clone()),
+                                TextColor(css::BLACK.into()),
                             ));
                         });
                     parent
                         .spawn(content_item_body_wrap.clone())
                         .with_children(|parent| {
-                            parent.spawn(TextBundle::from_section(
-                                format!(
+                            parent.spawn((
+                                Text::new(format!(
                                     "- {}",
                                     time_formatting(time.clone(), AppFfi::get_time_offset())
-                                ),
-                                TextStyle {
-                                    font: my_assets.ttf_nanum_gothic_bold.clone(),
-                                    color: css::BLACK.into(),
-                                    font_size: 14.,
-                                },
+                                )),
+                                TextFont::from_font(my_assets.ttf_nanum_gothic_bold.clone())
+                                    .with_font_size(14.),
+                                TextColor(css::BLACK.into()),
                             ));
-                            parent.spawn(TextBundle::from_section(
-                                format!("- {}", game_type.clone()),
-                                TextStyle {
-                                    font: my_assets.ttf_nanum_gothic_bold.clone(),
-                                    color: css::BLACK.into(),
-                                    font_size: 14.,
-                                },
+                            parent.spawn((
+                                Text::new(format!("- {}", game_type.clone())),
+                                TextFont::from_font(my_assets.ttf_nanum_gothic_bold.clone())
+                                    .with_font_size(14.),
+                                TextColor(css::BLACK.into()),
                             ));
 
                             let mut numbers = numbers.clone();
                             numbers.sort();
 
                             let ten = &numbers[..numbers.len().min(10)];
-                            parent.spawn(TextBundle::from_section(
-                                format!("{ten:?}"),
-                                TextStyle {
-                                    font: my_assets.ttf_nanum_gothic_bold.clone(),
-                                    font_size: 14.,
-                                    color: css::BLACK.into(),
-                                },
+                            parent.spawn((
+                                Text::new(format!("{ten:?}")),
+                                TextFont::from_font(my_assets.ttf_nanum_gothic_bold.clone())
+                                    .with_font_size(14.),
+                                TextColor(css::BLACK.into()),
                             ));
 
                             if numbers.len() > 10 {
                                 let ten = &numbers[10..];
-                                parent.spawn(TextBundle::from_section(
-                                    format!("{ten:?}"),
-                                    TextStyle {
-                                        font: my_assets.ttf_nanum_gothic_bold.clone(),
-                                        font_size: 13.,
-                                        color: css::BLACK.into(),
-                                    },
+
+                                parent.spawn((
+                                    Text::new(format!("{ten:?}")),
+                                    TextFont::from_font(my_assets.ttf_nanum_gothic_bold.clone())
+                                        .with_font_size(13.),
+                                    TextColor(css::BLACK.into()),
                                 ));
                             }
                         });
                     parent
                         .spawn(content_item_remove_btn.clone())
                         .insert(BtnIndianRedInteract)
-                        .insert(On::<Pointer<Click>>::send_event::<NumbersItemDeleteBtnClick>())
+                        // .insert(On::<Pointer<Click>>::send_event::<NumbersItemDeleteBtnClick>())
+                        .observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<NumbersItemDeleteBtnClick>| {
+                            //
+                            ew.send(NumbersItemDeleteBtnClick(t.entity(), t.hit.depth));
+                        })
                         .with_children(|parent| {
                             parent
                                 .spawn(ImageBundle {
-                                    style: Style {
+                                    node: Node {
                                         // width: Val::Percent(100.),
                                         height: Val::Percent(50.),
                                         ..default()
                                     },
-                                    image: UiImage::new(my_assets.png_trash.clone()),
+                                    image: ImageNode::new(my_assets.png_trash.clone()),
                                     ..default()
                                 })
-                                .insert(Pickable::IGNORE);
+                                .insert(PickingBehavior::IGNORE);
                         });
                 });
         }
@@ -960,7 +1008,7 @@ fn spawn_custom_rule_menu(
     my_assets: Res<MyAsstes>,
 ) {
     let root_wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(100.),
             justify_content: JustifyContent::Center,
@@ -976,7 +1024,7 @@ fn spawn_custom_rule_menu(
     let wrap = (
         Name::new("wrap"),
         NodeBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(80.),
                 height: Val::Percent(80.),
                 justify_content: JustifyContent::Start,
@@ -990,7 +1038,7 @@ fn spawn_custom_rule_menu(
         },
     );
     let wrap2 = (NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(80.),
             justify_content: JustifyContent::Center,
@@ -1003,7 +1051,7 @@ fn spawn_custom_rule_menu(
         ..default()
     },);
     let wrap3 = (NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
             justify_content: JustifyContent::Center,
@@ -1018,7 +1066,7 @@ fn spawn_custom_rule_menu(
     let custom_line_1_wrap = (
         Name::new("custom_line_1"),
         NodeBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(20.),
                 height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
@@ -1033,7 +1081,7 @@ fn spawn_custom_rule_menu(
     );
 
     let circle_1 = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(90.),
             height: Val::Percent(100. * 1. / 14.),
             justify_content: JustifyContent::Center,
@@ -1046,7 +1094,7 @@ fn spawn_custom_rule_menu(
         ..default()
     };
 
-    let circle_buttons_style = Style {
+    let circle_buttons_style = Node {
         width: Val::Percent(100.),
         height: Val::Percent(100.),
         justify_content: JustifyContent::Center,
@@ -1054,12 +1102,12 @@ fn spawn_custom_rule_menu(
         ..default()
     };
     let circle_btn = ButtonBundle {
-        style: circle_buttons_style.clone(),
+        node: circle_buttons_style.clone(),
         ..default()
     };
 
     let left_btn = (ButtonBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(30.),
             height: Val::Percent(70.),
             justify_content: JustifyContent::Center,
@@ -1076,17 +1124,14 @@ fn spawn_custom_rule_menu(
 
     let left_btn_txt = make_text("<");
 
-    let fire_cnt_txt = TextBundle::from_section(
-        custom_rule.fire.to_string(),
-        TextStyle {
-            font_size: 30.,
-            color: css::BLACK.into(),
-            ..default()
-        },
+    let fire_cnt_txt = (
+        Text::new(custom_rule.fire.to_string()),
+        TextFont::from_font_size(30.),
+        TextColor(css::BLACK.into()),
     );
 
     let right_btn = (ButtonBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(30.),
             height: Val::Percent(70.),
             justify_content: JustifyContent::Center,
@@ -1103,7 +1148,7 @@ fn spawn_custom_rule_menu(
     let right_btn_txt = make_text(">");
 
     let back_run_wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
             justify_content: JustifyContent::Center,
@@ -1119,7 +1164,7 @@ fn spawn_custom_rule_menu(
     let back_btn = (
         Name::new("back_btn"),
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(90.),
                 height: Val::Percent(90.),
                 justify_content: JustifyContent::Center,
@@ -1133,22 +1178,22 @@ fn spawn_custom_rule_menu(
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
+        // On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
     );
 
     let back_btn_img = ImageBundle {
-        style: Style {
+        node: Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: UiImage::new(my_assets.png_back.clone()),
+        image: ImageNode::new(my_assets.png_back.clone()),
         ..default()
     };
     let run_btn = (
         Name::new("back_btn"),
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(90.),
                 height: Val::Percent(90.),
                 justify_content: JustifyContent::Center,
@@ -1162,30 +1207,24 @@ fn spawn_custom_rule_menu(
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<CustomRuleRunBtnClick>(),
+        // On::<Pointer<Click>>::send_event::<CustomRuleRunBtnClick>(),
     );
     let run_btn_text = (
         Name::new("back_btn_text"),
-        TextBundle::from_section(
-            txt_ok(),
-            TextStyle {
-                font: my_assets.ttf_nanum_gothic_bold.clone(),
-                ..default()
-            },
-        ),
-        Pickable::IGNORE,
+        Text::new(txt_ok()),
+        TextFont::from_font(my_assets.ttf_nanum_gothic_bold.clone()),
+        PickingBehavior::IGNORE,
     );
     commands.entity(root_entity).with_children(|parent| {
         parent.spawn(root_wrap).with_children(|parent| {
             parent.spawn(wrap).with_children(|parent| {
-                parent.spawn(TextBundle::from_section(
-                    txt_insert_balls(),
-                    TextStyle {
-                        font: my_assets.ttf_nanum_gothic_bold.clone(),
-                        color: css::BLACK.into(),
-                        ..default()
-                    },
-                ));
+                parent.spawn(
+                    (
+                        Text::new(txt_insert_balls()),
+                        TextFont::from_font(my_assets.ttf_nanum_gothic_bold.clone()),
+                        TextColor(css::BLACK.into())
+                    )
+                );
                 parent.spawn(wrap2).with_children(|parent| {
                     let ranges = [(1..=14), (15..=28), (29..=42), (43..=56), (57..=70)];
                     for r in ranges {
@@ -1205,53 +1244,41 @@ fn spawn_custom_rule_menu(
                                             .spawn(circle_btn.clone())
                                             .insert(bg_col)
                                             .insert(custom_ball)
-                                            .insert(On::<Pointer<Down>>::send_event::<
-                                                CustomRuleBallClick,
-                                            >())
+                                            .observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<CustomRuleBallClick>| {
+                                                ew.send(CustomRuleBallClick(t.entity(), t.hit.depth));
+                                            }) 
+                                            // .insert(On::<Pointer<Down>>::send_event::<
+                                            //     CustomRuleBallClick,
+                                            // >())
                                             .with_children(|parent| {
-                                                parent
-                                                    .spawn(TextBundle::from_sections([
-                                                        TextSection::new(
-                                                            &i.to_string(),
-                                                            TextStyle {
-                                                                font: my_assets
-                                                                    .ttf_nanum_gothic_bold
-                                                                    .clone(),
-                                                                font_size: 16.,
-                                                                ..default()
-                                                            },
-                                                        ),
-                                                        TextSection::new(
-                                                            ox,
-                                                            TextStyle {
-                                                                font: my_assets
-                                                                    .ttf_nanum_gothic_bold
-                                                                    .clone(),
-                                                                font_size: 16.,
-                                                                ..default()
-                                                            },
-                                                        ),
-                                                    ]))
-                                                    .insert(Pickable::IGNORE);
-                                            });
+                                                parent.spawn((Text::new(i.to_string()), TextFont::from_font(my_assets
+                                                    .ttf_nanum_gothic_bold
+                                                    .clone()).with_font_size(16.))).insert(PickingBehavior::IGNORE);
+                                                parent.spawn((Text::new(ox.to_string()), TextFont::from_font(my_assets
+                                                    .ttf_nanum_gothic_bold
+                                                    .clone()).with_font_size(16.))).insert(PickingBehavior::IGNORE);
+                                           
                                     });
-                                }
+                                });
+                            }
                             });
                     }
                 });
-                parent.spawn(TextBundle::from_section(
-                    txt_draw_balls_count(),
-                    TextStyle {
-                        font: my_assets.ttf_nanum_gothic_bold.clone(),
-                        color: css::BLACK.into(),
-                        ..default()
-                    },
-                ));
+                parent.spawn(
+                    (
+                        Text::new(txt_draw_balls_count()),
+                        TextFont::from_font(my_assets.ttf_nanum_gothic_bold.clone()),
+                        TextColor(css::BLACK.into())
+                    )
+                );
                 parent.spawn(wrap3).with_children(|parent| {
                     // <
                     parent
                         .spawn(left_btn)
-                        .insert(On::<Pointer<Click>>::send_event::<CustomRuleFireCntDownClick>())
+                        .observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<CustomRuleFireCntDownClick>| {
+                            ew.send(CustomRuleFireCntDownClick(t.entity(), t.hit.depth));
+                        })
+                        // .insert(On::<Pointer<Click>>::send_event::<CustomRuleFireCntDownClick>())
                         .with_children(|parent| {
                             parent.spawn(left_btn_txt);
                         });
@@ -1262,7 +1289,10 @@ fn spawn_custom_rule_menu(
                     // >
                     parent
                         .spawn(right_btn)
-                        .insert(On::<Pointer<Click>>::send_event::<CustomRuleFireCntUpClick>())
+                        .observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<CustomRuleFireCntUpClick>| {
+                            ew.send(CustomRuleFireCntUpClick(t.entity(), t.hit.depth));
+                        })
+                        // .insert(On::<Pointer<Click>>::send_event::<CustomRuleFireCntUpClick>())
                         .with_children(|parent| {
                             parent.spawn(right_btn_txt);
                         });
@@ -1270,11 +1300,15 @@ fn spawn_custom_rule_menu(
 
                 parent.spawn(back_run_wrap).with_children(|parent| {
                     // back
-                    parent.spawn(back_btn).with_children(|parent| {
+                    parent.spawn(back_btn).observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<BackToGameRuleSelectBtnClick>| {
+                        ew.send(BackToGameRuleSelectBtnClick(t.entity(), t.hit.depth));
+                    }).with_children(|parent| {
                         parent.spawn(back_btn_img);
                     });
                     // run
-                    parent.spawn(run_btn).with_children(|parent| {
+                    parent.spawn(run_btn).observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<CustomRuleRunBtnClick>| {
+                        ew.send(CustomRuleRunBtnClick(t.entity(), t.hit.depth));
+                    }).with_children(|parent| {
                         parent.spawn(run_btn_text);
                     });
                 });
@@ -1295,7 +1329,7 @@ fn spawn_game_result_menu(
     // save btn
 
     let wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(100.),
             flex_direction: FlexDirection::Column,
@@ -1308,7 +1342,7 @@ fn spawn_game_result_menu(
         ..default()
     };
     let result_wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
             justify_content: JustifyContent::Center,
@@ -1318,18 +1352,16 @@ fn spawn_game_result_menu(
         ..default()
     };
 
-    let result_txt = TextBundle::from_section(
-        format!("{picked_numbers:?}"),
-        TextStyle {
-            font: my_assets.ttf_nanum_gothic_bold.clone(),
-            font_size: 20.,
-            color: css::BLACK.into(),
-            ..default()
-        },
+    let result_txt = 
+    (
+        Text::new(format!("{picked_numbers:?}")),
+        TextFont::from_font(my_assets.ttf_nanum_gothic_bold.clone()).with_font_size(20.),
+        TextColor(css::BLACK.into())
     );
+    
 
     let btn_wrap = NodeBundle {
-        style: Style {
+        node: Node {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
             flex_direction: FlexDirection::Row,
@@ -1357,7 +1389,7 @@ fn spawn_game_result_menu(
     let save_btn = (
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(30.),
                 height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
@@ -1372,22 +1404,22 @@ fn spawn_game_result_menu(
             ..default()
         },
         SaveBtn,
-        On::<Pointer<Click>>::send_event::<GameResultSaveBtnClick>(),
+        // On::<Pointer<Click>>::send_event::<GameResultSaveBtnClick>(),
     );
     let save_btn_img = ImageBundle {
-        style: Style {
+        node: Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: UiImage::new(my_assets.png_save.clone()),
+        image: ImageNode::new(my_assets.png_save.clone()),
         ..default()
     };
 
     let back_btn = (
         BtnInteract,
         ButtonBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(30.),
                 height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
@@ -1401,16 +1433,16 @@ fn spawn_game_result_menu(
             border_radius: BorderRadius::all(Val::Percent(5.)),
             ..default()
         },
-        On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
+        // On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
     );
 
     let back_btn_img = ImageBundle {
-        style: Style {
+        node: Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: UiImage::new(my_assets.png_back.clone()),
+        image: ImageNode::new(my_assets.png_back.clone()),
         ..default()
     };
 
@@ -1425,11 +1457,15 @@ fn spawn_game_result_menu(
                 //     parent.spawn(retry_btn_txt);
                 // });
 
-                parent.spawn(back_btn).with_children(|parent| {
+                parent.spawn(back_btn).observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<BackToGameRuleSelectBtnClick>| {
+                    ew.send(BackToGameRuleSelectBtnClick(t.entity(), t.hit.depth));
+                }).with_children(|parent| {
                     parent.spawn(back_btn_img);
                 });
 
-                parent.spawn(save_btn).with_children(|parent| {
+                parent.spawn(save_btn).observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<GameResultSaveBtnClick>| {
+                    ew.send(GameResultSaveBtnClick(t.entity(), t.hit.depth));
+                }).with_children(|parent| {
                     parent.spawn(save_btn_img);
                 });
             });
@@ -1442,7 +1478,7 @@ pub fn setup_main_ui(mut commands: Commands, my_assets: Res<MyAsstes>) {
         Name::new("root_node"),
         RootNode,
         NodeBundle {
-            style: Style {
+            node: Node {
                 width: Val::Percent(100.),
                 height: Val::Percent(100.),
                 justify_content: JustifyContent::Center,
@@ -1494,7 +1530,7 @@ pub fn button_indian_red_interaction(
                 *color = BUTTON_INDIAN_RED_CLICK_COLOR.into();
             }
             Interaction::None => {
-                *color = INDIAN_RED.into();
+                *color = css::INDIAN_RED.into();
             }
         }
     }
@@ -1804,13 +1840,21 @@ pub fn custom_rule_ball_click(
                     ui_config.saved_custom_rule.save_custom_rule();
 
                     if let Ok(child) = q_child.get(evt.0) {
-                        if let Ok(mut txt) = q_text.get_mut(child[0]) {
-                            if cb.1 {
-                                txt.sections[1].value = "[v]".to_string();
-                            } else {
-                                txt.sections[1].value = "[ ]".to_string();
-                            }
+                        if cb.1 {
+                            let mut text = q_text.get_mut(child[1]).unwrap();
+                            text.0 = "[v]".to_string();
+                            
+                        } else {
+                            let mut text = q_text.get_mut(child[1]).unwrap();
+                            text.0 = "[ ]".to_string();
                         }
+                        // if let Ok(mut txt) = q_text.get_mut(child[0]) {
+                        //     if cb.1 {
+                        //         txt.sections[1].value = "[v]".to_string();
+                        //     } else {
+                        //         txt.sections[1].value = "[ ]".to_string();
+                        //     }
+                        // }
                     }
                     if cb.1 {
                         *bg = BackgroundColor(css::BLUE.into());
@@ -1837,7 +1881,7 @@ pub fn custom_rule_fire_down_click(
                 ui_config.saved_custom_rule.fire = fc.0;
                 ui_config.saved_custom_rule.save_custom_rule();
 
-                text.sections[0].value = fc.0.to_string();
+                text.0 = fc.0.to_string();
             }
         }
     }
@@ -1879,7 +1923,7 @@ pub fn custom_rule_fire_up_click(
                 ui_config.saved_custom_rule.fire = fc.0;
                 ui_config.saved_custom_rule.save_custom_rule();
 
-                text.sections[0].value = fc.0.to_string();
+                text.0 = fc.0.to_string();
             }
         }
     }
@@ -1939,7 +1983,7 @@ pub fn numbers_paging_prev_click(
                     pagination.now -= 1;
                 }
 
-                text.sections[0].value = format!("{}/{}", pagination.now + 1, pagination.last);
+                text.0 = format!("{}/{}", pagination.now + 1, pagination.last);
 
                 let mut ball_numbers = ui_config.saved_ball_numbers.clone();
                 ball_numbers.sort_by(|a, b| b.time.cmp(&a.time));
@@ -1977,7 +2021,7 @@ pub fn numbers_paging_next_click(
                     pagination.now += 1;
                 }
 
-                text.sections[0].value = format!("{}/{}", pagination.now + 1, pagination.last);
+                text.0 = format!("{}/{}", pagination.now + 1, pagination.last);
 
                 let mut ball_numbers = ui_config.saved_ball_numbers.clone();
                 ball_numbers.sort_by(|a, b| b.time.cmp(&a.time));
@@ -2038,7 +2082,7 @@ pub fn numbers_item_delete_btn_click(
                     }
                     let (ball_nums, ..) = paginate_with_total(&ball_numbers, pagination.now, 5);
 
-                    text.sections[0].value = format!(
+                    text.0 = format!(
                         "{}/{}",
                         if pagination.now + 1 < 1 {
                             1

@@ -1,10 +1,9 @@
-use bevy::{prelude::*, window::WindowMode};
+use bevy::{prelude::*, window::WindowMode, winit::WinitSettings};
 use lucky_ball::AppPlugin;
 
 #[bevy_main]
 fn main() {
     App::new()
-        .insert_resource(Msaa::Off)
         .add_plugins(
             DefaultPlugins
                 // .set(RenderPlugin {
@@ -17,12 +16,13 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         resizable: false,
-                        mode: WindowMode::BorderlessFullscreen,
+                        mode: WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
                         ..default()
                     }),
                     ..default()
                 }),
         )
         .add_plugins(AppPlugin)
+        .insert_resource(WinitSettings::mobile())
         .run();
 }

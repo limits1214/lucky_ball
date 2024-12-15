@@ -3,7 +3,7 @@ use bevy_inspector_egui::{
     bevy_egui::{EguiContext, EguiPlugin},
     egui,
 };
-use iyes_perf_ui::{entries::PerfUiBundle, PerfUiPlugin};
+use iyes_perf_ui::{prelude::PerfUiDefaultEntries, PerfUiPlugin};
 
 use crate::{
     ffi::ffi_fn::{admob_interstitial_is_ready, kv_delete, kv_exists, kv_get, kv_set},
@@ -214,5 +214,5 @@ fn inspector_ui(world: &mut World) {
     });
 }
 fn setup(mut commands: Commands) {
-    commands.spawn(PerfUiBundle::default());
+    commands.spawn(PerfUiDefaultEntries::default());
 }

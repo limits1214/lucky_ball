@@ -1,6 +1,7 @@
 use crate::{asset::AssetsPlugin, ffi::FfiPlugin, game::GamePlugin, ui::MyUiPlugin};
 // use avian3d::prelude::*;
 use bevy::prelude::*;
+// use bevy_hanabi::HanabiPlugin;
 // use bevy_framepace::{FramepaceSettings, Limiter};
 // use bevy_kira_audio::AudioPlugin;
 // use bevy_mod_picking::prelude::*;
@@ -24,6 +25,7 @@ impl Plugin for AppPlugin {
         app.add_plugins(PanOrbitCameraPlugin)
             // .add_plugins(AudioPlugin)
             .add_plugins(TweeningPlugin)
+            // .add_plugins(HanabiPlugin)
             // .add_plugins(DefaultPickingPlugins)
             // .add_plugins(PhysicsPlugins::new(PostUpdate))
             // .add_plugins(bevy_framepace::FramepacePlugin)
@@ -42,6 +44,7 @@ impl Plugin for AppPlugin {
             .add_plugins(GamePlugin)
             .add_plugins(MyUiPlugin)
             .add_plugins(FfiPlugin)
+            // .add_plugins(MyFireworkPlugin)
             .insert_resource(ClearColor(Color::srgb(0.53, 0.81, 0.92)));
 
         app.add_systems(Startup, camera_light_setup);

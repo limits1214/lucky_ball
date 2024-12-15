@@ -1,8 +1,7 @@
 use bevy::{
     gltf::{GltfMesh, GltfNode},
-    math::{vec3, VectorSpace},
+    math::vec3,
     prelude::*,
-    utils::hashbrown::HashSet,
 };
 use bevy_rapier3d::prelude::*;
 use bevy_tweening::{lens::TransformPositionLens, Animator, Delay, Tween, TweenCompleted};
@@ -53,6 +52,27 @@ use super::{
 // pub fn spawn_balls(mut ew: EventWriter<BallSpawnEvent>) {
 //     ew.send(BallSpawnEvent(false));
 // }
+
+pub fn test_new_setup(
+    mut commands: Commands,
+    gltf_assets: Res<Assets<Gltf>>,
+    my_assets: Res<MyAsstes>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let Some(gltf) = gltf_assets.get(my_assets.luckyball.id()) else {
+        return;
+    };
+    // commands.spawn((
+    //     SceneRoot(gltf.named_scenes["Scene"].clone()),
+    //     Name::new("luckyball"),
+    // ));
+    commands.spawn((
+        Mesh3d(meshes.add(Cuboid::default())),
+        MeshMaterial3d(materials.add(Color::srgb(0.5, 0.4, 0.3))),
+        Transform::from_xyz(0.0, 0.5, 0.0),
+    ));
+}
 
 pub fn spawn_setup(
     mut commands: Commands,

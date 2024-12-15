@@ -1,9 +1,10 @@
-use avian3d::prelude::*;
 use bevy::{
     gltf::{GltfMesh, GltfNode},
     math::{vec3, VectorSpace},
     prelude::*,
+    utils::hashbrown::HashSet,
 };
+use bevy_rapier3d::prelude::*;
 use bevy_tweening::{
     lens::TransformPositionLens, Animator, Delay, EaseFunction, Tween, TweenCompleted,
 };
@@ -147,9 +148,11 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        .insert(SpeculativeMargin::MAX)
-                        .insert(RigidBody::Static)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(RigidBody::Fixed)
+                        .insert(
+                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
+                                .unwrap(),
+                        )
                         .insert(Name::new("BallCase"));
                 } else if node_name == "BallInletCover" {
                     commands
@@ -170,10 +173,13 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        .insert(RigidBody::Kinematic)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(RigidBody::KinematicVelocityBased)
+                        .insert(
+                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
+                                .unwrap(),
+                        )
                         .insert(BallMixer)
-                        .insert(AngularVelocity(vec3(0., 1., 0.)))
+                        .insert(Velocity::angular(vec3(0., 1., 0.)))
                         .insert(Name::new("BallMixer"));
                 } else if node_name == "BallMixerColliderd" {
                     commands
@@ -187,10 +193,13 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        .insert(RigidBody::Kinematic)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(RigidBody::KinematicPositionBased)
+                        .insert(
+                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
+                                .unwrap(),
+                        )
                         .insert(BallMixer)
-                        .insert(AngularVelocity(vec3(0., 0., 0.)))
+                        .insert(Velocity::angular(vec3(0., 0., 0.)))
                         .insert(Name::new("BallMixerCollider"));
                 } else if node_name == "BallDrawStick" {
                     commands
@@ -200,8 +209,11 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        .insert(RigidBody::Static)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(RigidBody::Fixed)
+                        .insert(
+                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
+                                .unwrap(),
+                        )
                         .insert(BallDrawStick)
                         .insert(Name::new("BallDrawStick"));
                 } else if node_name == "BallDrawStickIn" {
@@ -224,8 +236,11 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        .insert(RigidBody::Static)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(RigidBody::Fixed)
+                        .insert(
+                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
+                                .unwrap(),
+                        )
                         .insert(Name::new("pool"));
                 } else if node_name == "BottomSupport" {
                     commands
@@ -246,8 +261,11 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        .insert(RigidBody::Static)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(RigidBody::Fixed)
+                        .insert(
+                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
+                                .unwrap(),
+                        )
                         .insert(Name::new("test3"));
                 } else if node_name == "BallOutletGuideHolder1"
                     || node_name == "BallOutletGuideHolder2"
@@ -272,8 +290,11 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        .insert(RigidBody::Static)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(RigidBody::Fixed)
+                        .insert(
+                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
+                                .unwrap(),
+                        )
                         .insert(Name::new("BallOutletGuard"));
                 } else if node_name == "BallOutletGuideHolderLast" {
                     commands
@@ -283,9 +304,15 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        .insert(RigidBody::Static)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(RigidBody::Fixed)
+                        .insert(
+                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
+                                .unwrap(),
+                        )
                         .insert(BallOutletGuideHolderLast)
+                        // .insert(Sensor)
+                        .insert(ActiveEvents::COLLISION_EVENTS)
+                        .insert(CollidingEntities::default())
                         .insert(Name::new("BallOutletGuideHolderLast"));
                 } else if node_name == "Base" {
                     commands
@@ -307,23 +334,32 @@ pub fn spawn_setup(
                             transform,
                             ..default()
                         })
-                        .insert(RigidBody::Static)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(RigidBody::Fixed)
+                        .insert(
+                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
+                                .unwrap(),
+                        )
                         // .insert(BallOutletGuideHolderLast)
                         .insert(PoolOutletCover)
                         .insert(Name::new("poolOutletCover"));
                 } else if node_name == "BallOutletGuideResultCollider" {
                     commands
                         .spawn(Name::new("BallOutletGuideResultCollider"))
-                        .insert(RigidBody::Static)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(RigidBody::Fixed)
+                        .insert(
+                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
+                                .unwrap(),
+                        )
                         .insert(TransformBundle::from_transform(transform));
                     // .insert(BallOutletGuideHolderLast);
                 } else if node_name == "BallOutletGuideConnector" {
                     commands
                         .spawn(Name::new("BallOutletGuideConnector"))
-                        .insert(RigidBody::Static)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        .insert(RigidBody::Fixed)
+                        .insert(
+                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
+                                .unwrap(),
+                        )
                         .insert(TransformBundle::from_transform(transform));
                     // .insert(BallOutletGuideHolderLast);
                 } else if node_name == "poolPumpCollider" {
@@ -331,7 +367,12 @@ pub fn spawn_setup(
                         .spawn(Name::new("poolPumpCollider"))
                         .insert(PoolPumpSensor)
                         .insert(Sensor)
-                        .insert(Collider::trimesh_from_mesh(mesh).unwrap())
+                        // .insert(ActiveEvents::COLLISION_EVENTS)
+                        // .insert(CollidingEntities::default())
+                        .insert(
+                            Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh)
+                                .unwrap(),
+                        )
                         .insert(TransformBundle::from_transform(transform));
                     // .insert(BallOutletGuideHolderLast);
                 } else if node_name == "poolSupport" {
@@ -351,23 +392,29 @@ pub fn spawn_setup(
         }
     }
 
-    commands.spawn((
-        Name::new("BallCatchSensor"),
-        Sensor,
-        Collider::sphere(0.01),
-        BallCatchSensor,
-        TransformBundle::from_transform(Transform::from_xyz(0., -0.9, 0.)),
-    ));
+    commands
+        .spawn((
+            Name::new("BallCatchSensor"),
+            Sensor,
+            Collider::ball(0.01),
+            BallCatchSensor,
+            TransformBundle::from_transform(Transform::from_xyz(0., -0.9, 0.)),
+        ))
+        .insert(ActiveEvents::COLLISION_EVENTS)
+        .insert(CollidingEntities::default());
 
     commands
         .spawn_empty()
         .insert(Name::new("pool ball cnt sensor"))
         .insert(PoolBallCntSensor)
+        // .insert(ActiveCollisionTypes::all())
+        .insert(ActiveEvents::COLLISION_EVENTS)
+        .insert(CollidingEntities::default())
         .insert(Sensor)
         .insert(TransformBundle::from_transform(
             Transform::from_xyz(-1., 1., 0.).with_scale(vec3(4., 1., 1.)),
         ))
-        .insert(Collider::cuboid(0.1, 2., 1.0));
+        .insert(Collider::cuboid(0.1 / 2., 2. / 2., 1.0 / 2.));
 
     commands
         .spawn_empty()
@@ -376,7 +423,10 @@ pub fn spawn_setup(
             0., 1.1, 0.,
         )))
         .insert(BallReleaseSensor)
-        .insert(Collider::cuboid(0.3, 0.3, 0.3));
+        .insert(Sensor)
+        .insert(ActiveEvents::COLLISION_EVENTS)
+        .insert(CollidingEntities::default())
+        .insert(Collider::cuboid(0.3 / 2., 0.3 / 2., 0.3 / 2.));
 }
 
 pub fn er_ball_spawn(
@@ -473,16 +523,19 @@ pub fn er_ball_spawn(
                         transform,
                         ..default()
                     })
-                    .insert(RigidBody::Static)
+                    .insert(RigidBody::Fixed)
                     .insert(Friction::new(0.4))
                     .insert(Restitution::new(0.9))
-                    .insert(Collider::sphere(1.))
+                    .insert(Collider::ball(1.))
+                    // .insert(ActiveCollisionTypes::default())
+                    .insert(ActiveEvents::COLLISION_EVENTS)
                     .insert(Ball(number))
-                    .insert(LinearDamping(0.8))
-                    .insert(AngularDamping(0.8))
+                    .insert(Damping {
+                        angular_damping: 0.8,
+                        linear_damping: 0.8,
+                    })
                     .insert(GravityScale(0.5))
                     // .insert(SpeculativeMargin(10.0))
-                    .insert(SpeculativeMargin::MAX)
                     // .insert(SweptCcd::default())
                     .insert(Name::new(node_name));
             }
@@ -700,12 +753,12 @@ pub fn ball_holder_last_collding(
     for (_entity, colliding_entities) in &q_last_holder {
         for entity in colliding_entities.iter() {
             // info!("colliding_entities {entity:?}");
-            if let Ok(entity) = q_ball.get(*entity) {
+            if let Ok(entity) = q_ball.get(entity) {
                 info!("colliding ball ");
                 commands
                     .entity(entity)
                     .insert(PickedStatic)
-                    .insert(RigidBody::Static);
+                    .insert(RigidBody::Fixed);
             }
         }
     }
@@ -719,12 +772,15 @@ pub fn ball_picked_static(
     for (_entity, colliding_entities) in &q_picked_static {
         for entity in colliding_entities.iter() {
             // info!("colliding_entities {entity:?}");
-            if let Ok(entity) = q_ball.get(*entity) {
+            if let Ok(entity) = q_ball.get(entity) {
                 // info!("colliding ball {:?}", ball.0);
                 commands
                     .entity(entity)
                     .insert(PickedStatic)
-                    .insert(RigidBody::Static);
+                    // .insert(Sensor)
+                    .insert(ActiveEvents::COLLISION_EVENTS)
+                    .insert(CollidingEntities::default())
+                    .insert(RigidBody::Fixed);
             }
         }
     }
@@ -739,16 +795,19 @@ pub fn pool_pump_sensor(
     if config.is_running {
         for (_entity, colliding_entitiles) in &q_sensor {
             for entity in colliding_entitiles.iter() {
-                if let Ok(entity) = q_ball.get(*entity) {
+                if let Ok(entity) = q_ball.get(entity) {
                     let mut impulse = ExternalImpulse::default();
-                    impulse.apply_impulse(Vec3::X * 0.002);
+
+                    impulse.impulse = Vec3::X * 0.002;
                     commands
                         .entity(entity)
                         .remove::<GravityScale>()
                         // .insert(GravityScale::default())
                         .insert(impulse)
-                        .insert(AngularVelocity(Vec3::ZERO))
-                        .insert(LinearVelocity(Vec3::ZERO));
+                        .insert(Velocity {
+                            angvel: Vec3::ZERO,
+                            linvel: Vec3::ZERO,
+                        });
                 }
             }
         }
@@ -760,13 +819,26 @@ pub fn pool_ball_cnt_zero_sensor(
     q_sensor: Query<(Entity, &CollidingEntities), With<PoolBallCntSensor>>,
     q_ball: Query<&Ball>,
     mut ew: EventWriter<GameStepFinishEvent>,
+    mut collision_events: EventReader<CollisionEvent>,
+    mut contact_force_events: EventReader<ContactForceEvent>,
 ) {
+    // for collision_event in collision_events.read() {
+    //     println!("Received collision event: {:?}", collision_event);
+    // }
     if config.is_running {
         if config.is_pool_ball_cnt_sensor {
+            // for contact_force_event in contact_force_events.read() {
+            //     println!("Received contact force event: {:?}", contact_force_event);
+            // }
+            //
             for (_entity, colliding_entitiles) in &q_sensor {
+                info!(
+                    "q_sensor colliding_entitiles {:?}",
+                    colliding_entitiles.len()
+                );
                 let mut ball_cnt = 0;
                 for entity in colliding_entitiles.iter() {
-                    if let Ok(_) = q_ball.get(*entity) {
+                    if let Ok(_) = q_ball.get(entity) {
                         ball_cnt += 1;
                     }
                 }
@@ -792,7 +864,7 @@ pub fn ball_release_sensor(
                 let mut is_ball_released = true;
 
                 for entity in colliding_entitiles.iter() {
-                    if let Ok(_) = q_ball.get(*entity) {
+                    if let Ok(_) = q_ball.get(entity) {
                         is_ball_released = false;
                     }
                 }
@@ -824,7 +896,7 @@ pub fn ball_catch(
         if config.is_catching {
             for (_entity, colliding_entities) in &q_sensor {
                 for entity in colliding_entities.iter() {
-                    if let Ok((entity, transform, ball)) = q_ball.get(*entity) {
+                    if let Ok((entity, transform, ball)) = q_ball.get(entity) {
                         config.is_catching = false;
                         let tween = Tween::new(
                             EaseFunction::QuadraticInOut,
@@ -837,9 +909,11 @@ pub fn ball_catch(
                         .with_completed_event(TWEEN_BALL_CATCH_END);
                         commands
                             .entity(entity)
-                            .insert(RigidBody::Static)
-                            .insert(AngularVelocity(Vec3::ZERO))
-                            .insert(LinearVelocity(Vec3::ZERO))
+                            .insert(RigidBody::Fixed)
+                            .insert(Velocity {
+                                angvel: Vec3::ZERO,
+                                linvel: Vec3::ZERO,
+                            })
                             .insert(Catched)
                             .insert(Picked)
                             .insert(Animator::new(tween));
@@ -869,7 +943,7 @@ pub fn er_ball_release(
                     .insert(RigidBody::Dynamic);
 
                 let mut impulse = ExternalImpulse::default();
-                impulse.apply_impulse(Vec3::NEG_Z * 0.001);
+                impulse.impulse = Vec3::NEG_Z * 0.001;
                 commands.entity(entity).insert(impulse);
             }
         }
@@ -938,7 +1012,7 @@ pub fn er_ball_rigid_change(
             }
             STEP_BALL_RIGID_TO_STATIC => {
                 for entity in &q_ball {
-                    commands.entity(entity).insert(RigidBody::Static);
+                    commands.entity(entity).insert(RigidBody::Fixed);
                 }
             }
             _ => {}
@@ -955,10 +1029,10 @@ pub fn draw_stick_rigid_change(
     for GameStepStartEvent { event_id, .. } in er.read() {
         if *event_id == STEP_BALL_STICK_RIGID_TO_STATIC {
             if let Ok(entity) = q_stick.get_single() {
-                commands.entity(entity).insert(RigidBody::Static);
+                commands.entity(entity).insert(RigidBody::Fixed);
             }
             if let Ok(entity) = q_stick_in.get_single() {
-                commands.entity(entity).insert(RigidBody::Static);
+                commands.entity(entity).insert(RigidBody::Fixed);
             }
         } else if *event_id == STEP_BALL_STICK_RIGID_TO_EMPTY {
             if let Ok(entity) = q_stick.get_single() {
@@ -974,7 +1048,7 @@ pub fn draw_stick_rigid_change(
 pub fn ball_mixer_rotate(
     mut commands: Commands,
     mut er: EventReader<GameStepStartEvent>,
-    q_mixer: Query<(Entity, &AngularVelocity), With<BallMixer>>,
+    q_mixer: Query<(Entity, &Velocity), With<BallMixer>>,
 ) {
     for evt in er.read() {
         match evt {
@@ -987,7 +1061,7 @@ pub fn ball_mixer_rotate(
                         EaseFunction::QuarticInOut,
                         Duration::from_millis(1600),
                         MyAngularVelocityYLens {
-                            start: av.y,
+                            start: av.angvel.y,
                             end: *speed,
                         },
                     )
@@ -1210,10 +1284,11 @@ pub fn game_run_step_finish(
                     for entity in &q_rjt {
                         commands.entity(entity).despawn_recursive();
                     }
+                    // from open end temp
+                    ew_step_start.send(GameStepStartEvent::new(STEP_BALL_RIGID_TO_DYNAMIC));
                 }
                 STEP_POOL_OUTLET_OPEN_END => {
                     config.is_pool_ball_cnt_sensor = true;
-                    ew_step_start.send(GameStepStartEvent::new(STEP_BALL_RIGID_TO_DYNAMIC));
                 }
                 STEP_POOL_BALL_ZERO => {
                     ew_step_start.send(GameStepStartEvent::new(STEP_POOL_OUTLET_CLOSE_START));

@@ -1,6 +1,7 @@
 mod app;
 mod asset;
 mod ffi;
+// mod firework;
 mod game;
 #[cfg(feature = "inspector")]
 mod inspector;

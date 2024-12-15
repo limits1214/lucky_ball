@@ -221,4 +221,6 @@ impl AppFfiTrait for AppFfi {
     fn get_time_offset() -> i32 {
         unsafe { ffi_get_time_offset() }
     }
+
+    fn splash_hide() {}
 }

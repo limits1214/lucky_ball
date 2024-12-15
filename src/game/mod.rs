@@ -1,5 +1,5 @@
-use avian3d::prelude::AngularVelocity;
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::Velocity;
 use bevy_tweening::{component_animator_system, AnimationSystem, Lens};
 use event::{
     BallClearEvent, BallSpawnEvent, DrawStickResetEvent, GameEndEvent, GameRunEvent,
@@ -88,8 +88,7 @@ impl Plugin for GamePlugin {
             )
             .add_systems(
                 Update,
-                component_animator_system::<AngularVelocity>
-                    .in_set(AnimationSystem::AnimationUpdate),
+                component_animator_system::<Velocity>.in_set(AnimationSystem::AnimationUpdate),
             );
     }
 }
@@ -99,8 +98,8 @@ pub struct MyAngularVelocityYLens {
     end: f32,
 }
 
-impl Lens<AngularVelocity> for MyAngularVelocityYLens {
-    fn lerp(&mut self, target: &mut dyn bevy_tweening::Targetable<AngularVelocity>, ratio: f32) {
-        target.y = self.start + (self.end - self.start) * ratio;
+impl Lens<Velocity> for MyAngularVelocityYLens {
+    fn lerp(&mut self, target: &mut dyn bevy_tweening::Targetable<Velocity>, ratio: f32) {
+        target.angvel.y = self.start + (self.end - self.start) * ratio;
     }
 }

@@ -3,11 +3,8 @@ use chrono::{DateTime, FixedOffset, Utc};
 
 use super::component::TextResize;
 
-pub fn make_text(txt: &str) -> (TextBundle, TextResize) {
-    (
-        TextBundle::from_section(txt, TextStyle { ..default() }),
-        TextResize,
-    )
+pub fn make_text(txt: &str) -> (Text, TextFont, TextResize) {
+    (Text::new(txt), TextFont { ..default() }, TextResize)
 }
 
 pub fn paginate_with_total<T>(items: &[T], page: usize, page_size: usize) -> (&[T], usize) {

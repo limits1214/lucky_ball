@@ -3,7 +3,7 @@ use crate::{asset::AssetsPlugin, ffi::FfiPlugin, game::GamePlugin, ui::MyUiPlugi
 use bevy::prelude::*;
 // use bevy_framepace::{FramepaceSettings, Limiter};
 // use bevy_kira_audio::AudioPlugin;
-use bevy_mod_picking::prelude::*;
+// use bevy_mod_picking::prelude::*;
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 use bevy_rapier3d::prelude::*;
 use bevy_tweening::TweeningPlugin;
@@ -16,7 +16,7 @@ impl Plugin for AppPlugin {
     fn build(&self, app: &mut App) {
         app.insert_state(MyStates::Load(Loading::Loading));
 
-        let mut config = RapierConfiguration::new(1.);
+        // let mut config = RapierConfiguration::new(1.);
         // config.timestep_mode = TimestepMode::Fixed {
         //     dt: 1. / 60.,
         //     substeps: 1,
@@ -24,13 +24,13 @@ impl Plugin for AppPlugin {
         app.add_plugins(PanOrbitCameraPlugin)
             // .add_plugins(AudioPlugin)
             .add_plugins(TweeningPlugin)
-            .add_plugins(DefaultPickingPlugins)
+            // .add_plugins(DefaultPickingPlugins)
             // .add_plugins(PhysicsPlugins::new(PostUpdate))
             // .add_plugins(bevy_framepace::FramepacePlugin)
             // .insert_resource(Time::new_with(Physics::fixed_hz(144.0)))
             // .insert_resource(Time::<Physics>::default().with_relative_speed(2.0))
             .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
-            .insert_resource(config)
+            // .insert_resource(config)
             // .insert_resource(SubstepCount(12))
             ;
 
@@ -61,15 +61,17 @@ fn camera_light_setup(mut commands: Commands) {
     let mut panorbit = PanOrbitCamera::default();
     // panorbit.yaw_upper_limit = Some(20.);
     panorbit.zoom_upper_limit = Some(20.);
-    panorbit.zoom_lower_limit = Some(4.);
+    panorbit.zoom_lower_limit = 4.;
     // panorbit.modifier_pan = Some(KeyCode::ShiftLeft);
     panorbit.pan_sensitivity = 0.;
 
     commands.spawn((
         Camera3dBundle {
             transform: Transform::from_xyz(8.0, 5.0, 0.0).looking_at(Vec3::Y * 2.0, Vec3::Y),
+            msaa: Msaa::Off,
             ..default()
         },
+        // Msaa::Off,
         panorbit,
     ));
 }

@@ -4,7 +4,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_rapier3d::prelude::*;
-use bevy_tweening::{lens::TransformPositionLens, Animator, Delay, Tween, TweenCompleted};
+use bevy_tweening::{lens::TransformPositionLens, Animator, Tween, TweenCompleted};
 use rand::Rng;
 use std::time::Duration;
 
@@ -63,15 +63,264 @@ pub fn test_new_setup(
     let Some(gltf) = gltf_assets.get(my_assets.luckyball.id()) else {
         return;
     };
+
     // commands.spawn((
-    //     SceneRoot(gltf.named_scenes["Scene"].clone()),
-    //     Name::new("luckyball"),
+    //     DirectionalLight {
+    //         illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 2.,
+    //         ..default()
+    //     },
+    //     Transform::from_xyz(16.0, 16.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
+    //     Name::new("DirectionalLight"),
     // ));
+    // commands.spawn((
+    //     DirectionalLight {
+    //         illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 10.,
+    //         ..default()
+    //     },
+    //     Transform::from_xyz(-16.0, -16.0, -16.0).looking_at(Vec3::ZERO, Vec3::Y),
+    //     Name::new("DirectionalLight bck"),
+    // ));
+    // commands.spawn((
+    //     DirectionalLight {
+    //         illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 10.,
+    //         ..default()
+    //     },
+    //     Transform::from_xyz(-16.0, -16.0, 16.0).looking_at(Vec3::ZERO, Vec3::Y),
+    //     Name::new("DirectionalLight bck2"),
+    // ));
+
+    commands.insert_resource(AmbientLight {
+        brightness: 2000.,
+        ..default()
+    });
+
     commands.spawn((
-        Mesh3d(meshes.add(Cuboid::default())),
-        MeshMaterial3d(materials.add(Color::srgb(0.5, 0.4, 0.3))),
-        Transform::from_xyz(0.0, 0.5, 0.0),
+        SceneRoot(gltf.named_scenes["Scene"].clone()),
+        Name::new("luckyballscene"),
     ));
+
+    commands
+        .spawn((
+            Name::new("BallCatchSensor"),
+            Sensor,
+            Collider::ball(0.01),
+            BallCatchSensor,
+            Transform::from_xyz(0., -0.9, 0.),
+            // TransformBundle::from_transform(Transform::from_xyz(0., -0.9, 0.)),
+        ))
+        .insert(ActiveEvents::COLLISION_EVENTS)
+        .insert(CollidingEntities::default());
+
+    commands
+        .spawn_empty()
+        .insert(Name::new("pool ball cnt sensor"))
+        .insert(PoolBallCntSensor)
+        // .insert(ActiveCollisionTypes::all())
+        .insert(ActiveEvents::COLLISION_EVENTS)
+        .insert(CollidingEntities::default())
+        .insert(Sensor)
+        .insert(Transform::from_xyz(-1., 1., 0.).with_scale(vec3(4., 1., 1.)))
+        // .insert(TransformBundle::from_transform(
+        //     Transform::from_xyz(-1., 1., 0.).with_scale(vec3(4., 1., 1.)),
+        // ))
+        .insert(Collider::cuboid(0.1 / 2., 2. / 2., 1.0 / 2.));
+
+    commands
+        .spawn_empty()
+        .insert(Name::new("ball release sensor"))
+        .insert(Transform::from_xyz(0., 1.1, 0.))
+        // .insert(TransformBundle::from_transform(Transform::from_xyz(
+        //     0., 1.1, 0.,
+        // )))
+        .insert(BallReleaseSensor)
+        .insert(Sensor)
+        .insert(ActiveEvents::COLLISION_EVENTS)
+        .insert(CollidingEntities::default())
+        .insert(Collider::cuboid(0.3 / 2., 0.3 / 2., 0.3 / 2.));
+}
+
+pub fn new_setup_added(
+    mut commands: Commands,
+    q_added_name: Query<(Entity, &Children, &Parent, &Name, &Transform), Added<Name>>,
+    q_mesh: Query<(&Mesh3d, &Name)>,
+    q_materials: Query<(&MeshMaterial3d<StandardMaterial>, &Name)>,
+    meshes: Res<Assets<Mesh>>,
+    gltf_assets: Res<Assets<Gltf>>,
+    mut assets_standard_materails: ResMut<Assets<StandardMaterial>>,
+) {
+    for (entity, children, parent, name, transform) in &q_added_name {
+        match name.as_str() {
+            // ball은 따로 스폰
+            ball if ball.contains("Ball__") => {
+                commands.entity(entity).despawn_recursive();
+            }
+            "poolPumpCollider" => {
+                let mesh_entity = children.get(0).unwrap();
+                let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                commands.entity(entity).insert((
+                    Sensor,
+                    PoolPumpSensor,
+                    RigidBody::Fixed,
+                    Collider::from_bevy_mesh(mesh, &ComputedColliderShape::ConvexHull).unwrap(),
+                ));
+                commands.entity(*mesh_entity).despawn_recursive();
+            }
+            "BallCase" => {
+                let mesh_entity = children.get(0).unwrap();
+                let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                let (MeshMaterial3d(material_handle), _) = q_materials.get(*mesh_entity).unwrap();
+                let st = assets_standard_materails
+                    .get_mut(material_handle.id())
+                    .unwrap();
+                st.alpha_mode = AlphaMode::Opaque;
+                commands.entity(entity).insert((
+                    RigidBody::Fixed,
+                    Collider::from_bevy_mesh(
+                        mesh,
+                        &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                    )
+                    .unwrap(),
+                ));
+            }
+            "BallMixer2" => {
+                let mesh_entity = children.get(0).unwrap();
+                let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                commands.entity(entity).insert((
+                    RigidBody::KinematicVelocityBased,
+                    Collider::from_bevy_mesh(
+                        mesh,
+                        &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                    )
+                    .unwrap(),
+                    BallMixer,
+                    Velocity::angular(vec3(0., 1., 0.)),
+                ));
+            }
+            "BallDrawStick" => {
+                let mesh_entity = children.get(0).unwrap();
+                let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                commands.entity(entity).insert((
+                    RigidBody::Fixed,
+                    Collider::from_bevy_mesh(
+                        mesh,
+                        &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                    )
+                    .unwrap(),
+                    BallDrawStick,
+                ));
+            }
+            "BallDrawStickIn" => {
+                commands.entity(entity).insert(BallDrawStickIn);
+            }
+            "pool" => {
+                let mesh_entity = children.get(0).unwrap();
+                let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                let (MeshMaterial3d(material_handle), _) = q_materials.get(*mesh_entity).unwrap();
+                let st = assets_standard_materails
+                    .get_mut(material_handle.id())
+                    .unwrap();
+                st.alpha_mode = AlphaMode::Opaque;
+                commands.entity(entity).insert((
+                    RigidBody::Fixed,
+                    Collider::from_bevy_mesh(
+                        mesh,
+                        &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                    )
+                    .unwrap(),
+                ));
+            }
+            "BallOutletGuide" => {
+                let mesh_entity = children.get(0).unwrap();
+                let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                commands.entity(entity).insert((
+                    RigidBody::Fixed,
+                    Collider::from_bevy_mesh(
+                        mesh,
+                        &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                    )
+                    .unwrap(),
+                ));
+            }
+            "BallOutletGuard" => {
+                let mesh_entity = children.get(0).unwrap();
+                let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                commands.entity(entity).insert((
+                    RigidBody::Fixed,
+                    Collider::from_bevy_mesh(
+                        mesh,
+                        &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                    )
+                    .unwrap(),
+                ));
+            }
+            "BallOutletGuideHolderLast" => {
+                let mesh_entity = children.get(0).unwrap();
+                let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                commands.entity(entity).insert((
+                    RigidBody::Fixed,
+                    Collider::from_bevy_mesh(
+                        mesh,
+                        &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                    )
+                    .unwrap(),
+                    BallOutletGuideHolderLast,
+                    ActiveEvents::COLLISION_EVENTS,
+                    CollidingEntities::default(),
+                ));
+            }
+            "poolOutletCover" => {
+                let mesh_entity = children.get(0).unwrap();
+                let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                commands.entity(entity).insert((
+                    RigidBody::Fixed,
+                    PoolOutletCover,
+                    Collider::from_bevy_mesh(
+                        mesh,
+                        &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                    )
+                    .unwrap(),
+                ));
+            }
+            "BallOutletGuideResultCollider" => {
+                let mesh_entity = children.get(0).unwrap();
+                let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                commands.entity(entity).insert((
+                    RigidBody::Fixed,
+                    Collider::from_bevy_mesh(
+                        mesh,
+                        &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                    )
+                    .unwrap(),
+                ));
+                commands.entity(*mesh_entity).despawn_recursive();
+            }
+            "BallOutletGuideConnector" => {
+                let mesh_entity = children.get(0).unwrap();
+                let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                commands.entity(entity).insert((
+                    RigidBody::Fixed,
+                    Collider::from_bevy_mesh(
+                        mesh,
+                        &ComputedColliderShape::TriMesh(TriMeshFlags::default()),
+                    )
+                    .unwrap(),
+                ));
+                commands.entity(*mesh_entity).despawn_recursive();
+            }
+            _ => {}
+        }
+    }
 }
 
 pub fn spawn_setup(
@@ -100,42 +349,27 @@ pub fn spawn_setup(
     // ));
 
     commands.spawn((
-        DirectionalLightBundle {
-            directional_light: DirectionalLight {
-                // shadows_enabled: true, // 필요한 경우 이 줄을 활성화할 수 있습니다.
-                illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 2., // intensity와 유사한 개념 (단위: 루멘)
-                ..default()
-            },
-            // DirectionalLight는 위치보다는 방향이 중요하므로, 아래 transform을 통해 방향 설정
-            transform: Transform::from_xyz(16.0, 16.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y), // 빛의 방향 설정 (0, 0, 0)을 향하도록
+        DirectionalLight {
+            illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 2.,
             ..default()
         },
+        Transform::from_xyz(16.0, 16.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
         Name::new("DirectionalLight"),
     ));
     commands.spawn((
-        DirectionalLightBundle {
-            directional_light: DirectionalLight {
-                // shadows_enabled: true, // 필요한 경우 이 줄을 활성화할 수 있습니다.
-                illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 10., // intensity와 유사한 개념 (단위: 루멘)
-                ..default()
-            },
-            // DirectionalLight는 위치보다는 방향이 중요하므로, 아래 transform을 통해 방향 설정
-            transform: Transform::from_xyz(-16.0, -16.0, -16.0).looking_at(Vec3::ZERO, Vec3::Y), // 빛의 방향 설정 (0, 0, 0)을 향하도록
+        DirectionalLight {
+            illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 10.,
             ..default()
         },
+        Transform::from_xyz(-16.0, -16.0, -16.0).looking_at(Vec3::ZERO, Vec3::Y),
         Name::new("DirectionalLight bck"),
     ));
     commands.spawn((
-        DirectionalLightBundle {
-            directional_light: DirectionalLight {
-                // shadows_enabled: true, // 필요한 경우 이 줄을 활성화할 수 있습니다.
-                illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 10., // intensity와 유사한 개념 (단위: 루멘)
-                ..default()
-            },
-            // DirectionalLight는 위치보다는 방향이 중요하므로, 아래 transform을 통해 방향 설정
-            transform: Transform::from_xyz(-16.0, -16.0, 16.0).looking_at(Vec3::ZERO, Vec3::Y), // 빛의 방향 설정 (0, 0, 0)을 향하도록
+        DirectionalLight {
+            illuminance: light_consts::lux::AMBIENT_DAYLIGHT / 10.,
             ..default()
         },
+        Transform::from_xyz(-16.0, -16.0, 16.0).looking_at(Vec3::ZERO, Vec3::Y),
         Name::new("DirectionalLight bck2"),
     ));
     //////

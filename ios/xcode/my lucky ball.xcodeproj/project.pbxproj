@@ -310,7 +310,7 @@
 					"$(inherited)",
 					"../../target/x86_64-apple-ios/release",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-lios",
@@ -430,7 +430,7 @@
 					"$(inherited)",
 					"../../target/x86_64-apple-ios/release",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-lios",

@@ -103,9 +103,9 @@ pub fn test_new_setup(
         .spawn((
             Name::new("BallCatchSensor"),
             Sensor,
-            Collider::ball(0.01),
+            Collider::ball(0.04),
             BallCatchSensor,
-            Transform::from_xyz(0., -0.9, 0.),
+            Transform::from_xyz(0., -0.87, 0.),
             // TransformBundle::from_transform(Transform::from_xyz(0., -0.9, 0.)),
         ))
         .insert(ActiveEvents::COLLISION_EVENTS)
@@ -144,7 +144,7 @@ pub fn new_setup_added(
     q_added_name: Query<(Entity, &Children, &Parent, &Name, &Transform), Added<Name>>,
     q_mesh: Query<(&Mesh3d, &Name)>,
     q_materials: Query<(&MeshMaterial3d<StandardMaterial>, &Name)>,
-    meshes: Res<Assets<Mesh>>,
+    mut meshes: ResMut<Assets<Mesh>>,
     gltf_assets: Res<Assets<Gltf>>,
     mut assets_standard_materails: ResMut<Assets<StandardMaterial>>,
 ) {
@@ -153,6 +153,16 @@ pub fn new_setup_added(
             // ball은 따로 스폰
             ball if ball.contains("Ball__") => {
                 commands.entity(entity).despawn_recursive();
+                // let mesh_entity = children.get(0).unwrap();
+                // let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                // let mesh = meshes.get(mesh_handle.id()).unwrap();
+                // let (MeshMaterial3d(material_handle), _) = q_materials.get(*mesh_entity).unwrap();
+
+                // commands.spawn((
+                //     Name::new("test"),
+                //     Mesh3d(meshes.add(Sphere::new(1.))),
+                //     MeshMaterial3d(material_handle.clone()),
+                // ));
             }
             "poolPumpCollider" => {
                 let mesh_entity = children.get(0).unwrap();
@@ -163,10 +173,11 @@ pub fn new_setup_added(
                     PoolPumpSensor,
                     RigidBody::Fixed,
                     Collider::from_bevy_mesh(mesh, &ComputedColliderShape::ConvexHull).unwrap(),
+                    CollidingEntities::default(),
                 ));
                 commands.entity(*mesh_entity).despawn_recursive();
             }
-            "BallCase" => {
+            "BallCaseV2" => {
                 let mesh_entity = children.get(0).unwrap();
                 let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
                 let mesh = meshes.get(mesh_handle.id()).unwrap();
@@ -212,9 +223,21 @@ pub fn new_setup_added(
                     .unwrap(),
                     BallDrawStick,
                 ));
+                // commands.entity(entity).despawn_recursive();
             }
+
             "BallDrawStickIn" => {
                 commands.entity(entity).insert(BallDrawStickIn);
+            }
+            "poolFrontCollider" => {
+                let mesh_entity = children.get(0).unwrap();
+                let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
+                let mesh = meshes.get(mesh_handle.id()).unwrap();
+                commands.entity(entity).insert((
+                    RigidBody::Fixed,
+                    Collider::from_bevy_mesh(mesh, &ComputedColliderShape::ConvexHull).unwrap(),
+                ));
+                commands.entity(*mesh_entity).despawn_recursive();
             }
             "pool" => {
                 let mesh_entity = children.get(0).unwrap();
@@ -224,7 +247,7 @@ pub fn new_setup_added(
                 let st = assets_standard_materails
                     .get_mut(material_handle.id())
                     .unwrap();
-                st.alpha_mode = AlphaMode::Opaque;
+                // st.alpha_mode = AlphaMode::Opaque;
                 commands.entity(entity).insert((
                     RigidBody::Fixed,
                     Collider::from_bevy_mesh(
@@ -233,6 +256,10 @@ pub fn new_setup_added(
                     )
                     .unwrap(),
                 ));
+                // commands.entity(*mesh_entity).insert(MeshMaterial3d(
+                //     assets_standard_materails.add(StandardMaterial::from_color(css::WHEAT)),
+                // ));
+                // commands.entity(entity).despawn_recursive();
             }
             "BallOutletGuide" => {
                 let mesh_entity = children.get(0).unwrap();
@@ -251,6 +278,11 @@ pub fn new_setup_added(
                 let mesh_entity = children.get(0).unwrap();
                 let (Mesh3d(mesh_handle), _) = q_mesh.get(*mesh_entity).unwrap();
                 let mesh = meshes.get(mesh_handle.id()).unwrap();
+                let (MeshMaterial3d(material_handle), _) = q_materials.get(*mesh_entity).unwrap();
+                let st = assets_standard_materails
+                    .get_mut(material_handle.id())
+                    .unwrap();
+                st.alpha_mode = AlphaMode::Opaque;
                 commands.entity(entity).insert((
                     RigidBody::Fixed,
                     Collider::from_bevy_mesh(
@@ -259,6 +291,9 @@ pub fn new_setup_added(
                     )
                     .unwrap(),
                 ));
+                // commands.entity(*mesh_entity).insert(MeshMaterial3d(
+                //     assets_standard_materails.add(StandardMaterial::from_color(css::WHEAT)),
+                // ));
             }
             "BallOutletGuideHolderLast" => {
                 let mesh_entity = children.get(0).unwrap();
@@ -805,14 +840,21 @@ pub fn er_ball_spawn(
             } in balls
             {
                 commands
-                    .spawn(PbrBundle {
-                        mesh: Mesh3d(mesh_handle),
-                        material: MeshMaterial3d(mat_handle),
-                        transform,
-                        ..default()
+                    .spawn_empty()
+                    .insert(Mesh3d(mesh_handle))
+                    .insert(MeshMaterial3d(mat_handle))
+                    .insert(Transform {
+                        scale: Vec3::splat(0.069),
+                        ..transform
                     })
+                    // .spawn(PbrBundle {
+                    //     mesh: Mesh3d(mesh_handle),
+                    //     material: MeshMaterial3d(mat_handle),
+                    //     transform,
+                    //     ..default()
+                    // })
                     .insert(RigidBody::Fixed)
-                    .insert(Friction::new(0.4))
+                    .insert(Friction::new(0.6))
                     .insert(Restitution::new(0.9))
                     .insert(Collider::ball(1.))
                     // .insert(ActiveCollisionTypes::default())
@@ -1086,11 +1128,11 @@ pub fn pool_pump_sensor(
                 if let Ok(entity) = q_ball.get(entity) {
                     let mut impulse = ExternalImpulse::default();
 
-                    impulse.impulse = Vec3::X * 0.002;
+                    impulse.impulse = Vec3::X * 0.004;
                     commands
                         .entity(entity)
-                        .remove::<GravityScale>()
-                        // .insert(GravityScale::default())
+                        // .remove::<GravityScale>()
+                        .insert(GravityScale::default())
                         .insert(impulse)
                         .insert(Velocity {
                             angvel: Vec3::ZERO,
@@ -1188,7 +1230,7 @@ pub fn ball_catch(
                         config.is_catching = false;
                         let tween = Tween::new(
                             EaseFunction::QuadraticInOut,
-                            Duration::from_millis(100),
+                            Duration::from_millis(150),
                             TransformPositionLens {
                                 start: transform.translation,
                                 end: vec3(0., -0.9, 0.),
@@ -1251,7 +1293,7 @@ pub fn er_pool_outlet_cover_open(
                     Duration::from_millis(500),
                     TransformPositionLens {
                         start: vec3(-0.86, 0.1, 0.0),
-                        end: vec3(-0.86, -0.13, 0.0),
+                        end: vec3(-0.86, -0.2, 0.0),
                     },
                 )
                 .with_completed_event(TWEEN_POOL_OUTLET_OPEN_END);
@@ -1273,7 +1315,7 @@ pub fn er_pool_outlet_cover_close(
                     EaseFunction::QuadraticInOut,
                     Duration::from_millis(500),
                     TransformPositionLens {
-                        start: vec3(-0.86, -0.13, 0.0),
+                        start: vec3(-0.86, -0.2, 0.0),
                         end: vec3(-0.86, 0.1, 0.0),
                     },
                 )

@@ -51,22 +51,19 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
         Name::new("game_btn"),
         GameBtn,
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(25.),
-                height: Val::Percent(10.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(25.),
+            height: Val::Percent(10.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<GameRuleSelectButtonClickEvent>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
     let game_btn_text = (
         Name::new("game_btn_text"),
@@ -84,22 +81,19 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
         Name::new("numbers_btn"),
         NumbersBtn,
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(25.),
-                height: Val::Percent(10.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(25.),
+            height: Val::Percent(10.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<NumbersBtnClick>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
     let numbers_btn_text = (
         Name::new("numbers_btn_text"),
@@ -116,22 +110,19 @@ fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<M
         Name::new("quit_btn"),
         QuitBtn,
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(25.),
-                height: Val::Percent(10.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(25.),
+            height: Val::Percent(10.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<QuitBtnClick>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
     let quit_btn_text = (
         Name::new("quit_btn_text"),
@@ -185,22 +176,19 @@ fn spawn_game_rule_select_menu(
     let loaded69_fire_5_btn = (
         Name::new("loaded_69_fire_5_btn"),
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(25.),
-                height: Val::Percent(10.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(25.),
+            height: Val::Percent(10.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<Load69Fire5BtnClick>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
     let loaded_69_fire_5_btn_text = (
         Name::new("loaded_69_fire_5_btn_text"),
@@ -215,22 +203,19 @@ fn spawn_game_rule_select_menu(
     let loaded_26_fire_1_btn = (
         Name::new("loaded_26_fire_1_btn"),
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(25.),
-                height: Val::Percent(10.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(25.),
+            height: Val::Percent(10.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<Load26Fire1BtnClick>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
 
     let loaded_26_fire_1_btn_text = (
@@ -246,22 +231,19 @@ fn spawn_game_rule_select_menu(
     let loaded_45_fire_5_btn = (
         Name::new("loaded_45_fire_5_btn"),
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(25.),
-                height: Val::Percent(10.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(25.),
+            height: Val::Percent(10.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<Load45Fire6BtnClick>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
 
     let loaded_45_fire_5_btn_text = (
@@ -277,32 +259,29 @@ fn spawn_game_rule_select_menu(
     let custom_game_rule_btn = (
         Name::new("custom_game_rule_btn"),
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(25.),
-                height: Val::Percent(10.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(25.),
+            height: Val::Percent(10.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<CustomGameRuleBtnClick>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
-    let custom_game_rule_img = ImageBundle {
-        node: Node {
+    let custom_game_rule_img = (
+        Node {
             // width: Val::Percent(100.),
             height: Val::Percent(50.),
             ..default()
         },
-        image: ImageNode::new(my_assets.png_customize.clone()),
-        ..default()
-    };
+        ImageNode::new(my_assets.png_customize.clone()),
+    );
+    
     let custom_game_rule_btn_text = (
         Name::new("custom_game_rule_btn_text"),
         Text::new(format!("{custom_type}")),
@@ -317,33 +296,29 @@ fn spawn_game_rule_select_menu(
     let back_btn = (
         Name::new("back_btn"),
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(25.),
-                height: Val::Percent(10.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(25.),
+            height: Val::Percent(10.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<BackToMainMenuBtnClickEvent>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
 
-    let back_btn_img = ImageBundle {
-        node: Node {
+    let back_btn_img = (
+        Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: ImageNode::new(my_assets.png_back.clone()),
-        ..default()
-    };
+        ImageNode::new(my_assets.png_back.clone()),
+    );
 
     commands.entity(root_entity).with_children(|parent| {
         parent
@@ -412,46 +387,36 @@ fn spawn_game_menu(
 ) {
     let wrap = (
         Name::new("wrap"),
-        NodeBundle {
-            node: Node {
-                width: Val::Percent(100.),
-                height: Val::Percent(10.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::End,
-                flex_direction: FlexDirection::Row,
-                ..default()
-            },
+        Node {
+            width: Val::Percent(100.),
+            height: Val::Percent(10.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::End,
+            flex_direction: FlexDirection::Row,
             ..default()
         },
     );
 
-    let wrapwrap = (NodeBundle {
-        node: Node {
-            width: Val::Percent(100.),
-            height: Val::Percent(100.),
-            justify_content: JustifyContent::End,
-            align_items: AlignItems::Center,
-            flex_direction: FlexDirection::Column,
-            // margin: UiRect::bottom(Val::Percent(40.)),
-            margin: UiRect::bottom(Val::Px(100.)),
-            ..default()
-        },
-        // background_color: BackgroundColor(css::YELLOW.into()),
+    let wrapwrap = Node {
+        width: Val::Percent(100.),
+        height: Val::Percent(100.),
+        justify_content: JustifyContent::End,
+        align_items: AlignItems::Center,
+        flex_direction: FlexDirection::Column,
+        // margin: UiRect::bottom(Val::Percent(40.)),
+        margin: UiRect::bottom(Val::Px(100.)),
         ..default()
-    },);
+    };
 
-    let game_type_wrap = (NodeBundle {
-        node: Node {
-            width: Val::Percent(100.),
-            height: Val::Percent(10.),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            flex_direction: FlexDirection::Column,
-            ..default()
-        },
-        // background_color: BackgroundColor(css::YELLOW.into()),
+    let game_type_wrap = Node {
+        width: Val::Percent(100.),
+        height: Val::Percent(10.),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        flex_direction: FlexDirection::Column,
         ..default()
-    },);
+    };
+
     let game_type_txt = (
         Text::new(game_type),
         TextFont {
@@ -464,95 +429,83 @@ fn spawn_game_menu(
     let ball_shuffle_btn = (
         Name::new("ball_shuffle_btn"),
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(25.),
-                height: Val::Percent(100.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(25.),
+            height: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
         ShuffleBtn,
-        // On::<Pointer<Click>>::send_event::<GameMenuShuffleBtnClick>(),
     );
 
-    let ball_shuffle_btn_img = ImageBundle {
-        node: Node {
+    let ball_shuffle_btn_img = (
+        Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: ImageNode::new(my_assets.png_shuffle.clone()),
-        ..default()
-    };
+        ImageNode::new(my_assets.png_shuffle.clone()),
+    );
 
     let game_run_btn = (
         Name::new("game_run_btn"),
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(25.),
-                height: Val::Percent(100.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(25.),
+            height: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
         GameRunBtn,
-        // On::<Pointer<Click>>::send_event::<GameRunBtnClick>(),
     );
-    let game_run_btn_img = ImageBundle {
-        node: Node {
+    let game_run_btn_img = (
+        Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: ImageNode::new(my_assets.png_play.clone()),
-        ..default()
-    };
+        ImageNode::new(my_assets.png_play.clone()),
+    );
 
     let back_btn = (
         Name::new("back_btn"),
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(25.),
-                height: Val::Percent(100.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(25.),
+            height: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
-    let back_btn_img = ImageBundle {
-        node: Node {
+    let back_btn_img = (
+        Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: ImageNode::new(my_assets.png_back.clone()),
-        ..default()
-    };
+        ImageNode::new(my_assets.png_back.clone()),
+    );
 
     commands.entity(root_entity).with_children(|parent| {
         parent.spawn(wrapwrap).with_children(|parent| {
@@ -601,80 +554,66 @@ fn spawn_numbers_menu(
 ) {
     let (paginated_ball_numbers, total_size) = paginate_with_total(&ball_numbers, 0, 5);
 
-    let root_wrap = NodeBundle {
-        node: Node {
-            width: Val::Percent(100.),
-            height: Val::Percent(100.),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            flex_direction: FlexDirection::Column,
-            margin: UiRect::bottom(Val::Px(100.)),
-            ..default()
-        },
+    let root_wrap = Node {
+        width: Val::Percent(100.),
+        height: Val::Percent(100.),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        flex_direction: FlexDirection::Column,
+        margin: UiRect::bottom(Val::Px(100.)),
         ..default()
     };
 
-    let wrap = NodeBundle {
-        node: Node {
-            width: Val::Percent(80.),
-            height: Val::Percent(70.),
-            justify_content: JustifyContent::Start,
-            align_items: AlignItems::Center,
-            flex_direction: FlexDirection::Column,
-            ..default()
-        },
+    let wrap = Node {
+        width: Val::Percent(80.),
+        height: Val::Percent(70.),
+        justify_content: JustifyContent::Start,
+        align_items: AlignItems::Center,
+        flex_direction: FlexDirection::Column,
         ..default()
     };
 
-    let title_wrap = NodeBundle {
-        node: Node {
+    let title_wrap = (
+        Node {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
             justify_content: JustifyContent::Start,
             align_items: AlignItems::Center,
             ..default()
         },
-        background_color: BackgroundColor(css::BISQUE.into()),
-        ..default()
-    };
+        BackgroundColor(css::BISQUE.into()),
+    ); 
 
     let back_btn = (
         Name::new("back_btn"),
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(10.),
-                height: Val::Percent(100.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(10.),
+            height: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<BackToMainMenuBtnClickEvent>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
-    let back_btn_img = ImageBundle {
-        node: Node {
+    let back_btn_img = (
+        Node {
             // width: Val::Percent(100.),
             height: Val::Percent(50.),
             ..default()
         },
-        image: ImageNode::new(my_assets.png_back.clone()),
-        ..default()
-    };
+        ImageNode::new(my_assets.png_back.clone()),
+    ); 
 
-    let title_txt_wrap = NodeBundle {
-        node: Node {
-            width: Val::Percent(80.),
-            height: Val::Percent(100.),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            ..default()
-        },
+    let title_txt_wrap = Node {
+        width: Val::Percent(80.),
+        height: Val::Percent(100.),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
         ..default()
     };
 
@@ -689,51 +628,42 @@ fn spawn_numbers_menu(
 
     let content_wrap = (
         Name::new("NumbersContentNode"),
-        NodeBundle {
-            node: Node {
-                width: Val::Percent(100.),
-                height: Val::Percent(80.),
-                flex_direction: FlexDirection::Column,
-                ..default()
-            },
-            // background_color: BackgroundColor(css::BLACK.into()),
-            background_color: BackgroundColor(css::LIGHT_BLUE.into()),
+        Node {
+            width: Val::Percent(100.),
+            height: Val::Percent(80.),
+            flex_direction: FlexDirection::Column,
             ..default()
         },
+        BackgroundColor(css::LIGHT_BLUE.into()),
         NumbersContentNode,
     );
 
-    let paging_wrap = NodeBundle {
-        node: Node {
+    let paging_wrap = (
+        Node {
             width: Val::Percent(100.),
             height: Val::Percent(10.),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             ..default()
         },
-        background_color: BackgroundColor(css::BISQUE.into()),
-        // background_color: BackgroundColor(css::YELLOW_GREEN.into()),
-        ..default()
-    };
+        BackgroundColor(css::BISQUE.into()),
+    );
 
     let paging_prev_btn = (
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(20.),
-                height: Val::Percent(80.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(20.),
+            height: Val::Percent(80.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<NumbersPagingPrevBtnClick>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
 
     let paging_prev_btn_txt = (
@@ -745,16 +675,13 @@ fn spawn_numbers_menu(
         PickingBehavior::IGNORE,
     );
 
-    let paging_txt_wrap = (NodeBundle {
-        node: Node {
-            width: Val::Percent(20.),
-            height: Val::Percent(100.),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            ..default()
-        },
+    let paging_txt_wrap = Node {
+        width: Val::Percent(20.),
+        height: Val::Percent(100.),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
         ..default()
-    },);
+    };
 
     let paging_txt = (
         Text::new(format!("1/{}", if total_size < 1 { 1 } else { total_size })),
@@ -771,22 +698,19 @@ fn spawn_numbers_menu(
 
     let paging_next_btn = (
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(20.),
-                height: Val::Percent(80.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(20.),
+            height: Val::Percent(80.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<NumbersPagingNextBtnClick>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
 
     let paging_next_btn_txt = (
@@ -856,20 +780,18 @@ fn spawn_numbers_contents(
     ball_nums: &[BallNumber],
     my_assets: Res<MyAsstes>,
 ) {
-    let content_item_wrap = NodeBundle {
-        node: Node {
+    let content_item_wrap = (
+        Node {
             width: Val::Percent(100.),
             height: Val::Percent(20.),
             border: UiRect::all(Val::Px(1.)),
             ..default()
         },
-        // background_color: BackgroundColor(css::LIGHT_BLUE.into()),
-        border_color: BorderColor(css::BLACK.into()),
-        ..default()
-    };
+        BorderColor(css::BLACK.into()),
+    );
 
-    let content_item_number_wrap = NodeBundle {
-        node: Node {
+    let content_item_number_wrap = (
+        Node {
             width: Val::Percent(10.),
             height: Val::Percent(100.),
             justify_content: JustifyContent::Center,
@@ -878,33 +800,29 @@ fn spawn_numbers_contents(
             border: UiRect::right(Val::Px(1.)),
             ..default()
         },
-        border_color: BorderColor(css::BLACK.into()),
-        ..default()
-    };
+        BorderColor(css::BLACK.into()),
+    ); 
 
-    let content_item_body_wrap = NodeBundle {
-        node: Node {
-            width: Val::Percent(70.),
-            height: Val::Percent(100.),
-            flex_direction: FlexDirection::Column,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Start,
-            margin: UiRect::left(Val::Percent(2.)),
-            ..default()
-        },
+    let content_item_body_wrap =Node {
+        width: Val::Percent(70.),
+        height: Val::Percent(100.),
+        flex_direction: FlexDirection::Column,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Start,
+        margin: UiRect::left(Val::Percent(2.)),
         ..default()
     };
-    let content_item_remove_btn = (ButtonBundle {
-        node: Node {
+    let content_item_remove_btn = (
+        Button,
+        Node {
             width: Val::Percent(20.),
             height: Val::Percent(100.),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             ..default()
         },
-        background_color: BackgroundColor(css::INDIAN_RED.into()),
-        ..default()
-    },);
+        BackgroundColor(css::INDIAN_RED.into()),
+    );
     commands.entity(content_entity).with_children(|parent| {
         for (
             i,
@@ -978,23 +896,18 @@ fn spawn_numbers_contents(
                     parent
                         .spawn(content_item_remove_btn.clone())
                         .insert(BtnIndianRedInteract)
-                        // .insert(On::<Pointer<Click>>::send_event::<NumbersItemDeleteBtnClick>())
                         .observe(|t: Trigger<Pointer<Click>>, mut ew: EventWriter<NumbersItemDeleteBtnClick>| {
-                            //
                             ew.send(NumbersItemDeleteBtnClick(t.entity(), t.hit.depth));
                         })
                         .with_children(|parent| {
                             parent
-                                .spawn(ImageBundle {
-                                    node: Node {
-                                        // width: Val::Percent(100.),
+                                .spawn((
+                                    Node {
                                         height: Val::Percent(50.),
                                         ..default()
-                                    },
-                                    image: ImageNode::new(my_assets.png_trash.clone()),
-                                    ..default()
-                                })
-                                .insert(PickingBehavior::IGNORE);
+                                    },ImageNode::new(my_assets.png_trash.clone()),
+                                    PickingBehavior::IGNORE,
+                                ));
                         });
                 });
         }
@@ -1007,81 +920,63 @@ fn spawn_custom_rule_menu(
     custom_rule: &SavedCustomRule,
     my_assets: Res<MyAsstes>,
 ) {
-    let root_wrap = NodeBundle {
-        node: Node {
-            width: Val::Percent(100.),
-            height: Val::Percent(100.),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            flex_direction: FlexDirection::Column,
-            // margin: UiRect::top(Val::Percent(30.)),
-            margin: UiRect::bottom(Val::Px(100.)),
-            ..default()
-        },
+    let root_wrap = Node {
+        width: Val::Percent(100.),
+        height: Val::Percent(100.),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        flex_direction: FlexDirection::Column,
+        // margin: UiRect::top(Val::Percent(30.)),
+        margin: UiRect::bottom(Val::Px(100.)),
         ..default()
     };
 
     let wrap = (
         Name::new("wrap"),
-        NodeBundle {
-            node: Node {
-                width: Val::Percent(80.),
-                height: Val::Percent(80.),
-                justify_content: JustifyContent::Start,
-                align_items: AlignItems::Center,
-                flex_direction: FlexDirection::Column,
-                ..default()
-            },
-            border_radius: BorderRadius::all(Val::Percent(1.)),
-            background_color: BackgroundColor(css::BEIGE.into()),
-            ..default()
-        },
-    );
-    let wrap2 = (NodeBundle {
-        node: Node {
-            width: Val::Percent(100.),
+        Node {
+            width: Val::Percent(80.),
             height: Val::Percent(80.),
-            justify_content: JustifyContent::Center,
+            justify_content: JustifyContent::Start,
             align_items: AlignItems::Center,
-            flex_direction: FlexDirection::Row,
-            border: UiRect::all(Val::Px(1.)),
+            flex_direction: FlexDirection::Column,
             ..default()
         },
-        // background_color: BackgroundColor(css::YELLOW.into()),
+        BorderRadius::all(Val::Percent(1.)),
+        BackgroundColor(css::BEIGE.into()),
+    );
+    let wrap2 = Node {
+        width: Val::Percent(100.),
+        height: Val::Percent(80.),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        flex_direction: FlexDirection::Row,
+        border: UiRect::all(Val::Px(1.)),
         ..default()
-    },);
-    let wrap3 = (NodeBundle {
-        node: Node {
-            width: Val::Percent(100.),
-            height: Val::Percent(10.),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            flex_direction: FlexDirection::Row,
-            border: UiRect::all(Val::Px(1.)),
-            ..default()
-        },
-        // background_color: BackgroundColor(css::YELLOW.into()),
+    };
+    let wrap3 = Node {
+        width: Val::Percent(100.),
+        height: Val::Percent(10.),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        flex_direction: FlexDirection::Row,
+        border: UiRect::all(Val::Px(1.)),
         ..default()
-    },);
+    };
     let custom_line_1_wrap = (
         Name::new("custom_line_1"),
-        NodeBundle {
-            node: Node {
-                width: Val::Percent(20.),
-                height: Val::Percent(100.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                flex_direction: FlexDirection::Column,
-                border: UiRect::all(Val::Px(1.)),
-                ..default()
-            },
-            // background_color: BackgroundColor(css::YELLOW.into()),
+        Node {
+            width: Val::Percent(20.),
+            height: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            flex_direction: FlexDirection::Column,
+            border: UiRect::all(Val::Px(1.)),
             ..default()
-        },
+        }
     );
 
-    let circle_1 = NodeBundle {
-        node: Node {
+    let circle_1 = (
+        Node {
             width: Val::Percent(90.),
             height: Val::Percent(100. * 1. / 14.),
             justify_content: JustifyContent::Center,
@@ -1089,10 +984,8 @@ fn spawn_custom_rule_menu(
             border: UiRect::all(Val::Px(1.)),
             ..default()
         },
-        border_color: BorderColor(css::BLACK.into()),
-        // background_color: BackgroundColor(css::WHEAT.into()),
-        ..default()
-    };
+        BorderColor(css::BLACK.into()),
+    );
 
     let circle_buttons_style = Node {
         width: Val::Percent(100.),
@@ -1101,13 +994,13 @@ fn spawn_custom_rule_menu(
         align_items: AlignItems::Center,
         ..default()
     };
-    let circle_btn = ButtonBundle {
-        node: circle_buttons_style.clone(),
-        ..default()
-    };
+    let circle_btn = (
+        Button,
+        circle_buttons_style.clone(),
+    );
 
-    let left_btn = (ButtonBundle {
-        node: Node {
+    let left_btn = (
+        Node {
             width: Val::Percent(30.),
             height: Val::Percent(70.),
             justify_content: JustifyContent::Center,
@@ -1116,11 +1009,10 @@ fn spawn_custom_rule_menu(
             border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        border_color: BorderColor(BUTTON_BORDER_COLOR),
-        background_color: BackgroundColor(BUTTON_BG_COLOR),
-        border_radius: BorderRadius::all(Val::Percent(5.)),
-        ..default()
-    },);
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
+    );
 
     let left_btn_txt = make_text("<");
 
@@ -1130,8 +1022,8 @@ fn spawn_custom_rule_menu(
         TextColor(css::BLACK.into()),
     );
 
-    let right_btn = (ButtonBundle {
-        node: Node {
+    let right_btn = (
+        Node {
             width: Val::Percent(30.),
             height: Val::Percent(70.),
             justify_content: JustifyContent::Center,
@@ -1140,74 +1032,61 @@ fn spawn_custom_rule_menu(
             border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        border_color: BorderColor(BUTTON_BORDER_COLOR),
-        background_color: BackgroundColor(BUTTON_BG_COLOR),
-        border_radius: BorderRadius::all(Val::Percent(5.)),
-        ..default()
-    },);
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
+    ); 
     let right_btn_txt = make_text(">");
 
-    let back_run_wrap = NodeBundle {
-        node: Node {
-            width: Val::Percent(100.),
-            height: Val::Percent(10.),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            flex_direction: FlexDirection::Row,
-            border: UiRect::all(Val::Px(1.)),
-            ..default()
-        },
-        // background_color: BackgroundColor(css::YELLOW.into()),
+    let back_run_wrap =  Node {
+        width: Val::Percent(100.),
+        height: Val::Percent(10.),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        flex_direction: FlexDirection::Row,
+        border: UiRect::all(Val::Px(1.)),
         ..default()
     };
 
     let back_btn = (
         Name::new("back_btn"),
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(90.),
-                height: Val::Percent(90.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Node {
+            width: Val::Percent(90.),
+            height: Val::Percent(90.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
 
-    let back_btn_img = ImageBundle {
-        node: Node {
+    let back_btn_img = (
+        Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: ImageNode::new(my_assets.png_back.clone()),
-        ..default()
-    };
+        ImageNode::new(my_assets.png_back.clone()),
+    ); 
     let run_btn = (
         Name::new("back_btn"),
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(90.),
-                height: Val::Percent(90.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(90.),
+            height: Val::Percent(90.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<CustomRuleRunBtnClick>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
     let run_btn_text = (
         Name::new("back_btn_text"),
@@ -1328,27 +1207,21 @@ fn spawn_game_result_menu(
     // result
     // save btn
 
-    let wrap = NodeBundle {
-        node: Node {
-            width: Val::Percent(100.),
-            height: Val::Percent(100.),
-            flex_direction: FlexDirection::Column,
-            justify_content: JustifyContent::End,
-            align_items: AlignItems::Center,
-            // margin: UiRect::bottom(Val::Percent(40.)),
-            margin: UiRect::bottom(Val::Px(100.)),
-            ..default()
-        },
+    let wrap = Node {
+        width: Val::Percent(100.),
+        height: Val::Percent(100.),
+        flex_direction: FlexDirection::Column,
+        justify_content: JustifyContent::End,
+        align_items: AlignItems::Center,
+        // margin: UiRect::bottom(Val::Percent(40.)),
+        margin: UiRect::bottom(Val::Px(100.)),
         ..default()
     };
-    let result_wrap = NodeBundle {
-        node: Node {
-            width: Val::Percent(100.),
-            height: Val::Percent(10.),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            ..default()
-        },
+    let result_wrap = Node {
+        width: Val::Percent(100.),
+        height: Val::Percent(10.),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
         ..default()
     };
 
@@ -1360,15 +1233,12 @@ fn spawn_game_result_menu(
     );
     
 
-    let btn_wrap = NodeBundle {
-        node: Node {
-            width: Val::Percent(100.),
-            height: Val::Percent(10.),
-            flex_direction: FlexDirection::Row,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            ..default()
-        },
+    let btn_wrap =  Node {
+        width: Val::Percent(100.),
+        height: Val::Percent(10.),
+        flex_direction: FlexDirection::Row,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
         ..default()
     };
 
@@ -1388,63 +1258,55 @@ fn spawn_game_result_menu(
     // let retry_btn_txt = (TextBundle::from_section("retry", TextStyle::default()));
     let save_btn = (
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(30.),
-                height: Val::Percent(100.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(30.),
+            height: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
         SaveBtn,
-        // On::<Pointer<Click>>::send_event::<GameResultSaveBtnClick>(),
     );
-    let save_btn_img = ImageBundle {
-        node: Node {
+    let save_btn_img = (
+        Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: ImageNode::new(my_assets.png_save.clone()),
-        ..default()
-    };
+        ImageNode::new(my_assets.png_save.clone()),
+    ); 
 
     let back_btn = (
         BtnInteract,
-        ButtonBundle {
-            node: Node {
-                width: Val::Percent(30.),
-                height: Val::Percent(100.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                margin: UiRect::all(Val::Percent(1.)),
-                border: UiRect::all(Val::Px(2.)),
-                ..default()
-            },
-            border_color: BorderColor(BUTTON_BORDER_COLOR),
-            background_color: BackgroundColor(BUTTON_BG_COLOR),
-            border_radius: BorderRadius::all(Val::Percent(5.)),
+        Button,
+        Node {
+            width: Val::Percent(30.),
+            height: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Percent(1.)),
+            border: UiRect::all(Val::Px(2.)),
             ..default()
         },
-        // On::<Pointer<Click>>::send_event::<BackToGameRuleSelectBtnClick>(),
+        BorderColor(BUTTON_BORDER_COLOR),
+        BackgroundColor(BUTTON_BG_COLOR),
+        BorderRadius::all(Val::Percent(5.)),
     );
 
-    let back_btn_img = ImageBundle {
-        node: Node {
+    let back_btn_img = (
+        Node {
             // width: Val::Percent(100.),
             height: Val::Percent(100.),
             ..default()
         },
-        image: ImageNode::new(my_assets.png_back.clone()),
-        ..default()
-    };
+        ImageNode::new(my_assets.png_back.clone()),
+    );
 
     commands.entity(root_entity).with_children(|parent| {
         parent.spawn(wrap).with_children(|parent| {
@@ -1477,15 +1339,12 @@ pub fn setup_main_ui(mut commands: Commands, my_assets: Res<MyAsstes>) {
     let root_node = (
         Name::new("root_node"),
         RootNode,
-        NodeBundle {
-            node: Node {
-                width: Val::Percent(100.),
-                height: Val::Percent(100.),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                flex_direction: FlexDirection::Column,
-                ..default()
-            },
+        Node {
+            width: Val::Percent(100.),
+            height: Val::Percent(100.),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            flex_direction: FlexDirection::Column,
             ..default()
         },
     );

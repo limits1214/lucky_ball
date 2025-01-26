@@ -1,0 +1,65 @@
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <style>
+      body {
+        background: linear-gradient(
+          135deg,
+          white 0%,
+          white 49%,
+          black 49%,
+          black 51%,
+          white 51%,
+          white 100%
+        ) repeat;
+        background-size: 20px 20px;
+      }
+      canvas {
+        background-color: white;
+      }
+    </style>
+    <title>Wasm Example</title>
+  </head>
+  <body>
+    <canvas id="target"></canvas>
+  </body>
+  <script>
+    function ffi_get_current_epoch_time() {
+        return Math.floor(Date.now() / 1000);
+    }
+    function ffi_get_time_offset() {
+        return new Date().getTimezoneOffset();
+    }
+  </script>
+  <script>
+    function ffi_kv_get(key) {
+        const value = localStorage.getItem(key);
+        return value !== null ? value : "";
+    }
+    function ffi_kv_set(key, val) {
+        localStorage.setItem(key, val);
+    }
+    function ffi_kv_delete(key) {
+        localStorage.removeItem(key);
+    }
+    function ffi_kv_exists(key) {
+        return localStorage.getItem(key) !== null;
+    }
+  </script>
+  <script type="module">
+    if (navigator.gpu) {
+        console.log('webgpu');
+        const wasm = await import('/web/wasm_webgpu/web.js');
+        Object.assign(window, wasm);
+        await wasm.default()
+        await wasm.main()
+    } else {
+        console.log('webgl2');
+        const wasm = await import('/web/wasm_webgl2/web.js');
+        Object.assign(window, wasm);
+        await wasm.default()
+        await wasm.main()
+    }
+  </script>
+</html>

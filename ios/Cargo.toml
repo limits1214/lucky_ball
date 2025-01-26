@@ -7,7 +7,7 @@ edition = "2021"
 crate-type = ["staticlib"]
 
 [dependencies]
-bevy = { version = "0.15.0", features = [
+bevy = { version = "0.15.1", features = [
     # "android_shared_stdcxx",
     # "animation",
     # "bevy_animation",

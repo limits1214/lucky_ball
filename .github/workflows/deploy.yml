@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  # Single deploy job since we're just deploying
+  # Single deploy job since we're just deploying1
   deploy:
     runs-on: ubuntu-latest
     steps:

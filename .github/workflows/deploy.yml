@@ -26,11 +26,13 @@ jobs:
           cargo install wasm-bindgen-cli --version 0.2.99
           wasm-bindgen --version
 
-          chmod +x ./web/build.webgl2.sh
-          ./web/build.webgl2.sh
+          cd web
 
-          chmod +x ./web/build.webgpu.sh
-          ./web/build.webgpu.sh
+          chmod +x ./build.webgl2.sh
+          ./build.webgl2.sh
+
+          chmod +x ./build.webgpu.sh
+          ./build.webgpu.sh
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

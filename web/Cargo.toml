@@ -43,5 +43,5 @@ bevy = { version = "0.15.1", features = [
     # "zstd",
     # "webgpu",
 ], default-features = false }
-wasm-bindgen = "0.2.93"
+wasm-bindgen = "0.2.99"
 lucky_ball = { path = "..", default-features = false }

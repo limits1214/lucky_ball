@@ -3,10 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
-  # Single deploy job since we're just deploying1
+  # Single deploy job since we're just deploying
   deploy:
     runs-on: ubuntu-latest
     steps:

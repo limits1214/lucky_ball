@@ -12,6 +12,12 @@ wasm-bindgen --out-name $name \
 
 # sed -i '' 's/module_or_path = fetch(module_or_path)/module_or_path = bevyProgressiveFetch(module_or_path)/' ./wasm/${name}.js
 
+if [ "$(uname)" = "Darwin" ]; then
+  sed -i '' 's/module_or_path = fetch(module_or_path)/module_or_path = bevyProgressiveFetch(module_or_path)/' wasm_webgpu/${name}.js
+else
+  sed -i 's/module_or_path = fetch(module_or_path)/module_or_path = bevyProgressiveFetch(module_or_path)/' wasm_webgpu/${name}.js
+fi
+
 wasm-opt -Oz --output optimized.wasm wasm_webgpu/${name}_bg.wasm
 mv optimized.wasm wasm_webgpu/${name}_bg.wasm
 
@@ -20,3 +26,4 @@ mv optimized.wasm wasm_webgpu/${name}_bg.wasm
 # zstd wasm/${name}_bg.wasm -o wasm/${name}_bg.wasm.zst
 
 # cp -r wasm ../../server/static
+echo $(stat -f %z wasm_webgpu/${name}_bg.wasm)

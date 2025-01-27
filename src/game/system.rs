@@ -1503,15 +1503,13 @@ pub fn remixer_timer(
 ) {
     if config.is_running {
         for (entity, mut remixer_timer) in q.iter_mut() {
-            // timers gotta be ticked, to work
             remixer_timer.0.tick(time.delta());
 
-            // if it finished, despawn the bomb
             if remixer_timer.0.finished() {
                 commands.entity(entity).despawn();
                 ew_step_start.send(GameStepStartEvent::new_with_data(
                     STEP_BALL_MIXER_ROTATE,
-                    GameStepData::Float(9.),
+                    GameStepData::Float(18.),
                 ));
                 commands.spawn(RemixerEndTimer(Timer::new(
                     Duration::from_secs(2),
@@ -1626,7 +1624,7 @@ pub fn game_run_step_finish(
                 STEP_POOL_OUTLET_CLOSE_END => {
                     ew_step_start.send(GameStepStartEvent::new_with_data(
                         STEP_BALL_MIXER_ROTATE,
-                        GameStepData::Float(9.),
+                        GameStepData::Float(18.),
                     ));
                     ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
                 }
@@ -1683,7 +1681,7 @@ pub fn game_run_step_finish(
                         ew_step_start.send(GameStepStartEvent::new(STEP_DRAW_STICK_DOWN));
                         ew_step_start.send(GameStepStartEvent::new_with_data(
                             STEP_BALL_MIXER_ROTATE,
-                            GameStepData::Float(9.),
+                            GameStepData::Float(18.),
                         ));
                     } else {
                         // END

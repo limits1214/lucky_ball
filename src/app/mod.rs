@@ -71,7 +71,7 @@ fn camera_light_setup(mut commands: Commands) {
     commands.spawn((
         Camera3dBundle {
             transform: Transform::from_xyz(8.0, 5.0, 0.0).looking_at(Vec3::Y * 2.0, Vec3::Y),
-            // msaa: Msaa::Off,
+            msaa: Msaa::Off,
             ..default()
         },
         // Msaa::Off,

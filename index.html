@@ -36,6 +36,9 @@
     function ffi_get_time_offset() {
         return Math.abs(new Date().getTimezoneOffset() * 60);
     }
+    function ffi_get_locale() {
+        return navigator.language.replace('-', '_');
+    }
   </script>
   <script>
     function ffi_kv_get(key) {

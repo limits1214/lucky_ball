@@ -34,6 +34,8 @@ jobs:
           chmod +x ./build.webgpu.sh
           ./build.webgpu.sh
 
+          ls -al .
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

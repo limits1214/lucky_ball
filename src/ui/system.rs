@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::{color::palettes::css, prelude::*, window::WindowResized};
 
 use uuid::Uuid;
@@ -22,9 +24,7 @@ use crate::{
 
 use super::{
     component::{
-        BtnIndianRedInteract, BtnInteract, CustomRuleBall, CustomRuleFireCnt, GameBtn, GameRunBtn,
-        NumbersBtn, NumbersContentNode, NumbersItem, NumbersPagination, QuitBtn, RootNode, SaveBtn,
-        ShuffleBtn, TextResize,
+        BtnIndianRedInteract, BtnInteract, CustomRuleBall, CustomRuleFireCnt, GameBtn, GameRunBtn, LoadingUi, LoadingUiAniTimer, NumbersBtn, NumbersContentNode, NumbersItem, NumbersPagination, QuitBtn, RootNode, SaveBtn, ShuffleBtn, TextResize
     },
     constant::{
         BUTTON_BG_COLOR, BUTTON_BORDER_COLOR, BUTTON_CLICK_COLOR, BUTTON_HOVER_COLOR,
@@ -45,6 +45,52 @@ use super::{
     resource::{BallNumber, SavedCustomRule, UiConfig, VecBallNumberExt},
     utils::{make_text, time_formatting},
 };
+
+pub fn loading_ui(mut commands: Commands) {
+    let loading_text = (
+        Name::new("loading_text"),
+        Text::new("LOADING -"),
+        TextFont {
+            font_size: 30.,
+            ..default()
+        },
+        LoadingUi,
+        // TextColor(Color::BLACK),
+        Node {
+            align_self: AlignSelf::Center,
+            justify_self: JustifySelf::Center,
+            ..default()
+        },
+        // TextResize,
+        LoadingUiAniTimer(Timer::new(Duration::from_millis(100), TimerMode::Repeating))
+        
+    );
+    commands.spawn(loading_text);
+}
+
+pub fn remove_loading_ui(mut commands: Commands, q_loading_ui: Query<Entity, With<LoadingUi>>) {
+    for entity in &q_loading_ui {
+        commands.entity(entity).despawn_recursive();
+    }
+}
+
+pub fn loading_ui_animate(mut q: Query<(Entity, &mut LoadingUiAniTimer)>,time: Res<Time>, mut text: Query<&mut Text, With<LoadingUi>>) {
+    for (_entity, mut fuse_timer) in q.iter_mut() {
+        fuse_timer.0.tick(time.delta());
+        if fuse_timer.0.finished() {
+            for mut t in &mut text {
+                let now_txt= (**t).clone();
+                let dots = now_txt.as_str().split_whitespace().collect::<Vec<_>>()[1];
+                // let dot_cnt = dots.chars().filter(|&c| c == '.').count();
+                let str = match dots {
+                    "-" => "LOADING *",
+                    _ => "LOADING -",
+                };
+                **t = str.to_string();
+            }
+        }
+    }
+}
 
 fn spawn_main_menu(root_entity: Entity, mut commands: Commands, my_assets: Res<MyAsstes>) {
     let game_btn = (

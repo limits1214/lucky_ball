@@ -1,0 +1,5 @@
+/target
+assets/
+blender/
+.DS_Store
+wasm_*

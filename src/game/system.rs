@@ -1162,10 +1162,10 @@ pub fn pool_ball_cnt_zero_sensor(
             // }
             //
             for (_entity, colliding_entitiles) in &q_sensor {
-                info!(
-                    "q_sensor colliding_entitiles {:?}",
-                    colliding_entitiles.len()
-                );
+                // info!(
+                //     "q_sensor colliding_entitiles {:?}",
+                //     colliding_entitiles.len()
+                // );
                 let mut ball_cnt = 0;
                 for entity in colliding_entitiles.iter() {
                     if let Ok(_) = q_ball.get(entity) {

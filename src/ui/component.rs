@@ -16,6 +16,12 @@ pub struct NumbersBtn;
 #[derive(Component)]
 pub struct TextResize;
 
+#[derive(Component)]
+pub struct LoadingUi;
+
+#[derive(Component)]
+pub struct LoadingUiAniTimer(pub Timer);
+
 /// tuple 0(u8): ball_number
 /// tuple 1(bool): is_use
 #[derive(Component, Clone, Debug, Serialize, Deserialize)]

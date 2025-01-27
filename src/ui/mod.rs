@@ -16,12 +16,12 @@ use system::{
     custom_rule_run_btn_click, er_game_end, game_menu_shuffle_btn_click,
     game_result_menu_retry_btn_click, game_result_menu_save_btn_click,
     game_rule_select_button_click, game_run_btn_click, loaded_26_fire_1_btn_click,
-    loaded_45_fire_6_btn_click, loaded_69_fire_5_btn_click, numbers_btn_click,
-    numbers_item_delete_btn_click, numbers_paging_next_click, numbers_paging_prev_click,
-    quit_btn_click, setup_main_ui, splash_hide,
+    loaded_45_fire_6_btn_click, loaded_69_fire_5_btn_click, loading_ui, loading_ui_animate,
+    numbers_btn_click, numbers_item_delete_btn_click, numbers_paging_next_click,
+    numbers_paging_prev_click, quit_btn_click, remove_loading_ui, setup_main_ui, splash_hide,
 };
 
-use crate::app::states::MyStates;
+use crate::app::states::{Loading, MyStates};
 pub mod component;
 pub mod constant;
 pub mod event;
@@ -55,9 +55,14 @@ impl Plugin for MyUiPlugin {
             .add_event::<GameMenuShuffleBtnClick>()
             .add_event::<GameResultRetryBtnClick>()
             .add_event::<GameResultSaveBtnClick>()
+            .add_systems(OnEnter(MyStates::Load(Loading::Loading)), loading_ui)
+            .add_systems(
+                Update,
+                loading_ui_animate.run_if(in_state(MyStates::Load(Loading::Loading))),
+            )
             .add_systems(
                 OnEnter(MyStates::Game),
-                (setup_main_ui, app_init, splash_hide),
+                (setup_main_ui, app_init, splash_hide, remove_loading_ui),
             )
             .add_systems(
                 Update,

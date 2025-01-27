@@ -26,10 +26,10 @@
   </body>
   <script>
     function ffi_get_current_epoch_time() {
-        return Math.floor(Date.now() / 1000);
+        return BigInt(Math.floor(Date.now() / 1000));
     }
     function ffi_get_time_offset() {
-        return new Date().getTimezoneOffset();
+        return Math.abs(new Date().getTimezoneOffset() * 60);
     }
   </script>
   <script>

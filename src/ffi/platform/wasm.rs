@@ -9,6 +9,7 @@ use wasm_bindgen::prelude::*;
 extern "C" {
     fn ffi_get_current_epoch_time() -> i64;
     fn ffi_get_time_offset() -> i32;
+    fn ffi_get_locale() -> String;
 }
 
 impl AppFfiTrait for AppFfi {
@@ -21,7 +22,7 @@ impl AppFfiTrait for AppFfi {
     }
 
     fn get_locale() -> String {
-        String::from("ko_KR")
+        ffi_get_locale()
     }
 
     fn get_time_offset() -> i32 {

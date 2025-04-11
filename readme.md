@@ -1,1 +1,1 @@
-url: https://lsy969999.github.io/lucky_ball/
+url: https://limits1214.github.io/lucky_ball/

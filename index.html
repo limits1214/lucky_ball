@@ -73,6 +73,8 @@
             }
         })
     }
+    
+    /*
     if (navigator.gpu) {
         console.log('webgpu');
         const wasm = await import('./wasm_webgpu/web.js');
@@ -86,6 +88,13 @@
         await wasm.default()
         await wasm.main()
     }
+    */
+
+    console.log('webgl2');
+    const wasm = await import('./wasm_webgl2/web.js');
+    Object.assign(window, wasm);
+    await wasm.default()
+    await wasm.main()
   </script>
 
   <script>
